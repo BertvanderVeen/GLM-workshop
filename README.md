@@ -24,9 +24,11 @@ On the first day we will go through R basics and background theory of frequentis
 * Reminder of foundational statistical concepts
 * Simple linear regression
 
-[First presentation here](https://github.com/BertvanderVeen/GLM-workshop/1Monday/Introduction.pdf)
-[Second presentation here](https://github.com/BertvanderVeen/GLM-workshop/1Monday/SamplingMLE.pdf)
-[Third presentation here](https://github.com/BertvanderVeen/GLM-workshop/1Monday/introLM.pdf)
+[First presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/1Monday/Introduction.pdf)
+
+[Second presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/1Monday/SamplingMLE.pdf)
+
+[Third presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/1Monday/introLM.pdf)
 
 ## Tuesday
 * Multiple linear regression
@@ -34,9 +36,11 @@ On the first day we will go through R basics and background theory of frequentis
 * Introduction to GLMs
 * Visualizing outputs
 
-[First presentation here](https://github.com/BertvanderVeen/GLM-workshop/2Tuesday/MultipleRegression.pdf)
-[Second presentation here](https://github.com/BertvanderVeen/GLM-workshop/2Tuesday/ModelValidation.pdf)
-[Third presentation here](https://github.com/BertvanderVeen/GLM-workshop/2Tuesday/GLMs.pdf)
+[First presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/2Tuesday/MultipleRegression.pdf)
+
+[Second presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/2Tuesday/ModelValidation.pdf)
+
+[Third presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/2Tuesday/GLMs.pdf)
 
 ## Wednesday
 * Models for binary data: binomial regression
@@ -44,10 +48,13 @@ On the first day we will go through R basics and background theory of frequentis
 * P-values recap
 * $R^2$ measures of variation
 
-[First presentation here](https://github.com/BertvanderVeen/GLM-workshop/3Wednesday/BinomialGLMs.pdf)
-[Second presentation here](https://github.com/BertvanderVeen/GLM-workshop/3Wednesday/ModelComparison.pdf)
-[Third presentation here](https://github.com/BertvanderVeen/GLM-workshop/3Wednesday/Pvalues.pdf)
-[Fourth presentation here](https://github.com/BertvanderVeen/GLM-workshop/3Wednesday/R2.pdf)
+[First presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/3Wednesday/BinomialGLMs.pdf)
+
+[Second presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/3Wednesday/ModelComparison.pdf)
+
+[Third presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/3Wednesday/Pvalues.pdf)
+
+[Fourth presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/3Wednesday/R2.pdf)
 
 ## Thursday
 * Models for count data: Poisson, NB
@@ -59,9 +66,11 @@ On the first day we will go through R basics and background theory of frequentis
   * Tweedie regression
   * Zero-inflated regression
 
-[First presentation here](https://github.com/BertvanderVeen/GLM-workshop/4Thursday/CountGLMs.pdf)
-[Second presentation here](https://github.com/BertvanderVeen/GLM-workshop/4Thursday/ModelValidationGLMs.pdf)
-[Third presentation here](https://github.com/BertvanderVeen/GLM-workshop/3Wednesday/OtherModels.pdf)
+[First presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/4Thursday/CountGLMs.pdf)
+
+[Second presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/4Thursday/ModelValidationGLMs.pdf)
+
+[Third presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/4Thursday/OtherModels.pdf)
 
 ## Friday
 * What lies ahead (GAMs, GLMMs, etc.)
