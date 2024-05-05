@@ -15,9 +15,6 @@ Please make sure to update your R installation prior to the workshop. Most of th
 
 [You can find an R installation based on your operating system here](https://cran.r-project.org/bin/windows/base/)
 
-### Required R packages
-
-
 ## PROGRAM
 Sessions from 14:00 to 20:00 (Monday to Thursday), 14:00 to 18:00 on Friday (Berlin time). Sessions will consist of a mix of lectures, in-class discussion, and practical exercises / case studies over Slack and Zoom.
 
@@ -25,32 +22,93 @@ Sessions from 14:00 to 20:00 (Monday to Thursday), 14:00 to 18:00 on Friday (Ber
 On the first day we will go through R basics and background theory of frequentist statistics to build a foundation for the rest of the workshop.
 * Brief reminder of R programming
 * Reminder of foundational statistical concepts
-* Introduction to linear models
+* Simple linear regression
+
+[First presentation here](https://github.com/BertvanderVeen/GLM-workshop/1Monday/Introduction.pdf)
+[Second presentation here](https://github.com/BertvanderVeen/GLM-workshop/1Monday/SamplingMLE.pdf)
+[Third presentation here](https://github.com/BertvanderVeen/GLM-workshop/1Monday/introLM.pdf)
 
 ## Tuesday
-* Simple linear regression
 * Multiple linear regression
-* Understading, visualizing output
-* Model validation and predictions
+* Model validation
+* Introduction to GLMs
+* Visualizing outputs
+
+[First presentation here](https://github.com/BertvanderVeen/GLM-workshop/2Tuesday/MultipleRegression.pdf)
+[Second presentation here](https://github.com/BertvanderVeen/GLM-workshop/2Tuesday/ModelValidation.pdf)
+[Third presentation here](https://github.com/BertvanderVeen/GLM-workshop/2Tuesday/GLMs.pdf)
 
 ## Wednesday
-* ANOVA and variation partitioning.
+* Models for binary data: binomial regression
 * Model selection
-* Generalized linear models (GLM) components
-* GLMs for binary responses (Logistic Regression)
+* P-values recap
+* $R^2$ measures of variation
+
+[First presentation here](https://github.com/BertvanderVeen/GLM-workshop/3Wednesday/BinomialGLMs.pdf)
+[Second presentation here](https://github.com/BertvanderVeen/GLM-workshop/3Wednesday/ModelComparison.pdf)
+[Third presentation here](https://github.com/BertvanderVeen/GLM-workshop/3Wednesday/Pvalues.pdf)
+[Fourth presentation here](https://github.com/BertvanderVeen/GLM-workshop/3Wednesday/R2.pdf)
 
 ## Thursday
-* Beta regression
-* Poisson regression
-* Negative binomial regression
-* Other useful response distributions
-  
+* Models for count data: Poisson, NB
+* Residual diagnostics in GLMs
+* Other useful models
+  * Models for positive continuous data: Gamma, log-normal, and inverse gaussian regression
+  * Multinomial and ordinal regression
+  * Beta regression
+  * Tweedie regression
+  * Zero-inflated regression
+
+[First presentation here](https://github.com/BertvanderVeen/GLM-workshop/4Thursday/CountGLMs.pdf)
+[Second presentation here](https://github.com/BertvanderVeen/GLM-workshop/4Thursday/ModelValidationGLMs.pdf)
+[Third presentation here](https://github.com/BertvanderVeen/GLM-workshop/3Wednesday/OtherModels.pdf)
+
 ## Friday
+* What lies ahead (GAMs, GLMMs, etc.)
 * Participants' case studies (bring your own data)
 
-What lies ahead: generalized additive models, multilevel or mixed-effects models to account for hierarchical and correlated data (time, space, phylogeny).
-
-# TODO
-* List of R packages
-* Add slides
+# Detailed schedule
+|   Day   |Time         |Subject                                                |
+|---------|-------------|-------------------------------------------------------|
+|Monday   |14:00 - 15:00| Introduction, getting started                         |
+|         |15:00 - 15:45| Recap R (coding)                                      |
+|         |15:45 - 16:00| Break                                                 |
+|         |16:00 - 16:45| Sampling theory and Maximum likelihood estimation     |
+|         |16:45 - 17:45| Practical 1: Simulation and variance                  |
+|         |17:45 - 18:30| Break                                                 |
+|         |18:30 - 19:15| Introduction to Linear models                         |
+|         |19:15 - 20:00| Practical 2: Simple linear regression                 |
+|---------|-------------|-------------------------------------------------------|
+|Tuesday  |14:00 - 14:45| Multiple linear regression                            |
+|         |14:45 - 16:00| Practical 3: multiple linear regression               |
+|         |16:00 - 16:15| Break                                                 |
+|         |16:15 - 17:00| Model validation                                      |
+|         |17:00 - 17:45| Practical 4: Checking fitted models assumptions       |
+|         |17:45 - 18:30| Break                                                 |
+|         |18:30 - 19:15| Introduction to GLMs                                  |
+|         |19:15 - 20:00| Practical 5: visualizing model results                |
+|---------|-------------|-------------------------------------------------------|
+|Wednesday|14:00 - 14:45| Binomial regression                                   |
+|         |14:45 - 15:30| Practical 6: Binomial GLM                             |
+|         |15:30 - 16:15| Model comparison                                      |
+|         |16:15 - 16:30| Break                                                 |
+|         |16:30 - 17:15| Practical 7: Model comparison: exploratory            |  
+|         |17:15 -      | P-values                                              |
+|         |      - 17:45| $R^2$                                                 |
+|         |17:45 - 18:30| Break                                                 |
+|         |18:30 - 19:15| Practical 8: Model comparison: confirmatory           |
+|         |19:15 - 20:00| Q & A / Practical 9: Repeat practical 5 with GLM      |
+|---------|-------------|-------------------------------------------------------|
+|Thursday |14:00 - 14:45| Models for count data                                 |
+|         |15:00 - 16:00| Practical 10: Poisson and NB regression               |
+|         |16:00 - 16:15| Break                                                 |
+|         |16:15 - 17:00| Residuals diagnostics in GLMs                         |
+|         |16:15 -      | Practical 11: Residuals diagnostics in GLMs           |
+|         |      - 17:45| Discussion: reporting your GLM analysis               |
+|         |17:45 - 18:30| Break                                                 |
+|         |18:30 - 19:15| Other useful models                                   |
+|         |19:15 - 20:00| Practical 12: other useful models                     |
+|---------|-------------|-------------------------------------------------------|
+|Friday   |14:00 - 15:00| What lies ahead (GLMMs, GAMs, GLLVMs, Bayesian stats) |
+|         |15:00 - 18:00| Bring/present your own data (in group)                |
 

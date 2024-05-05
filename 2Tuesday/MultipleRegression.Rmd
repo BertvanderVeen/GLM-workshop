@@ -1,0 +1,667 @@
+---
+title: "Multiple regression"
+institute: "Department of Mathematical Sciences, NTNU"
+author: "Bert van der Veen"
+output: 
+  beamer_presentation:
+    toc: false
+    slide_level: 2
+    latex_engine: lualatex
+    includes:
+      in_header: ../header.tex
+header-includes:
+  - \AtBeginSection{}
+  - \useoutertheme{miniframes}
+  - \setbeamertemplate{frametitle}{\vskip0.3cm\usebeamerfont*{frametitle}\insertframetitle\vskip-1.5ex\begin{beamercolorbox}[colsep=0.2pt, wd=\textwidth]{lower separation line head}\end{beamercolorbox}}
+  - \setbeamercolor{lower separation line head}{bg=orange}
+  - \definecolor{shadecolor}{RGB}{200, 200, 200}
+  - \hypersetup{colorlinks,citecolor=orange,filecolor=red,linkcolor=brown,urlcolor=blue}
+  - \definecolor{green}{RGB}{48, 69, 41}
+  - \definecolor{darkorange}{RGB}{255, 150, 0}
+  - \definecolor{gray}{RGB}{100, 100, 100}
+  - \setbeamercolor{itemize item}{fg=orange}
+  - \setbeamercolor{itemize subitem}{fg=orange}
+  - \setbeamercolor{enumerate item}{fg=orange}
+  - \setbeamercolor{enumerate subitem}{fg=orange}
+  - \tcbuselibrary{skins}
+  - \usepackage{emoji}
+editor_options: 
+  chunk_output_type: console
+urlcolor: orange
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+
+default_source_hook <- knit_hooks$get('source')
+default_output_hook <- knit_hooks$get('output')
+
+knit_hooks$set(
+  source = function(x, options) {
+    paste0(
+      "\n::: {.codebox data-latex=\"\"}\n\n",
+      default_source_hook(x, options),
+      "\n\n:::\n\n")
+  }
+)
+
+knit_hooks$set(
+  output = function(x, options) {
+    paste0(
+      "\n::: {.codebox data-latex=\"\"}\n\n",
+      default_output_hook(x, options),
+      "\n\n:::\n\n")
+  }
+)
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+Going to largely omit code in presentation. But see .Rmd files.
+
+## Outline Today
+
+- Mutiple linear regression
+- Model validation
+- Introduction to GLMs
+
+## Questions about yesterday?
+
+\center
+
+![](questions.jpg){width=40%}
+
+# Multiple regression
+
+## What if we have >1 explanatory variable?
+
+We often want to look at the impacts of several variables together
+
+- they may all have some effect
+- we might be doing an experiment where factors interact
+- we might want to model one variable as a polynomial
+
+## The model
+
+This is our model for simple regression
+
+$$
+y_i = \textcolor{red}{\alpha + \beta x_i} + \textcolor{blue}{\epsilon_i}
+$$
+
+How can we extend it to more than one variable?
+
+## Two explanatory variables
+
+\columnsbegin
+\column{0.5\textwidth}
+
+$$
+y_i = \textcolor{red}{\alpha + \beta_1 x_{1i} + \beta_2 x_{2i}} + \textcolor{blue}{\epsilon_i}
+$$
+This is a plane \newline
+With more than two covariates it is a \textbf{hyperplane}
+\column{0.5\textwidth}
+\center
+![](plane.jpg){width=80%}
+
+```{r, echo = FALSE, out.height = "47%", fig.align="center"}
+set.seed(12345)
+X = data.frame(intercept = 1, x1 = rnorm(20), x2 = rnorm(20))
+beta = rnorm(3, mean = 4)
+y = as.matrix(X)%*%beta+rnorm(20)
+model <- lm(y~x1+x2,data = X)
+PlotData <- expand.grid(x1 = seq(-3,3,length.out = 20), x2 = seq(-3,3,length.out = 20))
+ynew <- matrix(predict(model, newdata = PlotData), ncol = 20)
+
+PlotData <- expand.grid(
+  x1 = seq(-3,3,length.out=20),
+  x2 = seq(-3,3,length.out=20)
+)
+ext <- fitted(model) + 5*resid(model)
+fit <- fitted(model)
+persp(x=seq(-3,3,length.out=20), y=seq(-3,3,length.out=20), z=ynew,
+      xlab="Explanatory variable 1", ylab="Explanatory variable 2", theta=300, 
+      zlab="Response variable") -> res
+points(trans3d(x=X$x1, y=X$x2, z=ext, pmat = res), col = "red", pch = 16)
+
+thing <- apply(cbind(X,ext,fit), 1, function(v) 
+lines(trans3d(x=rep(v["x1"],2), y=rep(v["x2"],2), z=v[c("ext", "fit")], pmat = res), col = "blue", lwd=2))
+```
+\columnsend
+
+## Plane
+
+```{r, echo = FALSE, fig.align="center", out.height="80%"}
+set.seed(12345)
+X = data.frame(intercept = 1, x1 = rnorm(20), x2 = rnorm(20))
+beta = rnorm(3, mean = 4)
+y = as.matrix(X)%*%beta+rnorm(20)
+model <- lm(y~x1+x2,data = X)
+PlotData <- expand.grid(x1 = seq(-3,3,length.out = 20), x2 = seq(-3,3,length.out = 20))
+ynew <- matrix(predict(model, newdata = PlotData), ncol = 20)
+
+PlotData <- expand.grid(
+  x1 = seq(-3,3,length.out=20),
+  x2 = seq(-3,3,length.out=20)
+)
+ext <- fitted(model) + 5*resid(model)
+fit <- fitted(model)
+persp(x=seq(-3,3,length.out=20), y=seq(-3,3,length.out=20), z=ynew,
+      xlab="Explanatory variable 1", ylab="Explanatory variable 2", theta=300, 
+      zlab="Response variable") -> res
+points(trans3d(x=X$x1, y=X$x2, z=ext, pmat = res), col = "red", pch = 16)
+
+thing <- apply(cbind(X,ext,fit), 1, function(v) 
+lines(trans3d(x=rep(v["x1"],2), y=rep(v["x2"],2), z=v[c("ext", "fit")], pmat = res), col = "blue", lwd=2))
+```
+
+
+## Fitting in R
+
+In R we can just use the same function as we did before.
+
+The only change is in the formula. It was 
+
+``y ~ x``
+
+now it is 
+
+`y ~ x1 + x2`
+
+and the same for categorical and continuous covariates.
+
+## More than two: general linear regression
+
+$$
+\begin{aligned}
+y_i &= \alpha + \beta_1 x_{i1} + \beta_2 x_{i2} + \beta_3 x_{i3} + \dots + \beta_k x_{ik} + \epsilon_i \\
+y_i &= \alpha + \sum_{k=1}^p \beta_k x_{ik} + \epsilon_i
+\end{aligned}
+$$
+
+- we have $p$ covariates, labelled from $k=1$ to $p$
+- we have $p$ covariate effects
+- the $k^{th}$ covariate values for the $i^{th}$ observation is $x_{ik}$
+
+## Design Matrices
+
+We can write this more compactly. First, we turn the intercept into a covariate by filling a column of 1s for every data point. Then we write all of the covariates in a matrix, $\textbf{X}$:
+
+$$
+\textbf{X} = \left( \begin{array}{ccc}
+  x_1 & x_2 & x_3\\
+  \hline &&\\
+   1 & 2.3 & 3.0 \\
+   1 & 4.9 & -5.3 \\
+   1 & 1.6 & -0.7 \\
+\vdots & \vdots & \vdots \\
+   1 & 8.4 & 1.2 \\
+  \end{array}  \right)
+$$
+
+So, the first column is the intercept, and the second and third columns are two covarias.
+
+This is called the *Design Matrix*: it helps to write down the model
+
+## Writing the Model 
+
+Using matrix algebra, the regression model becomes
+
+$$
+\textbf{Y} = \textbf{X} \symbf{\beta} + \symbf{\epsilon}
+$$
+
+where $\textbf{Y}$, $\symbf{\beta}$ and $\symbf{\epsilon}$ are now all vectors of length $n$, where there are $n$ data points. $\textbf{X}$ is am $n \times p$ matrix.
+
+We will not look at the mathematics in any detail: the point here is that the model for the effect of covariates can be written in the design matrix.
+
+## The Solution (just so you can see it)
+
+After a bit of matrix algebra, one can find the ML solution:
+
+$$
+\hat{\textbf{b}} = (\textbf{X}^\top \textbf{X})^{-1}\textbf{X}^\top \textbf{y}
+$$
+where $\textbf{b}$ is the MLE for $\symbf{\beta}$.
+
+In practice:
+
+- you won't have to calculate this: the computer does it, and 
+- the computer actually doesn't use this
+
+# Examples
+
+## Writing the Model: continuous covariates
+
+$$
+\textbf{Y} = \textbf{X} \symbf{\beta} + \symbf{\epsilon}
+$$
+
+is 
+
+$$
+\left( \begin{array}{c}
+   y_1 \\
+   y_2 \\
+   y_3 \\
+\vdots \\
+   y_n \\
+  \end{array}  \right) = \left( \begin{array}{ccc}
+   1 & 2.3 & 3.0 \\
+   1 & 4.9 & -5.3 \\
+   1 & 1.6 & -0.7 \\
+\vdots & \vdots & \vdots \\
+   1 & 8.4 & 1.2 \\
+  \end{array}  \right)
+  \left( \begin{array}{c}
+   \alpha \\
+   \beta_1 \\
+   \beta_2
+   \end{array}  \right)
+ +   \left( \begin{array}{c}
+   \epsilon_1 \\
+   \epsilon_2 \\
+   \epsilon_3 \\
+\vdots \\
+   \epsilon_n \\
+  \end{array}  \right)
+$$
+
+$\alpha$ is the intercept, $\beta_1$ is the slope parameter for $x_1$, and so on.
+
+
+## Categorical variables
+
+Categorical variables need to be turned into something numerical.
+
+$$
+\textbf{x} = \left( \begin{array}{ccc}
+\textbf{Species} \\
+   \text{Orchid} \\
+   \text{Orchid} \\
+   \text{Dandelion} \\
+\vdots \\
+   \text{Daisy} \\
+  \end{array}  \right)
+  \Rightarrow 
+  \textbf{X} = \left( \begin{array}{ccc}
+  \textbf{Orchid} & \textbf{Dandelion} & \textbf{Daisy} \\
+   1 & 0 & 0 \\
+   1 & 0 & 0 \\
+   0 & 1 & 0 \\
+\vdots & \vdots & \vdots \\
+   0 & 0 & 1
+  \end{array}  \right)
+$$
+\center
+But do we need each column?
+
+## Contrasts
+
+There are many ways to construct a design matrix for categorical variables.
+
+ `constrasts` and `constr.treatment`
+ 
+ - Treatment contrast are default in \texttt{R} ("dummy")
+ - Sum-to-zero
+ - Polynomial
+ - Difference
+ - Etc.
+
+## Writing the Model: categorical (ANOVA)
+
+$$
+\left( \begin{array}{c}
+   y_1 \\
+   y_2 \\
+   y_3 \\
+\vdots \\
+   y_n \\
+  \end{array}  \right) = \left( \begin{array}{ccc}
+   1 & 0 & 1 \\
+   1 & 1 & 1 \\
+   1 & 1 & 0 \\
+\vdots & \vdots & \vdots \\
+   1 & 0 & 0 \\
+  \end{array}  \right)
+  \left( \begin{array}{c}
+   \alpha \\
+   \beta_1 \\
+   \beta_2 \\
+  \end{array}  \right)
+ +   \left( \begin{array}{c}
+   \epsilon_1 \\
+   \epsilon_2 \\
+   \epsilon_3 \\
+\vdots \\
+   \epsilon_n \\
+  \end{array}  \right)
+$$
+
+Here, $\alpha$ is the intercept for the first category, $\beta_1$ the difference of the first and second category, $\beta_2$ the difference between the first and third categories. 
+
+## Examples of linear models: categorical $x_i$ (from yesterday)
+
+```{r echo=FALSE, fig.height=4.5, cache = TRUE}
+set.seed(12345)
+x <- rbinom(50, 0.5, size = 1)
+y = 20 + 5*x + rnorm(50)
+Means <- aggregate(y,list(x),mean)
+par(mfrow=c(1,1), mar=c(4.1,4,1,1), oma=c(0,0,0,0))
+plot(y, jitter(1*x), yaxt="n", ann=FALSE, 
+     col="grey50") 
+points(Means[,2], c(0,1), col=2, pch=3, cex=4)
+text(Means[1,2], 0.2, expression(alpha + 0*beta), cex=3, adj=-0.2)
+text(Means[2,2], 0.8, expression(alpha + 1*beta), cex=3, adj=-0.2)
+
+axis(2, c("Something", "Something else"), at=c(0,1), las=1)
+```
+
+- $\alpha$ is the mean of the first group
+- $\beta$ is the deviation from the mean of the first group
+
+## Writing the Model: continuous and categorical
+
+$$
+\left( \begin{array}{c}
+   y_1 \\
+   y_2 \\
+   y_3 \\
+\vdots \\
+   y_n \\
+  \end{array}  \right) = \left( \begin{array}{ccc}
+   1 & 0 & 3.0 \\
+   1 & 1 & -5.3 \\
+   1 & 1 & -0.7 \\
+\vdots & \vdots & \vdots \\
+   1 & 0 & 1.2 \\
+  \end{array}  \right)
+  \left( \begin{array}{c}
+   \alpha \\
+   \beta_1 \\
+   \beta_2 \\
+  \end{array}  \right)
+ +   \left( \begin{array}{c}
+   \epsilon_1 \\
+   \epsilon_2 \\
+   \epsilon_3 \\
+\vdots \\
+   \epsilon_n \\
+  \end{array}  \right)
+$$
+
+Here, $\alpha$ is the intercept for the first category at $x_3 = 0$, $\beta_1$ is the difference for the second category at $x_3 = 0$, and $\beta_2$ is the slope parameter for two regression lines.
+
+## Writing the Model: continuous and categorical
+
+```{r, echo = FALSE,cache=TRUE}
+set.seed(1234)
+x <- data.frame(x1 = as.factor(sample(rep(1:2,15, replace=TRUE))), x2 = rnorm(30))
+beta = rnorm(3)
+y <- rnorm(30, model.matrix(~.,data.frame(x))%*%beta, 2)
+model <- lm(y~x1+x2, data = x)
+
+plot(x$x2, y, ylab="Response variable", xlab = "Covariate", type = "n", main = "Categorical and continuous covariate regression (ANCOVA)")
+points(x$x2[x$x1==1], y[x$x1==1], col ="red")
+points(x$x2[x$x1==2], y[x$x1==2], col ="purple")
+abline(a = coef(model)[1], b = coef(model)[3], col = "red")
+abline(a = coef(model)[1]+coef(model)[2], b = coef(model)[3], col = "purple", lty = "dashed")
+legend("topright", lty = c("solid","dashed"),col=c("red","purple"), legend=c("Group 1", "Group 2"))
+```
+
+## Interactions
+
+An interaction is when we have the product of two (or more) covariates in the model:
+
+$$
+\begin{aligned}
+y_i &= \alpha + \beta_1 x_{i1} + \beta_2 x_{i2} + \beta_3 x_{i1}x_{i2} + \epsilon_i \\
+\end{aligned}
+$$
+
+
+``y ~ x1+x2+x1:x2`` or ``y ~ x1*x2``
+
+It means that we expect the effect of two covariates to jointly impact $y_i$ \newline
+It does \textbf{not} mean we model how $x_1$ affect $x_2$ or vice versa!
+
+## Interactions: continuous-continuous
+
+$$
+\left( \begin{array}{c}
+   y_1 \\
+   y_2 \\
+   y_3 \\
+\vdots \\
+   y_n \\
+  \end{array}  \right) = \left( \begin{array}{cccc}
+   1 & 2.3 & 3.0 & 2.3*3.0 \\
+   1 & 4.9 & -5.3 & 4.9*-5.3\\
+   1 & 1.6 & -0.7 & 1.6*-0.7 \\
+\vdots & \vdots & \vdots & \vdots \\
+   1 & 8.4 & 1.2 & 8.4*1.2 \\
+  \end{array}  \right)
+  \left( \begin{array}{c}
+   \alpha \\
+   \beta_1 \\
+   \beta_2 \\
+   \beta_3 \\
+   \end{array}  \right)
+ +   \left( \begin{array}{c}
+   \epsilon_1 \\
+   \epsilon_2 \\
+   \epsilon_3 \\
+\vdots \\
+   \epsilon_n \\
+  \end{array}  \right)
+$$
+$\beta_1$ is the slope for $x_2$, $\beta_2$ is the slope of $x_3$, $\beta_3$ is their joint parameter. It represents how
+the effect of $x_1$ or $x_2$ changes with the other covariate. E.g., water and fertilizer on plant growth.
+
+## Interactions: categorical-continuous
+
+$$
+\left( \begin{array}{c}
+   y_1 \\
+   y_2 \\
+   y_3 \\
+\vdots \\
+   y_n \\
+  \end{array}  \right) = \left( \begin{array}{cccc}
+   1 & 0 & 3.0 & 0 \\
+   1 & 1 & -5.3 & -5.3\\
+   1 & 1 & -0.7 & -0.7\\
+\vdots & \vdots & \vdots & \vdots \\
+   1 & 0 & 1.2 & 0\\
+  \end{array}  \right)
+  \left( \begin{array}{c}
+   \alpha \\
+   \beta_1 \\
+   \beta_2 \\
+   \beta_3\\
+   \beta_4\\
+  \end{array}  \right)
+ +   \left( \begin{array}{c}
+   \epsilon_1 \\
+   \epsilon_2 \\
+   \epsilon_3 \\
+\vdots \\
+   \epsilon_n \\
+  \end{array}  \right)
+$$
+A separate regression line for each category. Here, $\alpha$ and $\beta_2$ are the slope and intercept for the regression line of the first category.\newline
+$\alpha+\beta_1$ is the intercept and $\beta_3+\beta_4$ is the slope of the regression line for the second category.
+
+## Interactions: categorical-continuous
+
+```{r, echo = FALSE,cache=TRUE}
+set.seed(1234)
+x <- data.frame(x1 = as.factor(sample(rep(1:2,15, replace=TRUE))), x2 = rnorm(30))
+beta = rnorm(4)
+y <- rnorm(30, model.matrix(~x1+x2+x1:x2,data.frame(x))%*%beta, 2)
+model <- lm(y~x1+x2+x1:x2, data = x)
+
+plot(x$x2, y, ylab="Response variable", xlab = "Covariate", type = "n", main = "Categorical and continuous covariate regression interaction")
+points(x$x2[x$x1==1], y[x$x1==1], col ="red")
+points(x$x2[x$x1==2], y[x$x1==2], col ="purple")
+abline(a = coef(model)[1], b = coef(model)[3], col = "red")
+abline(a = coef(model)[1]+coef(model)[2], b = coef(model)[3]+coef(model)[4], col = "purple", lty = "dashed")
+legend("topright", lty = c("solid","dashed"),col=c("red","purple"), legend=c("Group 1", "Group 2"))
+```
+
+## Other functions of explanatory variables
+
+As long as the model is linear in the parameters, we can also have functions:
+
+- Quadratic: $y_i = x_i\beta + x_i^2\beta_2$
+- Centering: $y_i = (x_i-\bar{\textbf{x}})\beta$
+- Exponential: $y_i = \exp(x_i)\beta$
+  - or logarithmic: $y_i = \log(x_i)\beta$
+
+## Surface: quadratic effects
+
+```{r, echo = FALSE, out.height="80%", fig.align="center"}
+set.seed(12345)
+X = data.frame(intercept = 1, x1 = rnorm(20), x2 = rnorm(20))
+beta = rnorm(3, mean = 4)
+beta2 = c(-2,-2)
+y = as.matrix(X)%*%beta+as.matrix(X[,c("x1","x2")]^2)%*%beta2+rnorm(20)
+model <- lm(y~x1+I(x1^2)+x2+I(x2^2),data = X)
+PlotData <- expand.grid(x1 = seq(-3,3,length.out = 20), x2 = seq(-3,3,length.out=20))
+ynew <- matrix(predict(model, newdata = PlotData), ncol = 20)
+
+ext <- fitted(model) + 5*resid(model)
+fit <- fitted(model)
+persp(x=seq(-3,3,length.out=20), y=seq(-3,3,length.out=20), z=ynew,
+      xlab="Explanatory variable 1", ylab="Explanatory variable 2", theta=300, 
+      zlab="Response variable") -> res
+points(trans3d(x=X$x1, y=X$x2, z=ext, pmat = res), col = "red", pch = 16)
+```
+
+
+## Wiggly things
+
+
+$$
+\textbf{Y} = s(\textbf{X}) + \symbf{\epsilon}
+$$
+
+\center
+
+![](wiggly.png){width=80%}
+
+See [GAM workshop by Physalia](https://www.physalia-courses.org/courses-workshops/gams-in-r/)
+
+## Finding a "good" model
+
+We do not usually explicitly specify regressions in terms of their imposed hypersurface. \newline
+
+*More on how to find a model that fits the data well tomorrow.*
+
+## The predict function
+
+In \texttt{R} we can calulate $\hat{y}_i = \hat{\alpha} + x_i\hat{\beta_1}$ with the `predict` function:
+
+`predict(model, newdata = newX)`
+
+Here, `newX` are the values of the covariate that we want to calculate $\hat{y}_i$ for. For the observed values we leave it empty.
+
+## Visualizing a multiple regression
+
+\columnsbegin
+\column{0.5\textwidth}
+```{r, echo = FALSE, out.height="50%", fig.align="center"}
+set.seed(12345)
+X = data.frame(intercept = 1, x1 = rnorm(20), x2 = rnorm(20))
+beta = rnorm(3, mean = 4)
+beta2 = c(-2,-2)
+y = as.matrix(X)%*%beta+as.matrix(X[,c("x1","x2")]^2)%*%beta2+rnorm(20)
+model <- lm(y~x1+I(x1^2)+x2+I(x2^2),data = X)
+PlotData <- expand.grid(x1 = seq(-3,3,length.out = 20), x2 = seq(-3,3,length.out=20))
+ynew <- matrix(predict(model, newdata = PlotData), ncol = 20)
+
+ext <- fitted(model) + 5*resid(model)
+fit <- fitted(model)
+persp(x=seq(-3,3,length.out=20), y=seq(-3,3,length.out=20), z=ynew,
+      xlab="Explanatory variable 1", ylab="Explanatory variable 2", theta=300, 
+      zlab="Response variable", cex.lab = 2) -> res
+points(trans3d(x=X$x1, y=X$x2, z=ext, pmat = res), col = "red", pch = 16)
+```
+\column{0.5\textwidth}
+
+```{r, echo = FALSE, out.height="50%", fig.align="center"}
+set.seed(12345)
+X = data.frame(intercept = 1, x1 = rnorm(20), x2 = rnorm(20))
+beta = rnorm(3, mean = 4)
+beta2 = c(-2,-2)
+y = as.matrix(X)%*%beta+as.matrix(X[,c("x1","x2")]^2)%*%beta2+rnorm(20)
+model <- lm(y~x1+I(x1^2)+x2+I(x2^2),data = X)
+PlotData <- expand.grid(x1 = seq(-3,3,length.out = 20), x2 = seq(-3,3,length.out=20))
+ynew <- matrix(predict(model, newdata = PlotData), ncol = 20)
+
+ext <- fitted(model) + 5*resid(model)
+fit <- fitted(model)
+persp(x=seq(-3,3,length.out=20), y=seq(-3,3,length.out=20), z=ynew,
+      xlab="Explanatory variable 1", ylab="Explanatory variable 2", theta=0, 
+      zlab="Response variable", phi = 0, cex.lab = 2) -> res
+points(trans3d(x=X$x1, y=X$x2, z=ext, pmat = res), col = "red", pch = 16)
+```
+\columnsend
+
+- We want to look at the regression in 2D anyway
+- So we need to choose what point to do that from
+
+## Visualizing a multiple regression
+
+\columnsbegin
+\column{0.5\textwidth}
+```{r, echo = FALSE, out.height="50%", fig.align="center"}
+set.seed(12345)
+X = data.frame(intercept = 1, x1 = rnorm(20), x2 = rnorm(20))
+beta = rnorm(3, mean = 4)
+beta2 = c(-2,-2)
+y = as.matrix(X)%*%beta+as.matrix(X[,c("x1","x2")]^2)%*%beta2+rnorm(20)
+model <- lm(y~x1+I(x1^2)+x2+I(x2^2),data = X)
+PlotData <- expand.grid(x1 = seq(-3,3,length.out = 20), x2 = seq(-3,3,length.out=20))
+ynew <- matrix(predict(model, newdata = PlotData), ncol = 20)
+
+fit <- fitted(model)
+persp(x=seq(-3,3,length.out=20), y=seq(-3,3,length.out=20), z=ynew,
+      xlab="Explanatory variable 1", ylab="Explanatory variable 2", theta=0,phi=0, 
+      zlab="Response variable", cex.lab = 2) -> res
+points(trans3d(x=X$x1, y=X$x2, z=y, pmat = res), col = "red", pch = 16)
+```
+\column{0.5\textwidth}
+
+```{r, echo = FALSE, out.height="50%", fig.align="center"}
+x1 <- seq(-3,3,length.out=100)
+par(mar=c(5,5,4,2)+.1)
+ypred <- predict(model, newdata=data.frame(x2=-3,x1=x1))
+plot(NA, ylim = c(-50,9), xlim = c(-3,3), type = "n", cex.axis = 2, cex.lab = 2, ylab  ="Response variable", xlab="Explanatory variable 1")
+points(X$x1, y, col = "red", pch = 16)
+
+lines(x1, ypred, col = "black")
+text(0, predict(model, newdata = data.frame(x2 = -3, x1 = 0)), labels = "x2=-3", cex = 2, adj = c(0,1))
+ypred2 <- predict(model, newdata=data.frame(x2=-2,x1=x1))
+lines(x1, ypred2, col = "red", lty = "dashed")
+text(0, predict(model, newdata = data.frame(x2 = -2, x1 = 0)), labels = "x2=-2", cex = 2, adj = c(0,1))
+ypred3 <- predict(model, newdata=data.frame(x2=-1,x1=x1))
+lines(x1, ypred3, col = "orange", lty = "dotted")
+text(0, predict(model, newdata = data.frame(x2 = -1, x1 = 0)), labels = "x2=-1", cex = 2, adj = c(0,1))
+ypred4 <- predict(model, newdata=data.frame(x2=0,x1=x1))
+lines(x1, ypred4, col = "brown", lty = "dotdash")
+text(0, predict(model, newdata = data.frame(x2 = 0, x1 = 0)), labels = "x2=0", cex = 2, adj = c(0,1))
+```
+\columnsend
+
+- We want to look at the regression in 2D anyway
+- So we need to choose what point to do that from
+
+## Summary
+
+- Multiple regression and the design matrix
+
+- Fortunately we have the `lm()` function in R!

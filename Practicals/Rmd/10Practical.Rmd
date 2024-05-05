@@ -1,0 +1,67 @@
+---
+title: "Practical: Poisson and NB regression"
+subtitle: "Physalia workshop on GLMs"
+author: "Bert van der Veen"
+output: html_document
+---
+
+# R functions
+
+Regression of count data requries a change of response distribution. Instead of doing regression based on the normal distribution or binomial distribution, we here perform regression with the Poisson and negative-binomial distributions. We will use real datasets, collected from different sources. For this you will need the following functions:
+
+- `plot`: draws all kinds of plots (controlled by `type`), but usually a scatterplot
+- `glm`: fits a generalized linear regression to data
+- `summary`: provides a summary table for a (linear) model
+- `confint`: calculates (estimated) confidence intervals for the parameters of a model
+- `predict`: calculates the predicted values from a regression, potentially for new $X$
+- `pairs`: construct a panel of plots for a dataset
+- `relevel`: changes the reference category for a factor
+- `deviance`: extracts deviance for a GLM
+- `df.residual`: extracts residual degrees of freedom for a GLM
+
+and perhaps some of the functions or R packages used in the previous practicals.
+
+If you do not remember what these functions do, or what arguments they take, you can look it up by typing `?functionName` in the console. That will show you the help page of the function, which hopefully clarifies things. If it does not, try a search engine to find online resources, or ask someone. Almost always your question has been asked (and answered) by someone else before. Some hints are given with questions **in bold**.
+
+# R-packages
+
+Base R does not include the necessary tools to calculate $R^2$ measures for GLMs, nor the possibility to fit negative-binomial regression. So the R-packages you might need in this practical include:
+
+- `MASS::glm.nb`: fits a GLM with negative-binomial distribution
+- `performance::check_overdispersion`: calculates an overdispersion factor
+- `DHARMa::testDispersion()`: test for overdispersion issues via simulation
+
+# Description
+
+Each type of data has its own unique properties. Besides binary (presence-absence) data, count data that cannot be directly connect to success/failure combinations, is very common. One of the properties of count data is that is usually follows a multiplicative process, and (as in most GLMs) the variance increases with the mean.
+
+More specifically, usually the mean and variance are the same! That is also the assumption we make when fitting Poisson GLMs to our data. When that assumption does not hold, we can use different types of regression that relax the Poisson assumptions. One such model is negative-binomial regression, but generalised Poisson or Conway-Maxwell-Poisson regression are two alternatives that we do not look at in this practical. For count models the link function is (essentially) always the log link-function.
+
+You can choose from the following datasets:
+
+1. ButterflyCounts: counts of the Baltimore checkerspot butterfly in 3 months for 8 years.
+2. Horseshoecrabs: Data on the number of male sattelites attracted by female horseshoecrabs, data used in the presentation today.
+3. Roadkill: Count of amphibian road kills (TOT.n) as a function of distance to a park (D.PARK), and other variables of the parks such as the amount of olive grooves, montado with and without shrubs, shrubs, urban area, water reservoirs, dirt road length, paved road length, distance to water reservoirs, water courses, and more.
+4. Alternatively, you can simulate Poisson/NB distributed responses
+
+Don't forget to use `set.seed` for reproducibility if you do simulations. You can answer the questions below for guidance. You can construct the plots from the presentation yourself with the aforementioned functions, or use the `plot` function on your model.
+
+# Tasks
+
+1. What are the assumptions of Poisson regression?
+
+2. What is the parameter that you are modeling in Poisson regression?
+
+3. Fit Poisson regression to one of the aforementioned datasets. Perform a model-selection procedure to find the best model.
+
+4. Do the effects of this model have a large statistical uncertainty? Which effect has the smallest uncertainty?
+
+5. Calculate the dispersion factor, and conclude if there are overdispersion issues with your model. *Hint: you can also use the performance::check_overdispersion, or DHARMa::testDispersion() functions*
+
+6. Fit a negative-binomial regression to the data and compare the estimates, and confidence intervals, to the Poisson regression. How much have they changed?
+
+7. Re-do your model-selection procedure with the negative-binomial regression. Do you find a different "best" model?
+
+8. Construct confidence intervals for the predicted mean.
+
+9. Plot the residuals of the model, how do they look? Can you discern any assumption violations?

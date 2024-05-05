@@ -1,0 +1,68 @@
+---
+title: "Practical: Multiple linear regression"
+subtitle: "Physalia workshop on GLMs"
+author: "Bert van der Veen"
+output: html_document
+---
+
+# R functions
+
+The third presentation of the workshop explained multiple linear regression; regression with more than one covariate. In this practical, we will use real datasets to fit multiple regressions. Each of the datasets is covered in Zuur et al (2009). For this you will need the following functions:
+
+- `plot`: draws all kinds of plots (controlled by `type`), but usually a scatterplot
+- `abline`: draws a straight line through a plot. Accepts a model as input (only for simple linear regression)
+- `lm`: fits a linear regression to data
+- `summary`: provides a summary table for a (linear) model
+- `confint`: calculates (estimated) confidence intervals for the parameters of a model
+- `predict`: calculates the predicted values from a regression, potentially for new $X$
+- `pairs`: construct a panel of plots for a dataset
+- `relevel`: changes the reference category for a factor
+
+If you do not remember what these functions do, or what arguments they take, you can look it up by typing `?functionName` in the console. That will show you the help page of the function, which hopefully clarifies things. If it does not, try a search engine to find online resources, or ask someone. Almost always your question has been asked (and answered) by someone else before. Some hints are given with questions **in bold**.
+
+# R-packages
+
+There are various functions to help you organize model outputs, or plot the regression line. For example, `display` in the \texttt{arm} R-package can help to retrieve a cleaner summary output from the model. The `visreg` function in the \texttt{visreg}, or the `allEffects` function in the \texttt{effects} R-package provide easy ways to quickly plot your regression. The `coefplot` function in the \texttt{arm} function makes plots of coefficients.
+
+# Description
+
+In the previous practicals we focused on estimating the mean of a normally distributed population, based on differently sized samples, and fitting simple linear regressions to simulated data. It should be clear that the sample size, and the variability of a sample, greatly affects the width of confidence intervals, and the precision with which parameters can be estimated.
+
+This is a concept that holds true for all statistical models, also for the multiple regressions in this practical, but also for more complex models such as Generalised Linear Models and otherwise. This can be further exacerbated by complexity of a model, since the information burden for a more complex model is higher than that for a model with fewer parameters and of lower complexity.
+
+In this practical we step things up a bit, and fit multiple linear regressions to real data. Real data are often messy, so make sure to carefully examine the data for its properties before fitting a model to it. There are four datasets that you can choose to fit models to in this practical. They are all covered in the book Zuur et al (2008) on mixed-effects models, but originally come from different sources:
+
+1. Clams: Wedge clam data: biomass (AFD) of 398 wedge clams, length of wedge clams in six months. The log-transformed version of length and biomass (AFD) have also been included (Ieno unpublished)
+2. ISIT: Pelagic bioluminescence ("Sources") along a depth gradient in different seasons (Gillibrand et al. 2007)
+3. Nereis: Nutrient concentration of three nutrient types in the marine benthos ($\text{NH}_4$ $\text{PO}_4$, $\text{NO}_3$), with density (biomass) of *Hediste diversicolor* by Ieno et al (2006)
+4. TeethNitrogen: Nitrogen isotope ratios in teeth of stranded whales (Mendes et al. 2007)
+5. Alternatively, you can simulate normally distributed responses from a multiple linear regression
+
+Don't forget to use `set.seed` for reproducibility if you do simulations. You can answer the questions below for guidance. You can load the data files using the `read.csv` function.
+
+# Tasks
+
+1. Pick a dataset. What might be a suitable question for this dataset?
+
+2. Fit a multiple linear regression that could answer your question. Make sure to also consider interactions of covariates.
+
+3. Fit separate simple linear regressions with the covariates of the multiple regression. Have the coefficients changed?
+
+4. How does the change in the coefficients affect the answer to your question?
+
+5. Look at the confidence intervals of the models, have these changed? Does their change impact your conclusion?
+
+6. Would centering one (or multiple) covariates in your model improve its interpretability?
+
+7. Include a quadratic effect for the continuous covariate in your model. *Hint: you need to use the `I()`, or `poly` function in your model formula*
+
+8. Are there other functions or transformations of the covariate that you might want to consider? Fit those models and consider their summary output. *Hint: consider using the MASS::boxcox function and try to understand what it does*
+
+9. Change the reference category of the categorical variable in your model, refit and examine the model summary. *Hint: have a look at the `relevel` function*
+
+10. Use a different contrast for the categorical variable, and refit your model. How has this changed the way in which you need to read the summary output of the model? *Hint: change the "unordered" component of options("contrasts") to an alternative listed in ?contr.treatment*
+
+11. Return to 1.
+
+
+

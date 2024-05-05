@@ -1,0 +1,65 @@
+---
+title: "Practical: residual diagnostics in GLMs"
+subtitle: "Physalia workshop on GLMs"
+author: "Bert van der Veen"
+output: html_document
+---
+
+# R functions
+
+Regression of count data requires a change of response distribution. Instead of doing regression based on the normal distribution or binomial distribution, we performed regression with the Poisson and negative-binomial distributions in the last practical. This practical continues where we left off, although you could instead fit binomial or linear regressions instead if you prefer. We will use real datasets, collected from different sources. For this you will need the following functions:
+
+- `plot`: draws all kinds of plots (controlled by `type`), but usually a scatterplot
+- `glm`: fits a generalized linear regression to data
+- `summary`: provides a summary table for a (linear) model
+- `confint`: calculates (estimated) confidence intervals for the parameters of a model
+- `predict`: calculates the predicted values from a regression, potentially for new $X$
+- `pairs`: construct a panel of plots for a dataset
+- `relevel`: changes the reference category for a factor
+- `deviance`: extracts deviance for a GLM
+- `df.residual`: extracts residual degrees of freedom for a GLM
+
+and perhaps some of the functions or R packages used in the previous practicals.
+
+If you do not remember what these functions do, or what arguments they take, you can look it up by typing `?functionName` in the console. That will show you the help page of the function, which hopefully clarifies things. If it does not, try a search engine to find online resources, or ask someone. Almost always your question has been asked (and answered) by someone else before. Some hints are given with questions **in bold**.
+
+# R-packages
+
+Similarly to before, you will need external tools for negative-binomial regression, but now we also need additional tools for model checking:
+
+- `MASS::glm.nb`: fits a GLM with negative-binomial distribution
+- `performance::check_overdispersion`: calculates an overdispersion factor
+- `DHARMa::plotQQunif`: QQ-plot based on simulated residuals
+- `DHARMa::plotResiduals`: Simulated residuals vs. fitted
+- `DHARMa::simulateResiduals`: Combines the two previous functions
+
+# Description
+
+Residual diagnostics in GLMs is harder than linear models. Because the residual term is not present in GLMs, the concept of "error" works a bit different. Becuase a lot of data is discrete, the residual usually looks a bit odd. Simulated residuals are instead mapped to a continuous scale, so that the plots actually look nice (i.e., random) when the model is valid.
+
+Quantile residuals can be difficult to determine. Fortunately, the `DHARMa` R-package has all the tools we need!
+
+You can choose from the following datasets:
+
+1. ButterflyCounts: counts of the Baltimore checkerspot butterfly in 3 months for 8 years.
+2. Horseshoecrabs: Data on the number of male sattelites attracted by female horseshoecrabs, data used in the presentation today.
+3. Roadkill: Count of amphibian road kills (TOT.n) as a function of distance to a park (D.PARK), and other variables of the parks such as the amount of olive grooves, montado with and without shrubs, shrubs, urban area, water reservoirs, dirt road length, paved road length, distance to water reservoirs, water courses, and more.
+4. Alternatively, you can simulate Poisson/NB distributed responses
+
+Don't forget to use `set.seed` for reproducibility if you do simulations. You can answer the questions below for guidance. You can construct the plots from the presentation yourself with the aforementioned functions, or use the `plot` function on your model.
+
+# Tasks
+
+1. What are the assumptions of a generalized linear model?
+
+2. What assumptions do we test using a QQ-plot?
+
+3. What assumptions do we chec with a residual vs. fitted plot?
+
+4. Use the DHARMa package to create residual plots for some of the Poisson models that you have fitted previously, and try to understand how it is constructed.
+
+5. Are there violated assumptions? Can you find a model that improves the residual plots?
+
+6. Compare the plots from the `DHARMa` package to the ones from `plot`. Do they show different patterns?
+
+7. Fit a negative-binomial regression and recreate the plots. How do they change, have they improved? 

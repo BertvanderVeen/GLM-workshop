@@ -1,0 +1,434 @@
+---
+title: "Generalized linear model validation"
+institute: "Department of Mathematical Sciences, NTNU"
+author: "Bert van der Veen"
+output: 
+  beamer_presentation:
+    toc: false
+    slide_level: 2
+    latex_engine: lualatex
+    includes:
+      in_header: ../header.tex
+header-includes:
+  - \AtBeginSection{}
+  - \useoutertheme{miniframes}
+  - \setbeamertemplate{frametitle}{\vskip0.3cm\usebeamerfont*{frametitle}\insertframetitle\vskip-1.5ex\begin{beamercolorbox}[colsep=0.2pt, wd=\textwidth]{lower separation line head}\end{beamercolorbox}}
+  - \setbeamercolor{lower separation line head}{bg=orange}
+  - \definecolor{shadecolor}{RGB}{200, 200, 200}
+  - \hypersetup{colorlinks,citecolor=orange,filecolor=red,linkcolor=brown,urlcolor=blue}
+  - \definecolor{green}{RGB}{48, 69, 41}
+  - \definecolor{darkorange}{RGB}{255, 150, 0}
+  - \definecolor{gray}{RGB}{100, 100, 100}
+  - \setbeamercolor{itemize item}{fg=orange}
+  - \setbeamercolor{itemize subitem}{fg=orange}
+  - \setbeamercolor{enumerate item}{fg=orange}
+  - \setbeamercolor{enumerate subitem}{fg=orange}
+  - \tcbuselibrary{skins}
+  - \usepackage{emoji}
+  - \usepackage{ulem}
+  - \usepackage{longtable,booktabs}
+editor_options: 
+  chunk_output_type: console
+urlcolor: orange
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+
+default_source_hook <- knit_hooks$get('source')
+default_output_hook <- knit_hooks$get('output')
+
+knit_hooks$set(
+  source = function(x, options) {
+    paste0(
+      "\n::: {.codebox data-latex=\"\"}\n\n",
+      default_source_hook(x, options),
+      "\n\n:::\n\n")
+  }
+)
+
+knit_hooks$set(
+  output = function(x, options) {
+    paste0(
+      "\n::: {.codebox data-latex=\"\"}\n\n",
+      default_output_hook(x, options),
+      "\n\n:::\n\n")
+  }
+)
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Recap
+
+## The model
+
+Writing the linear model:
+
+\begin{equation}
+y_i = \textcolor{red}{\alpha + \textbf{x}_i\symbf{\beta}} + \textcolor{blue}{\epsilon_i} \sim \mathcal{N}(0,\sigma^2)
+\end{equation}
+
+Is the same as:
+
+\begin{equation}
+\mathams{E}(y_i\vert \textbf{x}_i) = \alpha + \textbf{x}_i\symbf{\beta}
+\end{equation}
+
+as long as $\mathams{E}(\epsilon_i) = 0$.
+
+## Generalised linear model
+
+\begin{equation}
+\begin{aligned}
+ g\{\mathams{E}(y_i\vert x_i)\} &= \eta_i = \alpha + x_i\beta\\
+ \mathams{E}(y_i\vert x_i) &= g^{-1}(\eta_i) = g^{-1}(\alpha + x_i\beta)
+ \end{aligned}
+\end{equation}
+
+\center
+
+\textbf{GLMs do not have a residual term}
+
+## GLM Assumptions
+
+- No outliers
+- Independence
+- Correct distribution
+- Correct link function
+- Correct variance function (implied by previous two)
+
+# Outline
+
+- Residual plots for checking GLM assumptions
+- Issues with residuals in GLMs
+- Types of residuals
+- Residual diagnostics
+- Dharma/quantile residuals
+- Prediction error
+
+# Residual diagnostics in GLMs
+
+![McCullagh and Nelder (1989) workflow](workflow.png)
+
+## Methods for checking GLM assumptions
+
+- ~~Tests~~
+- Outliers: Cook's distance, Residual vs. fitted
+- Independence: Partial residual plots, Residuals vs. fitted, Rresiduals vs. lagged residuals
+- Correct distribution: QQ-plot
+- Correct link function: residuals vs. fitted, include $\eta_i$ in the model \footnotesize (Hinkley 1985) \normalsize, linear predictor against transformed response
+- Correct variance function: Abs(residuals) vs. fitted
+
+## Response residuals
+
+We could use the same residual as in linear regression:
+
+$$\textcolor{blue}{\epsilon_i} = y_i - \textcolor{red}{\hat{\mu}_i}$$
+
+But we do not expect these to look nice in GLMs.
+
+- Mean depends on variance
+- We would rather have nice looking residuals (when assumptions are not violated)
+
+## Defining GLM residuals: Pearson's
+
+We do not have a $\epsilon_i$ term in GLMs, but we still calculate the residual similarly:
+
+\begin{equation}
+\epsilon_{i,pearson} = \frac{y_i-\hat{\mu}_i}{\sqrt{\text{var}(y_i;\mu_i,\phi)}}
+\end{equation}
+
+as the scale difference between data and mean.
+
+\center
+
+\textbf{Approximately normally distributed in large samples}
+
+## Recall deviance?
+
+We do not have a $\epsilon_i$ term in GLMs, but we do have the deviance function:
+
+\begin{equation}
+D(\textbf{y};\hat{\symbf{\mu}}) = \sum \limits^n_{i=1} 2y_i\{g(y_i)-g(\hat{\mu}_i)\} - y_i + \hat{\mu}_i
+\end{equation}
+
+Which represents distance to the saturated model.
+
+## Defining GLM residuals: deviance
+
+\begin{equation}
+D(\textbf{y};\hat{\symbf{\mu}}) = \sum \limits^n_{i=1} 2y_i\{g(y_i)-g(\hat{\mu}_i)\} - y_i + \hat{\mu}_i
+\end{equation}
+
+- Note the summation over the observations
+- We can split this per observation!
+- $d_i = 2y_i\{g(y_i)-g(\hat{\mu}_i)\} - y_i + \hat{\mu}_i$
+
+\textbf{Deviance residuals}\newline
+\begin{equation}
+\epsilon_{i,deviance} = \text{sign}(y_i - \hat{\mu}_i)\sqrt{d_i}, \qquad \text{so that } \sum \limits^n_{i=1} \epsilon_{deviance,i}^2
+\end{equation}
+
+\center
+
+\textbf{Approximately normally distributed in large samples}
+
+## Why deviance residuals
+
+- Converges faster to approximate normality \tiny \newline (Dunn and Smyth 2018, Cox and Snell 1968) \normalsize
+- Otherwise, adjusted deviance residual
+- Good for small samples \tiny (Pierce and Schafer 1986) \normalsize
+  - e.g. Poisson $\mu_i^{-0.5}/6$
+
+\textbf{Still inappropriate for discrete data and small samples}
+
+## In practice
+
+In practice, both Pearson's and Deviance residuals are often non-normally distributed.
+
+# Trying it out
+
+\columnsbegin
+\column{0.5\textwidth}
+
+![Lizards in the sun](lizzy.jpeg)
+\column{0.5\textwidth}
+
+![nwf.org](Horseshoecrab.jpg)
+
+\columnsend
+
+## Lizards: recap
+
+```{r, echo = FALSE, fig.height = 4}
+par(mfrow=c(1,2))
+data(lizards, package="aods3")
+lizards <- lizards[-11,]
+plot(lizards$grahami, x=lizards$Time, ylab = "Observed grahami lizards", xlab="Time")
+plot(lizards$grahami, x=lizards$Site, ylab = "Observed grahami lizards", xlab="Site")
+```
+
+```{r}
+model1 <- glm(cbind(grahami, opalinus)~Time+Site, 
+             data = lizards, family="binomial")
+```
+
+## Lizards: residuals
+
+```{r, echo = FALSE, fig.height = 8, fig.width = 13}
+par(mfrow=c(1,3))
+car::residualPlot(model1, type="response", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Response")
+car::residualPlot(model1, type="deviance", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Deviance")
+car::residualPlot(model1, type="pearson", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Pearson")
+```
+
+## Horseshoe crabs: recap
+
+```{r, echo  =FALSE, message=FALSE, warning=FALSE, fig.width=13, fig.height=7}
+data(hcrabs, package="GLMsData")
+hcrabs$Col <-factor(hcrabs$Col, levels= c("LM","M","DM","D"))
+levels(hcrabs$Col) <- c("Light medium","Medium","Dark medium","Dark")
+hcrabs$Spine <-factor(hcrabs$Spine, levels= c("BothOK","OneOK","NoneOK"))
+colnames(hcrabs)<-c("Colour","Spine","Width","Sat","Weight")
+par(mfrow=c(2,2))
+plot(jitter(log1p(Sat)) ~Weight, data = hcrabs, ylab = "log(Number of satellites+1)", cex.lab=1.5, cex.axis = 2.5, cex = 2)
+plot(jitter(log1p(Sat)) ~Colour, data = hcrabs, ylab = NA, yaxt="n", cex.lab=1.5, cex.axis=2.5, cex = 2)
+plot(jitter(log1p(Sat)) ~Spine, data = hcrabs, ylab = NA, yaxt="n", cex.lab=1.5, cex.axis=2.5, cex = 2)
+plot(jitter(log1p(Sat)) ~Width, data = hcrabs, ylab = NA, yaxt="n", cex.lab=1.5, cex.axis=2.5, cex = 2)
+```
+
+```{r}
+model2 <- glm(Sat ~ Spine + Colour + Width + Weight, 
+             family = "poisson", data = hcrabs)
+```
+
+## Horseshoe crabs: Poisson model residuals
+
+```{r, echo = FALSE, fig.height = 8, fig.width = 13}
+par(mfrow=c(1,3))
+car::residualPlot(model2, type="response", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Response")
+car::residualPlot(model2, type="deviance", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Deviance")
+car::residualPlot(model2, type="pearson", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Pearson")
+```
+
+## Horseshoe crabs: NB model residuals
+
+```{r, echo = FALSE, fig.height = 8, fig.width = 13}
+model3 <- MASS::glm.nb(Sat ~ Spine + Colour + Width + Weight,
+                        data = hcrabs)
+par(mfrow=c(1,3))
+car::residualPlot(model3, type="response", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Response")
+car::residualPlot(model3, type="deviance", cex.main = 2, cex = 2, cex.lab = 1.5, ylab = NA, main = "Deviance")
+car::residualPlot(model3, type="pearson", cex.main = 2, cex = 2, cex.lab = 1.5, ylab = NA, main = "Pearson")
+```
+
+
+## Randomized Quantile residual \tiny (Dunn and Smyth 1996) \normalsize
+
+- Gold standard residual
+- Better suited for small samples and discrete data types
+- Exactly normally distributed
+- Suitable for all kinds of models
+
+### Continuous
+\begin{equation}
+r_Q = \Phi^{-1}\biggl\{\mathcal{F}\biggl(y_i;\hat{\mu_i},\hat{\phi}\biggr)\biggr\}
+\end{equation}
+
+```{r pgamma, eval=T, fig.align="center",out.width="30%", echo=F, warning=F,message=F, fig.show="hold"}
+hist(qnorm(ppois(hcrabs$Sat, predict.glm(model2,type="response"))), main="", cex.main=2, cex.lab=1.5, col="white", xlab="Normal deviates", ylab="")
+hist(ppois(hcrabs$Sat, predict.glm(model2,type="response")), main="", cex.main=2, cex.lab=1.5, col="white", xlab="Quantiles", ylab="")
+```
+
+## Lizards and Horseshoe crabs
+
+```{r, echo = FALSE, fig.height = 8, fig.width = 13}
+par(mfrow=c(1,3))
+# model 1
+b <- pbinom(as.vector(lizards$grahami),size=lizards$grahami+lizards$opalinus, predict(model1, type = "response"))
+a <- pmin(b, pbinom(as.vector(lizards$grahami)-1,size=lizards$grahami+lizards$opalinus, predict(model1, type = "response")))
+u <- runif(length(a),min=a,max=b)
+plot(predict(model1),qnorm(u), ylab = "Quantile residual", xlab  = "Fitted values", main = "Lizards", cex.main = 2, cex = 2, cex.lab = 1.5)
+panel.smooth(y=qnorm(u),predict(model1), cex = 0)
+# model 2
+b <- ppois(as.vector(hcrabs$Sat), predict(model2, type = "response"))
+a <- pmin(b, ppois(as.vector(hcrabs$Sat)-1, predict(model2, type = "response")))
+u <- runif(length(a),min=a,max=b)
+plot(predict(model2),qnorm(u), ylab = NA, xlab  = "Fitted values", main = "Horseshoe crabs Poisson", cex.main = 2, cex = 2, cex.lab = 1.5)
+panel.smooth(y=qnorm(u),predict(model2), cex = 0)
+# model 3
+b <- pnbinom(as.vector(hcrabs$Sat), mu = predict(model3, type = "response"), size = model3$theta)
+a <- pmin(b, pnbinom(as.vector(hcrabs$Sat)-1, mu = predict(model3, type = "response"), size = model3$theta))
+u <- runif(length(a),min=a,max=b)
+plot(predict(model3),qnorm(u), ylab = NA, xlab  = "Fitted values", main = "Horseshoe crabs NB", cex.main = 2, cex = 2, cex.lab = 1.5)
+panel.smooth(y=qnorm(u),predict(model3), cex = 0)
+```
+
+# Prediction
+
+When you are only interested in predictions, e.g.:
+
+- 20 years from now
+- on a map
+
+Some assumptions might not matter. Generally, we still do not want structural deviations from the model.
+
+## Finding a model that predicts well
+
+Usual procedure:
+
+1) Fit model to a part of the data ("train" and "test")
+2) Predict for the remaining part ("test")
+3) Quantify prediction "error" (e.g., RMSE)
+
+\textbf{Statistically leaving out data is weird. We want as much information for our model as possible.}
+
+## Quantifying prediction error
+
+MSE: $\frac{1}{n}\sum \limits^n_{i=1}(y_i-\mu_i)^2$\newline
+RMSE: $\sqrt{\frac{1}{n}\sum \limits^n_{i=1}(y_i-\mu_i)^2}$
+MAD: $\text{median}(\vert\textbf{y}-\symbf{\mu}\vert)^2$\newline
+
+Or another metric. "AUC" is often used in binomial models.\newline
+
+\textbf{For prediction, we want a model that performs well on one of these metrics.}
+
+## "Test" data is not external/independent
+
+- Test data is usually collected under the same circumstances
+- It is not really external!
+- Better procedure: fit model to all data, collect new data for testing
+
+## Leave-one-out cross-validation Horseshoe crabs
+
+```{r, echo = FALSE}
+#prevent issues with factors in cross-validation
+hcrabs <- data.frame(cbind(model.matrix(Sat ~ 0+Spine + Colour + Width + Weight, hcrabs), Sat = hcrabs$Sat))
+model3 <- update(model3, formula = Sat~SpineBothOK+SpineOneOK+SpineNoneOK+ColourMedium+ColourDark.medium+ColourDark+Width+Weight)
+```
+
+```{r, cache = TRUE, warning=FALSE}
+SE <- NULL
+for(i in 1:1000){
+set.seed(i)
+test <- sample(1:nrow(hcrabs), size = 1)
+train <- hcrabs[-test,]
+model <- update(model3, data = train)
+SE <- c(SE,(train[test, "Sat"]-
+  predict(model,newdata = train[test, ], type="response"))^2)
+}
+```
+
+## Result
+
+```{r, echo = FALSE}
+hist(SE, main = "Leave-one-out", xlab = "Squared error")
+```
+
+## K-fold cross-validation Horseshoe crabs
+
+```{r, cache = TRUE, warning=FALSE}
+k = 5
+SE <- NULL
+shuffle <- sample(1:nrow(hcrabs), nrow(lizards))
+for(i in seq(1,nrow(hcrabs),by=k)){
+set.seed(i)
+test <- i:min(i+k-1,nrow(hcrabs))
+train <- hcrabs[shuffle, ][-test,]
+model <- update(model3, data = train)
+SE <- c(SE,(hcrabs[shuffle, ][test, "Sat"]-
+  predict(model,newdata = hcrabs[shuffle, ][test, ], type="response"))^2)
+}
+```
+
+## Result
+
+```{r, echo = FALSE}
+hist(SE, main = "k-fold", xlab = "Squared error")
+```
+
+
+## Stratified cross-validation
+
+- Cross-validation in a structured fashion: time or space.
+
+- Select roughly equal partitions
+  - Time: fit to a few years per partition
+  - Space: areas
+- I.e., blocking for non-independent responses
+
+## Stratified k-fold cross-validation Horseshoecrabs
+\footnotesize
+```{r, cache = TRUE, warning=FALSE}
+k = 5
+SE <- NULL
+for(i in seq(1,nrow(hcrabs),by=k)){
+set.seed(i)
+test <- i:min(i+k-1,nrow(hcrabs))
+train <- hcrabs[order(hcrabs$Weight),][-test,]
+model <- update(model3, data = train)
+SE <- c(SE,(hcrabs[order(hcrabs$Weight),][test, "Sat"]-
+predict(model,newdata = hcrabs[order(hcrabs$Weight),][test, ], type="response"))^2)
+}
+```
+
+## Result
+
+```{r, echo = FALSE}
+hist(SE, main = "stratified k-fold", xlab = "Squared error")
+```
+
+# Summary
+
+- I did not mention Anscombe residuals, nor working residuals
+- Do not draw conclusions before validating your model
+- Use residual diagnostics/plots!
+- If violated, adjust the model
+- For prediction, look at cross-validation
+  - Consider the structure of the data
+  - Use independently collected data
+  - There are many forms of cross-validation and quantifying error
+  - Find model that minimizes the prediction error
+  
+Useful packages: \texttt{car}, \texttt{DHARMa}, \texttt{boot}
