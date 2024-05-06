@@ -1,0 +1,25 @@
+"Site","Diameter","Height","Time","grahami","opalinus"
+"Sun","D <= 2","H < 5","Early",20,2
+"Sun","D <= 2","H < 5","Mid-day",8,1
+"Sun","D <= 2","H < 5","Late",4,4
+"Sun","D <= 2","H >= 5","Early",13,0
+"Sun","D <= 2","H >= 5","Mid-day",8,0
+"Sun","D <= 2","H >= 5","Late",12,0
+"Sun","D > 2","H < 5","Early",8,3
+"Sun","D > 2","H < 5","Mid-day",4,1
+"Sun","D > 2","H < 5","Late",5,3
+"Sun","D > 2","H >= 5","Early",6,0
+"Sun","D > 2","H >= 5","Mid-day",0,0
+"Sun","D > 2","H >= 5","Late",1,1
+"Shade","D <= 2","H < 5","Early",34,11
+"Shade","D <= 2","H < 5","Mid-day",69,20
+"Shade","D <= 2","H < 5","Late",18,10
+"Shade","D <= 2","H >= 5","Early",31,5
+"Shade","D <= 2","H >= 5","Mid-day",55,4
+"Shade","D <= 2","H >= 5","Late",13,3
+"Shade","D > 2","H < 5","Early",17,15
+"Shade","D > 2","H < 5","Mid-day",60,32
+"Shade","D > 2","H < 5","Late",8,8
+"Shade","D > 2","H >= 5","Early",12,1
+"Shade","D > 2","H >= 5","Mid-day",21,5
+"Shade","D > 2","H >= 5","Late",4,4
