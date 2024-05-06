@@ -7,7 +7,6 @@ output:
     toc: false
     slide_level: 2
     latex_engine: lualatex
-    keep_tex: true
     includes:
       in_header: ../header.tex
 header-includes:
@@ -80,6 +79,14 @@ Practicals of about 45 minutes: datasets and R
 
   - Practical "tasks" serve as guideline, not as exhaustive exercise
   - I do not provide a lot of \texttt{R} code. We will figure that out together!
+
+
+## Friday
+
+1. Looking beyond (GLMMs, GAMs, Bayesian statistics, and such)
+2. Bring your own data
+
+Which topics should we look into on Friday?
 
 
 ## Disclaimer
