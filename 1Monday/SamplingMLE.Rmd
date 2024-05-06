@@ -589,12 +589,6 @@ abline(v=0.4, col="red")
 - We summarize this with a sampling distribution of our estimates
 - And use that to draw a conclusion
 
-## My questions
-
-Menti for "quiz"?
-Why not just use a single dataset?
---TODO
-
 ## Questions?
 
 \centering
