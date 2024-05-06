@@ -97,13 +97,6 @@ Generalised linear models are a unifying class
 
 \textbf{Makes sure that the mean is on the right scale (e.g., positive only, or between 0 and 1)}
 
-## Outline
-
-- Normal distribution
-- Linear models
-...
-
-
 # Binomial GLMs
 
 ## The binomial GLM
