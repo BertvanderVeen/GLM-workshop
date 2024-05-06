@@ -520,12 +520,24 @@ Just by chance, predictors with no relationship to the response will be selected
 
 ## Omitted variable bias
 
+Occurs if we omit a variable, i.e., we have the model:
+
+\begin{equation}
+\text{g}\{\mathams{E}(y_i \vert x_{i1},x_{i2})\} = \alpha + x_{i1}\beta_1+x_{i2}\beta_2
+\end{equation}
+
+but we fit without $x_{i2}$. The consequence is especially clear for linear models:
+
+\begin{equation}
+y_i = \alpha + x_{i1}\beta_1+\epsilon_i, \qquad \text{with } \epsilon_i = x_{i2}\beta_2+\epsilon_i^\star
+\end{equation}
+
+- $\epsilon_i$ may be correlated with $x_{i1}$
+- Residual variance changes with $x_{i1}$
+- Causes bias in parameter estimates and incorrect standard errors
+
 ## Multimodel inference
- 
- - this is what it is
- - i dont cover it because time
- - but dont do it
- 
+
 What to do when you have multiple models that are equally good?
 
 - The simpler model
