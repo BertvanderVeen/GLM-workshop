@@ -665,3 +665,17 @@ text(0, predict(model, newdata = data.frame(x2 = 0, x1 = 0)), labels = "x2=0", c
 - Multiple regression and the design matrix
 
 - Fortunately we have the `lm()` function in R!
+
+## Example code for practical
+
+```{r, eval = FALSE}
+dataset <- read.csv("some_place_on_my_computer/awesomedata.csv")
+lm(y ~ x1+x2, data = dataset)
+```
+
+## Questions
+
+\center
+
+![](questions.jpg){width=40%}
+
