@@ -84,6 +84,8 @@ abline(model2)
 
 ```{r}
 x <- rbinom(20,size = 1,prob = 0.5)
+alpha = 1;beta=3
+y <- rnorm(alpha+beta*x)
 model3 <- lm(y~x)
 plot(y~x)
 abline(model3)
@@ -111,11 +113,11 @@ confint(model3)
 9. Calculate confidence intervals via simulation similarly to the first practical instead: simulate data, fit a linear regression, store the parameter estimates, repeat. How do these confidence intervals compare to those from the `confint` function? **Hint: use the `quantile` function.**
 
 ```{r}
-dolm <- function(x){
-  ynew <- as.matrix(simulate(model3))
+dolm <- function(x, alpha, beta){
+  ynew <- rnorm(alpha+x*beta)
   coef(lm(ynew~x))
 }
-apply(t(replicate(1000,dolm(x))),2,quantile,probs=c(0.025,0.975))
+apply(t(replicate(10000,dolm(alpha = alpha, beta = beta, x = x))),2,quantile,probs=c(0.025,0.975))
 
 # less accurate especially for small nr of simulations
 ```
