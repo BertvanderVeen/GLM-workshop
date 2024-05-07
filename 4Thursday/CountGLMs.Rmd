@@ -1,5 +1,5 @@
 ---
-title: "Binomial regression"
+title: "Models for count data"
 institute: "Department of Mathematical Sciences, NTNU"
 author: "Bert van der Veen"
 output: 
