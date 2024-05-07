@@ -378,8 +378,6 @@ Similar problems in a lot of more complex models (e.g., GLMMs).
 - Gamma: (positive) continuous. Body size
 - Ordinal (cumulative link). Plant cover classes
 
-## Binomial: 
-
 ## in R
 
 - Similar to the lm() function!
@@ -421,7 +419,7 @@ summary(glm(y~X, family = "poisson"))
 ## Prediction
 
 \begin{equation}
-\hat{mu}_i = g^{-1}(\alpha + \textbf{x}_i\symbf{\beta})
+\hat{\mu}_i = g^{-1}(\alpha + \textbf{x}_i\symbf{\beta})
 \end{equation}
 
 ```{r, eval = FALSE}
@@ -454,7 +452,7 @@ gamma: $2\sum \limits^n_{i=1} -\log\{y_i/\hat{\mu}_i\}+(y_i-\hat{\mu_i})/\hat{\m
 
 and so on.
 
-# Deviance
+## Deviance
 
 - Measures (twice) difference to a model that perfectly fits the data ("saturated model")
   - equal to RSS for linear regression
@@ -486,17 +484,6 @@ and so on.
 - Residual checking in GLMs can be difficult
 
 (omitted details)
-
-## Some resources
-
-McCullagh and Nelder
-Dunn and Smyth
-Wood
-
-more friendly
-- dunn and smyth (because in R)
-- free book john fieberg
-- zuur
 
 # Recap
 
