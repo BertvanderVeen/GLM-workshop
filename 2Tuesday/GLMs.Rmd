@@ -64,7 +64,7 @@ knitr::opts_chunk$set(echo = TRUE)
 \columnsbegin
 \column{0.5\textwidth}
 \begin{equation}
-y_i = \textcolor{orange}{\alpha + \sum \limits^p_{k=1} x_{ik}\beta} + \textcolor{blue}{\epsilon_i}
+y_i = \textcolor{red}{\alpha + \sum \limits^p_{k=1} x_{ik}\beta} + \textcolor{blue}{\epsilon_i}
 \end{equation}
 \column{0.5\textwidth}
 \center 
@@ -79,7 +79,7 @@ y_i = \textcolor{orange}{\alpha + \sum \limits^p_{k=1} x_{ik}\beta} + \textcolor
 \columnsbegin
 \column{0.7\textwidth}
 \begin{equation}
-y_i = \textcolor{orange}{\alpha + x_i\beta} + \textcolor{blue}{\epsilon_i}
+y_i = \textcolor{red}{\alpha + x_i\beta} + \textcolor{blue}{\epsilon_i}
 \end{equation}
 
 - $y_i$ the data
