@@ -550,8 +550,6 @@ summary(model)
 cbind(y, signif(predict(model, type = "response"),2))
 ```
 
-## Choosing the wrong link
---
 
 ## Summary
 
