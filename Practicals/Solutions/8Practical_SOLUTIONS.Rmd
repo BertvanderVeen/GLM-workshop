@@ -70,9 +70,9 @@ N <- rowSums(lizards[,c("grahami","opalinus")])
 model <- glm(cbind(grahami, opalinus)~Time+Site, family="binomial", data =lizards)
 pred <- predict(model, type = "response")
 
-tempres <- (N-y)/(N-pred)
+tempres <- (N-y)/(N-N*pred)
 tempres <- ifelse(is.infinite(log(tempres)), 0, log(tempres))
-2*sum(y*log(y/pred) + (N-y)*tempres)
+2*sum(y*log(y/(N*pred)) + (N-y)*tempres)
 ```
 
 
