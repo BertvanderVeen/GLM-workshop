@@ -1,0 +1,137 @@
+---
+title: "Practical: model selection"
+subtitle: "Physalia workshop on GLMs"
+author: "Bert van der Veen"
+output: html_document
+---
+
+# R functions
+
+In the last practical we fitted binomial glms. In this practical we return to those models and try to figure out which model fits "best" to the data. For this you will might the following functions:
+
+- `AIC`: extracts Akaike's Information Criteria from a model
+- `BIC`: extracts Schwarz's Bayesian Information Criteria from a model
+
+and perhaps some of the functions or R packages used in the previous practicals.
+
+If you do not remember what these functions do, or what arguments they take, you can look it up by typing `?functionName` in the console. That will show you the help page of the function, which hopefully clarifies things. If it does not, try a search engine to find online resources, or ask someone. Almost always your question has been asked (and answered) by someone else before. Some hints are given with questions **in bold**.
+
+# R-packages
+
+Model-selection can be a tedious task, so there are some R-packages that can make things easier. In particular:
+
+- `AICcmodavg::AICc`: extract corrected AIC from a model. Alternatively `MuMIN::AICc`
+- `AICcmodavg::aictab`: creates a model selection table 
+- `AICcmodavg::bictab`: creates a model selection table
+- `MuMIn::dredge`: automatic model selection
+
+# Description
+
+Fitting model is fun, but how do you know it is a good model? In practical we went over how to determine if your model is valid, but that does not make it a good model, or the best in a set.
+
+The goal of this practical is to go over the models that you fitted during the last practical (or for the multiple linear regression practical) and determine for your dataset of choice, which is the model that is "best". "Best" being either 1) in a predictive manner, or 2) for inference. Again you can choose one of the following datasets from the binomial regression practical:
+
+1. Lizards: Lizard counts, used in the presentation this morning, includes a count of two lizard species and multiple categorical covariates [(Schoener 1970)](https://esajournals.onlinelibrary.wiley.com/doi/10.2307/1935376)
+2. Moose: Data on the detection of GPS collared moose by helicopter. This includes thee covariates: year of the survey, amount of visual obstruction in a 10m radius of the moose, number of moose in the sighted group [(Giudice et al. 2012)](https://wildlife.onlinelibrary.wiley.com/doi/full/10.1002/jwmg.213)
+3. deposit: Number of insects killed and exposed as a function of insecticide types with different doses [(Hewlet and Plackett 1950)](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1744-7348.1950.tb00973.x)
+4. wells: Water quality of contaminated wells (y vs n) in New York with variables of surrounding land use, sewer usage, and nitrate and chloride concentration [(Eckhard et al. 1989)](https://pubs.usgs.gov/publication/wri864142)
+5. Alternatively, you can simulate binomial distributed responses
+
+Or any of the dataset for the multiple linear regression example. Don't forget to use `set.seed` for reproducibility if you do simulations. You can answer the questions below for guidance. You can construct the plots from the presentation yourself with the aforementioned functions, or use the `plot` function on your model.
+
+# Tasks
+
+1. What makes a good model?
+
+```{r}
+# A model that is easy to interpret
+# A model that has no violated assumptions
+```
+
+2. What are the differences between AIC, BIC, and AICc for model comparison?
+
+```{r}
+
+# AIC has 2*k penalty - selects model that predicts best
+# BIC has log(n)*k - selects model closest to the truth
+# AICc has AIC + 2k(k+1)/(n-k-1) - selects models that predicts best, 2nd order correction AIC
+```
+
+3. How do you use AIC/BIC for model comparison?
+
+```{r}
+# You fit a model
+# You fit another model
+# The better model is the one that has lower AIC/BIC
+```
+
+
+4. How do you use LRT for model comparison?
+
+```{r}
+# Fit two models
+# You calculate the LRT statistic and its p-value
+# If p<0.05 we accept the alternative hypothesis (i.e., the more complex model)
+
+```
+
+5. Define a question for your dataset of choice, fit models, and compare models with your choice of information criteria. Write a brief summary of how you found "the best" model.
+
+```{r}
+# Which model is closest to the truth?
+```
+
+6. Use AIC/AICc/BIC (the one you did not use in 5.) and compare the same models. Do you find a different model?
+
+```{r}
+lizards <- read.csv("/home/bertv/GLM-workshop/data/lizards.csv")
+lizards <- lizards[-11,]
+
+# Use different information criteria to compare models
+model <- glm(cbind(grahami, opalinus)~Time+Site, family = binomial(link=cloglog), data = lizards)
+model1 <- glm(cbind(grahami, opalinus)~Time+Site+Time:Site, family = binomial(link=cloglog), data = lizards)
+BIC(model, model1);AIC(model, model1);MuMIn::AICc(model,model1)
+
+# Compare some link functions
+model2 <- glm(cbind(grahami, opalinus)~Time+Site+Time:Site, family = binomial(link=probit), data = lizards)
+model3 <- glm(cbind(grahami, opalinus)~Time+Site+Time:Site, family = binomial(link=logit), data = lizards)
+BIC(model1, model2, model3)
+
+model4 <- glm(cbind(grahami, opalinus)~Time+Site+Time:Site+Diameter+Height, family = binomial(link=logit), data = lizards, na.action = "na.fail")
+MuMIn::dredge(model4)
+```
+
+
+7. How would you explain the model selection procedure in a report or scientific article?
+
+```{r}
+# As measured by BIC, the model without interaction was not better.
+# Then, report BIC values
+```
+
+8. How might you determine if your model is a good model?
+
+```{r}
+# plot residuals to check for assumption violations
+# check R^2, which is covered in the next presentations
+# plot the model through the data; visually assess if the fit is good
+performance::check_overdispersion(model4) # maybe we also check overdispersion
+```
+
+9. What do you do if two models fit the data equally well?
+
+```{r}
+# describe difference between the models.
+# see if there is biological motivation for one or the other
+# you could pick the simpler one
+# look at the confidence intervals of parameter estimates
+```
+
+10. Can you think of any issues that might arise when comparing all possible submodels?
+
+```{r}
+# Freedman's paradox can arise
+# There might be too many submodels to compare
+# Too much focus on "The best" model
+```
+
