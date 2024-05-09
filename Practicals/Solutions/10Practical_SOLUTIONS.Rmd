@@ -1,0 +1,201 @@
+---
+title: "Practical: Poisson and NB regression"
+subtitle: "Physalia workshop on GLMs"
+author: "Bert van der Veen"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# R functions
+
+Regression of count data requries a change of response distribution. Instead of doing regression based on the normal distribution or binomial distribution, we here perform regression with the Poisson and negative-binomial distributions. We will use real datasets, collected from different sources. For this you will need the following functions:
+
+- `plot`: draws all kinds of plots (controlled by `type`), but usually a scatterplot
+- `glm`: fits a generalized linear regression to data
+- `summary`: provides a summary table for a (linear) model
+- `confint`: calculates (estimated) confidence intervals for the parameters of a model
+- `predict`: calculates the predicted values from a regression, potentially for new $X$
+- `pairs`: construct a panel of plots for a dataset
+- `relevel`: changes the reference category for a factor
+- `deviance`: extracts deviance for a GLM
+- `df.residual`: extracts residual degrees of freedom for a GLM
+
+and perhaps some of the functions or R packages used in the previous practicals.
+
+If you do not remember what these functions do, or what arguments they take, you can look it up by typing `?functionName` in the console. That will show you the help page of the function, which hopefully clarifies things. If it does not, try a search engine to find online resources, or ask someone. Almost always your question has been asked (and answered) by someone else before. Some hints are given with questions **in bold**.
+
+# R-packages
+
+Base R does not include the necessary tools to calculate $R^2$ measures for GLMs, nor the possibility to fit negative-binomial regression. So the R-packages you might need in this practical include:
+
+- `MASS::glm.nb`: fits a GLM with negative-binomial distribution
+- `performance::check_overdispersion`: calculates an overdispersion factor
+- `DHARMa::testDispersion()`: test for overdispersion issues via simulation
+
+# Description
+
+Each type of data has its own unique properties. Besides binary (presence-absence) data, count data that cannot be directly connect to success/failure combinations, is very common. One of the properties of count data is that is usually follows a multiplicative process, and (as in most GLMs) the variance increases with the mean.
+
+More specifically, usually the mean and variance are the same! That is also the assumption we make when fitting Poisson GLMs to our data. When that assumption does not hold, we can use different types of regression that relax the Poisson assumptions. One such model is negative-binomial regression, but generalised Poisson or Conway-Maxwell-Poisson regression are two alternatives that we do not look at in this practical. For count models the link function is (essentially) always the log link-function.
+
+You can choose from the following datasets:
+
+1. ButterflyCounts: counts of the Baltimore checkerspot butterfly in 3 months for 8 years.
+2. Horseshoecrabs: Data on the number of male sattelites attracted by female horseshoecrabs, data used in the presentation today.
+3. Roadkill: Count of amphibian road kills (TOT.n) as a function of distance to a park (D.PARK), and other variables of the parks such as the amount of olive grooves, montado with and without shrubs, shrubs, urban area, water reservoirs, dirt road length, paved road length, distance to water reservoirs, water courses, and more.
+4. Alternatively, you can simulate Poisson/NB distributed responses
+
+Don't forget to use `set.seed` for reproducibility if you do simulations. You can answer the questions below for guidance. You can construct the plots from the presentation yourself with the aforementioned functions, or use the `plot` function on your model.
+
+# Tasks
+
+1. What are the assumptions of Poisson regression?
+
+```{r}
+# Independence
+# Log link is the correct link function
+# Mean = variance
+# No outliers
+```
+
+2. What is the parameter that you are modeling in Poisson regression?
+
+```{r}
+# Lambda, the mean
+```
+
+3. Fit Poisson regression to one of the aforementioned datasets. Perform a model-selection procedure to find the best model.
+
+```{r}
+rkills <- read.csv("/home/bertv/GLM-workshop/data/RoadKills.csv")
+plot(log1p(TOT.N)~D.PARK, data = rkills)
+plot(log1p(TOT.N)~WAT.RES, data = rkills)
+plot(log1p(TOT.N)~L.SDI, data = rkills)
+
+model1 <- glm(TOT.N ~ D.PARK, family = "poisson", data = rkills)
+model2 <- glm(TOT.N ~ D.PARK + WAT.RES, family = "poisson", data = rkills)
+
+AIC(model1,model2)
+
+model3 <- glm(TOT.N ~ D.PARK+S.RICH, family = "poisson", data = rkills)
+
+AIC(model1,model3)
+
+plot(TOT.N~S.RICH, data = rkills)
+
+pred1 <- predict(model3, newdata = data.frame(D.PARK = 7000, S.RICH = seq(0,9, length.out=1000)), type = "response")
+lines(seq(0,9, length.out=1000), pred1, col = 2, lwd = 2)
+```
+
+
+4. Do the effects of this model have a large statistical uncertainty? Which effect has the smallest uncertainty?
+
+```{r}
+summary(model3)
+hist(rkills$TOT.N, freq = FALSE, breaks = 20)
+lines(density(rkills$TOT.N), col = "red")
+# Uncertainty looks fine, D.PARK has smallest uncertainty
+```
+
+
+5. Calculate the dispersion factor, and conclude if there are overdispersion issues with your model. *Hint: you can also use the performance::check_overdispersion, or DHARMa::testDispersion() functions*
+
+```{r}
+deviance(model3)/df.residual(model3)
+performance::check_overdispersion(model3)
+DHARMa::testDispersion(model3)
+```
+
+6. Fit a negative-binomial regression to the data and compare the estimates, and confidence intervals, to the Poisson regression. How much have they changed?
+
+```{r}
+model3nb <- MASS::glm.nb(TOT.N ~ D.PARK + S.RICH, data = rkills)
+plot(model3nb)
+AIC(model3, model3nb)
+```
+
+7. Re-do your model-selection procedure with the negative-binomial regression. Do you find a different "best" model?
+
+
+```{r}
+model1nb <- MASS::glm.nb(TOT.N ~ D.PARK, data = rkills)
+model4nb <- MASS::glm.nb(TOT.N ~ S.RICH, data = rkills)
+AIC(model1nb,model3nb,model4nb)
+
+# Looking for a covariate that can explain pt5
+apply(rkills, 2, which.max)
+plot(log1p(TOT.N)~BufoCalamita, data = rkills)
+
+model5nb <- MASS::glm.nb(TOT.N ~ D.PARK + S.RICH + BufoCalamita, data = rkills)
+AIC(model3nb, model5nb)
+
+model6nb <- MASS::glm.nb(TOT.N ~ S.RICH + BufoCalamita, data = rkills)
+model7nb <- MASS::glm.nb(TOT.N ~ D.PARK + BufoCalamita, data = rkills)
+model8nb <- MASS::glm.nb(TOT.N ~ D.PARK + log1p(BufoCalamita), data = rkills)
+
+AIC(model5nb, model6nb, model7nb, model8nb)
+
+model9nb <- MASS::glm.nb(TOT.N ~ D.PARK + S.RICH + BufoCalamita + OPEN.L, data = rkills)
+AIC(model9nb, model5nb)
+
+plot(TOT.N~S.RICH, data = rkills)
+
+pred2 <- predict(model9nb, newdata = data.frame(D.PARK = mean(rkills$D.PARK), BufoCalamita = mean(rkills$BufoCalamita), S.RICH = seq(0,9, length.out=1000), OPEN.L = mean(rkills$OPEN.L)), type = "response")
+lines(seq(0,9, length.out=1000), pred2, col = 2, lwd = 2)
+
+model10nb <- MASS::glm.nb(TOT.N ~ D.PARK + S.RICH + BufoCalamita + OPEN.L + offset(log(N.PATCH)), data = rkills)
+
+plot(TOT.N~S.RICH, data = rkills)
+pred3 <- predict(model10nb, newdata = data.frame(D.PARK = mean(rkills$D.PARK), BufoCalamita = mean(rkills$BufoCalamita), S.RICH = seq(0,9, length.out=1000), OPEN.L = mean(rkills$OPEN.L), N.PATCH = mean(rkills$N.PATCH)), type = "response")
+lines(seq(0,9, length.out=1000), pred3, col = 2, lwd = 2)
+
+model10nb <- MASS::glm.nb(TOT.N ~ D.PARK + S.RICH + BufoCalamita + OPEN.L + offset(log(N.PATCH)), data = rkills)
+model11nb <- MASS::glm.nb(TOT.N ~ D.PARK + S.RICH  + OPEN.L + offset(log(N.PATCH)), data = rkills)
+model12nb <- glm.nb(TOT.N ~ D.PARK + OPEN.L + offset(log(N.PATCH)), data = rkills)
+
+AIC(model10nb, model11nb, model12nb)
+
+plot(TOT.N~OPEN.L, data = rkills)
+pred4 <- predict(model12nb, newdata = data.frame(D.PARK = mean(rkills$D.PARK), OPEN.L = seq(0,100,length.out=1000), N.PATCH = mean(rkills$N.PATCH)), type = "response")
+lines(seq(0,100,length.out=1000), pred4, col = 2, lwd = 2)
+
+performance::r2_coxsnell(model12nb)
+performance::r2_nagelkerke(model12nb)
+DescTools::PseudoR2(model12nb, which="all")
+```
+
+
+8. Construct confidence intervals for the predicted mean.
+
+```{r}
+plot(TOT.N~S.RICH, data = rkills)
+
+pred2 <- predict(model5nb, newdata = data.frame(D.PARK = mean(rkills$D.PARK), BufoCalamita = mean(rkills$BufoCalamita), S.RICH = seq(0,9, length.out=1000)), type = "response")
+lines(seq(0,9, length.out=1000), pred2, col = 2, lwd = 2)
+```
+
+
+9. Plot the residuals of the model, how do they look? Can you discern any assumption violations?
+```{r}
+# Model 4: outlier that is accounted for in model 5
+# Model 5: Looks OK but a little deviation in QQ-plot
+```
+
+10. Fitting Conway-Maxwell and Generalized poisson
+
+```{r}
+library(glmmTMB)
+opts <- glmmTMBControl(optCtrl=list( maxit=10e3), optArgs = list(method="BFGS"), optimizer = optim)
+
+model5P <- glmmTMB(TOT.N ~ D.PARK + S.RICH + BufoCalamita, family = poisson, data = rkills, control = opts)
+# CMP does not converge for this dataset
+# model5CMP <- glmmTMB(TOT.N ~ D.PARK + S.RICH + BufoCalamita, family = compois, data = rkills, control = opts)
+model5GP <- glmmTMB(TOT.N ~ D.PARK + S.RICH + BufoCalamita, family = genpois, data = rkills, control = opts)
+model5nb2 <- glmmTMB(TOT.N ~ D.PARK + S.RICH + BufoCalamita, family = nbinom2, data = rkills, control = opts)
+model5nb1 <- glmmTMB(TOT.N ~ D.PARK + S.RICH + BufoCalamita, family = nbinom1, data = rkills, control = opts)
+
+AIC(model5P, model5GP, model5nb2, model5nb1)
+summary(model5nb2)
+```
+
