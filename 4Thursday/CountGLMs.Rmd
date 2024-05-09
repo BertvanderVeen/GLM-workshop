@@ -108,8 +108,6 @@ abline(v= 0, lty="dashed")
 legend("bottomright", lty=c(1,2,3,4), legend = c("Logit","Probit", "Complementary log-log", "Log-log"))
 ```
 
-## Outline
-
 # Log-linear regression
 
 Log-linear regression is a class of models that uses the log-link function:
@@ -236,6 +234,8 @@ hist(rpois(1000,100), xlab = expression(y[i]), main = expression(lambda == 100),
 - The rate of events is constant
 - Events cannot occur simultaneously
 - Variance equals the mean
+
+# Example
 
 ## Example: horseshoe crabs 
 
