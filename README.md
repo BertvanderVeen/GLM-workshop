@@ -112,8 +112,7 @@ On the first day we will go through R basics and background theory of frequentis
 |         |15:00 - 16:00| Practical 10: Poisson and NB regression               |
 |         |16:00 - 16:15| Break                                                 |
 |         |16:15 - 17:00| Residuals diagnostics in GLMs                         |
-|         |16:15 -      | Practical 11: Residuals diagnostics in GLMs           |
-|         |      - 17:45| Discussion: reporting your GLM analysis               |
+|         |17:00 - 17:45| Practical 11: Residuals diagnostics in GLMs           |
 |         |17:45 - 18:30| Break                                                 |
 |         |18:30 - 19:15| Other useful models                                   |
 |         |19:15 - 20:00| Practical 12: other useful models                     |
