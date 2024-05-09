@@ -213,7 +213,7 @@ Say that we have the model:
 - with $\alpha = 1$ and $\beta = \log(2) \approx 0.693$
 - $x_i$ is either 0 or 1: either I was fishing or you were
 - `exp(1) = 2.71828` the average number of fish I caught
-- `exp(1+2) = exp(1)*2 = 5.437` the average number of fish you caught
+- `exp(1+\log{2}) = exp(1)*2 = 5.437` the average number of fish you caught
 
 So, you caught twice as many fish!
 

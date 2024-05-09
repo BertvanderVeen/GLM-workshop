@@ -1,5 +1,5 @@
 ---
-title: "Generalized linear model validation"
+title: "Other useful models"
 institute: "Department of Mathematical Sciences, NTNU"
 author: "Bert van der Veen"
 output: 
@@ -232,7 +232,7 @@ points(nitrogen$Fert,nitrogen$SoilN,col="red", cex = 2,pch=16)
 \tiny
 
 ```{r}
-model3 <- glm(SoilN~Fert, data = nitrogen, family = "inverse.gaussian")
+model3 <- glm(SoilN~Fert, data = nitrogen, family = "Gamma")
 summary(model3)
 ```
 
@@ -273,12 +273,14 @@ With Tweedie we can:
 
 ## Tweedie GLM in \texttt{R}: finding $\xi$
 
-```{r, cache = TRUE, warning=FALSE}
+
+```{r, cache = TRUE, warning=FALSE, echo = FALSE}
 out.est <- tweedie::tweedie.profile(SoilN ~ Fert, xi.vec = seq(2.01, 4, by=0.05), data = nitrogen)
-out.est2 <- tweedie::tweedie.profile(SoilN ~ Fert, xi.vec =  seq(out.est$xi.max-0.5, out.est$xi.max+0.5, by=0.01), data = nitrogen)
+out.est2 <- tweedie::tweedie.profile(SoilN ~ Fert, xi.vec =  seq(out.est$xi.max-0.5, out.est$xi.max+0.5, by=0.01), data = nitrogen, verbose = FALSE)
 plot(out.est2, xlab = expression(xi), ylab="Log-likelihood", type = "l")
 abline(v=out.est2$xi.max, col = "red")
 ```
+
 
 ## Tweedie GLM in \texttt{R}: fitting
 
@@ -458,11 +460,11 @@ p\exp(-\lambda_{i}) & \text{if}\ \nu_{i} = 1\\
 - can choose to separately model $p$ as a logistic regression
 - quadratic mean-variance as in NB
 
-## Example: Cod parasite data
+## Example: Mistletoe infection data
 
 Mistletoe data covered in Zuur (2021)
 
-- Count of mistoetoe infections in a tree stand
+- Count of mistletoe infections in a tree stand
 - DBH, tree infected or not, size of largest mistletoe
 
 ```{r, echo = FALSE}

@@ -371,7 +371,7 @@ hist(SE, main = "Leave-one-out", xlab = "Squared error")
 ```{r, cache = TRUE, warning=FALSE}
 k = 5
 SE <- NULL
-shuffle <- sample(1:nrow(hcrabs), nrow(lizards))
+shuffle <- sample(1:nrow(hcrabs), k)
 for(i in seq(1,nrow(hcrabs),by=k)){
 set.seed(i)
 test <- i:min(i+k-1,nrow(hcrabs))
