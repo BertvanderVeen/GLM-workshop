@@ -910,7 +910,7 @@ text(7.5,1.3,"Bad", cex=6,col="red")
 \textbf{i.e. a range of options}
 
 
-# Simulation: grouping of errors
+## Simulation: grouping of errors
 
 ```{r poissim, eval=T, echo=T}
 n <- 200
@@ -925,7 +925,7 @@ mu <- exp(alpha + beta*x + e[fac])
 y <- rpois(n = n, lambda = mu)
 ```
 
-# Example: Poisson residuals (grouping)
+## Example: Poisson residuals (grouping)
 
 ```{r poisr, eval=T, fig.align="center", echo=F, warning=F,message=F, fig.show="hold", out.width="70%"}
 par(mar=c(5,5,4,2))
@@ -1286,4 +1286,4 @@ t = \frac{
 
 \center
 
-![](Thats_all_folks.png)
+![](Thats_all_folks.png){width=75%}
