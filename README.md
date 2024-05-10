@@ -73,8 +73,11 @@ On the first day we will go through R basics and background theory of frequentis
 [Third presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/4Thursday/OtherModels.pdf)
 
 ## Friday
-* What lies ahead (GAMs, GLMMs, etc.)
+* Beyond GLMs: Generalised linear mixed models
 * Participants' case studies (bring your own data)
+* Discussion/help/..
+
+[Presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/5Friday/BeyondGLMs.pdf)
 
 # Detailed schedule
 |   Day   |Time         |Subject                                                |
@@ -117,6 +120,6 @@ On the first day we will go through R basics and background theory of frequentis
 |         |18:30 - 19:15| Other useful models                                   |
 |         |19:15 - 20:00| Practical 12: other useful models                     |
 |---------|-------------|-------------------------------------------------------|
-|Friday   |14:00 - 15:00| What lies ahead (GLMMs, GAMs, GLLVMs, Bayesian stats) |
-|         |15:00 - 18:00| Bring/present your own data (in group)                |
+|Friday   |14:00 - 16:00| GLMMs                                                 |
+|         |16:00 - 18:00| Bring/present your own data/...                       |
 
