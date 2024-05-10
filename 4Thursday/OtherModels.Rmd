@@ -146,7 +146,7 @@ knitr::kable(head(nitrogen, 8), format="latex", booktabs = T)
 Connected to the normal distribution, in the sense:
 \begin{equation}
 \begin{aligned}
-\log(y)_i &\sim \mathcal{N}(\mu_i,\sigma^2)\\
+\log(y_i) &\sim \mathcal{N}(\mu_i,\sigma^2)\\
 y_i &\sim \mathcal{Lognormal}(\mu_i,\sigma^2)
 \end{aligned}
 \end{equation}
