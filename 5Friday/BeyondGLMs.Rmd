@@ -200,6 +200,14 @@ We just multiply! (assumes independence)
 
 - it's the kind of thing as the fixed effects design matrix!
 
+## When to include a random effect
+
+- Unobserved effect vs. observed effect
+- To account for pseudo replication
+- Nuisance vs. of interest
+- If parameter comes from a population
+- To incorporate correlation
+
 ## A linear mixed-effects model
 
 \begin{columns}
