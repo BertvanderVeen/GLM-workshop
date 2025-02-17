@@ -1,7 +1,7 @@
 # Physalia Generalised Linear Model workshop by Bert van der Veen
 This repository includes material for the Physalia workshop on Generalized linear models, 6-10 May 2024. Feel free to share, alter, or re-use this material with appropriate referencing of this repository.
 
-Workshop webpage: https://www.physalia-courses.org/courses-workshops/glm-in-r
+Workshop webpage: https://www.physalia-courses.org/courses-workshops/glm-in-r-1
 
 ## Generalized Linear Models
 Generalized Linear Models (GLMs) are a class of statistical models that were unified by Nelder and Wedderburn (1972). The models existed before then, but were fitted differently, and were applied independently when appropriate. The unification of these models into a class made them easier to teach, and the fitting algorithm that was developed allowed for faster and more robust parameter estimation.
@@ -28,7 +28,7 @@ On the first day we will go through R basics and background theory of frequentis
 
 [Second presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/1Monday/SamplingMLE.pdf)
 
-[Third presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/1Monday/introLM.pdf)
+[Third presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/1Monday/IntroLM.pdf)
 
 ## Tuesday
 * Multiple linear regression
@@ -92,13 +92,13 @@ On the first day we will go through R basics and background theory of frequentis
 |         |19:15 - 20:00| Practical 2: Simple linear regression                 |
 |---------|-------------|-------------------------------------------------------|
 |Tuesday  |14:00 - 14:45| Multiple linear regression                            |
-|         |14:45 - 16:00| Practical 3: multiple linear regression               |
+|         |14:45 - 16:00| Practical 3: multiple linear regression               | <!-- do a continuous-categorical interaction to add to the slides, maybe with the body temperature data. Maybe also centering. -->
 |         |16:00 - 16:15| Break                                                 |
 |         |16:15 - 17:00| Model validation                                      |
 |         |17:00 - 17:45| Practical 4: Checking fitted models assumptions       |
 |         |17:45 - 18:30| Break                                                 |
-|         |18:30 - 19:15| Introduction to GLMs                                  |
-|         |19:15 - 20:00| Practical 5: visualizing model results                |
+|         |18:30 - 19:15| Introduction to Generalised Linear Models             |
+|         |19:15 - 20:00| Practical 5: visualizing model prediction             | <!-- marginal effects? -->
 |---------|-------------|-------------------------------------------------------|
 |Wednesday|14:00 - 14:45| Binomial regression                                   |
 |         |14:45 - 15:30| Practical 6: Binomial GLM                             |
@@ -111,8 +111,8 @@ On the first day we will go through R basics and background theory of frequentis
 |         |18:30 - 19:15| Practical 8: Model comparison: confirmatory           |
 |         |19:15 - 20:00| Q & A / Practical 9: Repeat practical 5 with GLM      |
 |---------|-------------|-------------------------------------------------------|
-|Thursday |14:00 - 14:45| Models for count data                                 |
-|         |15:00 - 16:00| Practical 10: Poisson and NB regression               |
+|Thursday |14:00 - 14:45| Models for unbounded count data                       |
+|         |15:00 - 16:00| Practical 10: log-linear regression                   | <!--get people to interpret/discuss the results with CIs -->
 |         |16:00 - 16:15| Break                                                 |
 |         |16:15 - 17:00| Residuals diagnostics in GLMs                         |
 |         |17:00 - 17:45| Practical 11: Residuals diagnostics in GLMs           |
@@ -120,6 +120,28 @@ On the first day we will go through R basics and background theory of frequentis
 |         |18:30 - 19:15| Other useful models                                   |
 |         |19:15 - 20:00| Practical 12: other useful models                     |
 |---------|-------------|-------------------------------------------------------|
-|Friday   |14:00 - 16:00| GLMMs                                                 |
-|         |16:00 - 18:00| Bring/present your own data/...                       |
+|Friday   |14:00 - 16:00| Generalised Linear Mixed-effects Models               |
+|         |16:00 - 18:00| Practical 13: Real data exercise                      | <!-- first a demonstration, then discussion and correction after -->
 
+<!-- from survey
+more real data less simulations
+examples beyond ecology
+hypothesis testing (examples?)
+fewer equations
+one-or-two sessions with real data after learned how to model
+own practice after seeing a demonstration and discussion/correction after that
+-->
+
+<!--
+separate r packages in "we will use' and "might be useful"?
+add a table of example data for each presentation, after the "data" slide
+I will start with the suggestions from isabella
+Then think if those can be incorporated in the rest of the material
+then find examples beyond ecology
+think about the hypothesis testing
+Generally, I should swap to short exercises first + discussion, and a longer exercise after that?
+use marginal effects package throughout exercises? or maybe for "predictionn" part
+make slides with many equations incremental, such a s the re-arranging slides to glm in binomial.
+beyond glms should repeat poisson bits, and maybe a poisson example
+consider adding equation and equation in words for the examples?!
+-->
