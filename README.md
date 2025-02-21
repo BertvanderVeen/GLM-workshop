@@ -13,7 +13,7 @@ This workshop teaches GLMs by first considering linear models as a special type 
 ## Updating R
 Please make sure to update your R installation prior to the workshop. Most of the code used in the workshop should function on older versions of R as well, but not all R packages used might be available or function fully.
 
-[You can find an R installation based on your operating system here](https://cran.r-project.org/bin/windows/base/)
+[You can find an R installation based on your operating system here](https://cran.r-project.org/bin)
 
 ## PROGRAM
 Sessions from 14:00 to 20:00 (Monday to Thursday), 14:00 to 18:00 on Friday (Berlin time). Sessions will consist of a mix of lectures, in-class discussion, and practical exercises / case studies over Slack and Zoom.
