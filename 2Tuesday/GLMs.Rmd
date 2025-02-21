@@ -102,11 +102,11 @@ y_i = \textcolor{red}{\alpha + x_i\beta} + \textcolor{blue}{\epsilon_i}
 \item Normality (distribution of errors)
 \end{itemize}
 
-**Real ecological data do not usually follow these assumptions**
+**Real data do not usually follow these assumptions**
 
 \hfill \tiny and don't range $(-\infty,\infty)$
 
-# GLMs
+# Generalised Linear Models
 
 ## Generalised linear models (GLMs)
 
@@ -136,37 +136,39 @@ to address:
 ![](data.jpg){width=80%}
 
 \columnsend
-\textbf{The basis of many statistical models in Biology}
+\textbf{The basis of many statistical models}
 
-Many results are now asymptotic.\newline
+Many results are now asymptotic \tiny (via the normal distribution)\newline
 
 ## Components of a GLM
 
 - \textcolor{red}{Systematic component: $\eta$}
-- \textcolor{blue}{Random component: data/distribution)}
+- \textcolor{blue}{Random component: data/distribution}
 - The link function: connects these components
   - This is not a data transformation
 - The variance function
 
-**But no explicit error term**
+**No explicit error term**
 
 ## GLM Likelihood
 
-- We still use MLE for estimation
+- We still use maximum likelihood for estimation
 - But now a different likelihood function (in EF for fixed $\phi$)
 
-All GLMs can be formulated as:
+All GLMs can be formulated in terms of EF:
 
 \begin{equation}
 \mathcal{L}(y_i;\Theta) = \text{exp}\{\frac{y_i\textcolor{red}{\eta_i}-b(\textcolor{red}{\eta_i})}{a(\phi)} + c(y_i,\phi)\}
 \end{equation}
 
-## Linear regression as GLM
+## Linear regression as EF
 
 Previously:
 \begin{equation}
 \mathcal{L}(y_i;\Theta) = \frac{1}{\sigma\sqrt{2\pi}}\exp\{-\frac{1}{2}\frac{(y_i-\textcolor{red}{\mu_i})^2}{\sigma^2}\}
 \end{equation}
+
+\pause
 
 Now:
 
@@ -174,24 +176,29 @@ Now:
 \mathcal{L}(y_i;\Theta) = \text{exp}\{\frac{y_i\textcolor{red}{\eta_i}-b(\textcolor{red}{\eta_i})}{a(\phi)} + c(y_i,\phi)\}
 \end{equation}
 
+\pause
+
 - for some known functions $a(\cdot)$, $b(\cdot)$ and $c(\cdot)$
 - for normal distribution: $\textcolor{red}{\eta_i = \mu_i}$, $a(\phi) = \sigma^2$, $b(\textcolor{red}{\eta_i}) = -\textcolor{red}{\mu}^2/2$, $c(y_i, \phi) = -\frac{1}{2}\{y^2/\sigma^2 + \log(2\pi\sigma^2)\}$
 
 ## The linear model
 
-Writing the linear model:
+Previously we wrote the linear model as:
 
 \begin{equation}
 y_i = \textcolor{red}{\alpha + \textbf{x}_i\symbf{\beta}} + \textcolor{blue}{\epsilon_i} \sim \mathcal{N}(0,\sigma^2)
 \end{equation}
 
-Is the same as:
+\pause
+This is the same as:
 
 \begin{equation}
 \mathams{E}(y_i\vert \textbf{x}_i) = \alpha + \textbf{x}_i\symbf{\beta}
 \end{equation}
 
-as long as $\mathams{E}(\epsilon_i) = 0$.
+\pause
+
+when $\mathams{E}(\epsilon_i) = 0$.
 
 ## Generalised linear model
 
@@ -202,7 +209,8 @@ as long as $\mathams{E}(\epsilon_i) = 0$.
  \end{aligned}
 \end{equation}
 
-$\text{g}(\cdot)$ is the **link function**
+$\text{g}(\cdot)$ is the **link function** \newline
+$\text{g}^{-1}(\cdot)$ is the **inverse link function** \newline
 
 ## The link function
 
@@ -289,7 +297,7 @@ Nelder and Wedderburn (1972) proposed GLMs as a class to unify different forms o
 - Gamma regression
 - Inverse Gaussian regression
 
-McCullagh and Nelder (1989) wrote a book that popularised the class.
+[McCullagh and Nelder (1989)](https://www.utstat.toronto.edu/brunner/oldclass/2201s11/readings/glmbook.pdf) wrote a book that popularised the class.
 
 ## Fitting GLMs
 
@@ -339,11 +347,11 @@ $$\Theta^{t+1} = \Theta^t + {\frac{\partial^2\log\{\mathcal{L}(\textbf{y}_i;\The
 
 ## Iteratively reweighted least squares (IRLs)
 
-1) Start at some (decent) point (e.g., $\hat{\symbf{\eta}} = \textbf{y} + \symbf{\epsilon}$) \tiny (Wood 2017) \normalsize
-2) Set $\textbf{z}^t = \symbf{\eta} + \frac{\partial \hat{\symbf{\eta}}}{\partial g^{-1}(\hat{\symbf{\eta}})}\{\textbf{y} - g^{-1}(\hat{\symbf{\eta}})\}/a(g^{-1}(\hat{\symbf{\eta}}))$
-3) weight with $\textbf{w} = a(g^{-1}(\hat{\symbf{\eta}}))/\{\frac{\partial \hat{\symbf{\eta}}}{\partial g^{-1}(\hat{\symbf{\eta}})}^2\text{var}(\textbf{y}_i)\}$
-4) Fit weighted LM with $\symbf{z}$ as pseudodata and $\textbf{w}$ as weights
-5) Repeat until convergence
+1) Start at some (decent) guess (e.g., $\hat{\symbf{\eta}} = \textbf{y} + \symbf{\epsilon}$) \tiny (Wood 2017) \normalsize\pause
+2) Set $\textbf{z}^t = \symbf{\eta} + \frac{\partial \hat{\symbf{\eta}}}{\partial g^{-1}(\hat{\symbf{\eta}})}\{\textbf{y} - g^{-1}(\hat{\symbf{\eta}})\}/a(g^{-1}(\hat{\symbf{\eta}}))$\pause
+3) Calculate weights $\textbf{w} = a(g^{-1}(\hat{\symbf{\eta}}))/\{\frac{\partial \hat{\symbf{\eta}}}{\partial g^{-1}(\hat{\symbf{\eta}})}^2\text{var}(\textbf{y}_i)\}$\pause
+4) Fit weighted LM with $\symbf{z}$ as "data" and $\textbf{w}$ as weights\pause
+5) Repeat until convergence\pause
 
 \hfill \tiny(details omitted) \normalsize
 \center
@@ -370,13 +378,15 @@ Similar problems in a lot of more complex models (e.g., GLMMs).
 <!-- \center -->
 <!-- ![](sad.jpg){width=50%} -->
 
-## Often used GLMs in ecology
+## Commonly used GLMs
 
-- Binomial: occurrence/counts. Presence of species, number of germinated seeds out of a total
-- Poisson: counts. Number of fish caught
-- Negative binomial (fixed dispersion): counts. Overdispersed fish. 
-- Gamma: (positive) continuous. Body size
-- Ordinal (cumulative link). Plant cover classes
+- Normal
+- Binomial: occurrence/counts. Prevalence of diseases, number of germinated seeds out of a total
+- Poisson: counts. Number of fish caught, stars in the night sky
+- Negative binomial (fixed dispersion): still counts 
+- Gamma: (positive) continuous. Waiting time, body size
+- Ordinal (cumulative link). Survey responses
+
 
 ## in R
 
@@ -397,24 +407,98 @@ model <- glm(y ~ x, family = poisson(link = log), data = data)
 ```
 \normalsize
 
-## Output
+# Example 1
 
-\footnotesize
-```{r echo= FALSE, eval = TRUE, warning=FALSE}
-set.seed(12345)
-beta <- rnorm(2)
-X <- rnorm(20)
-y <- rpois(20, exp(beta[1]+X*beta[2]))
-summary(glm(y~X, family = "poisson"))
+## Example: Baseball game wins
+
+Wins of baseball games
+
+![community.jmp.com](baseball.png)
+
+## Baseball wins: the data
+
+Data from Cochran (2002)
+
+- 838 games
+- Many variables: team, league, division, year, runs scores, wins
+- Response variable: attendance
+
+\tiny
+
+```{r, echo  =FALSE, message=FALSE, warning=FALSE}
+data("MLBattend", package="UsingR")
+library(tidyr)
+knitr::kable(head(MLBattend, 7), format="latex", booktabs = T)%>%kableExtra::kable_styling(position="center")
 ```
 
 \normalsize
+
+## Baseball wins: fitting the linear model
+
+```{r}
+model <- glm(wins ~ games.behind, 
+             family = gaussian(link=identity),
+             data = MLBattend)
+```
+
+## Baseball wins: model summary
+
+\tiny
+
+```{r}
+summary(model)
+```
+
+## Baseball wins: residuals
+
+```{r, echo = FALSE, fig.height = 6}
+par(mfrow=c(2,2))
+plot(model)
+```
+
+## Baseball wins: response distribution
+
+\columnsbegin
+\column{0.25\textwidth}
+
+Should we fit a
+
+\vspace*{\baselineskip}
+
+a) Binomial
+b) Poisson
+c) Gamma
+
+\vspace{\baselineskip}
+
+regression?
+
+\column{0.75\textwidth}
+
+```{r, echo = FALSE}
+hist(MLBattend$wins, xlab = "Wins", main = NULL, cex.lab = 1.5, cex.axis = 1.5)
+```
+
+\columnsend
+\small
+
+```{r, eval = FALSE}
+model <- glm(wins ~ games.behind, family = ..., 
+             data = MLBattend)
+```
+
+# Post-fitting
+
+OK, let's say we have a "final" model. Now, the real work begins! \newline
+(interpreting and presenting the results)
 
 ## Back-transformation
 
 - Confidence intervals can be back-transformed to the response scale
   - as long as we have "monotonicity" of the link function
+- Parameter estimates can sometimes be back-transformed
 - Standard errors cannot be back-transformed!
+  - Interpretation happens on the __link__ scale
 
 ## Prediction
 
@@ -429,7 +513,7 @@ predict(model, type = "response")#Type = link alternatively
 ### Newdata
 
 ```{r, eval = FALSE}
-predict(model, newdata = X, type = "response")#Type = link alternatively
+predict(model, newdata = X, type = "response")
 ```
 
 ## Intervals for $\hat{\mu_i}$
@@ -444,6 +528,8 @@ predict(model, newdata = X, type = "response")#Type = link alternatively
 - LMs used RSS to quantify fit
 - GLMs use deviance to quantify **lack of fit**
 - Deviance $D(\textbf{y};\hat{\symbf{\mu}})$ is different for every GLM.
+
+\pause
 
 Normal: $\sum \limits^n_{i=1}(y_i-\hat{\mu_i})^2$
 Poisson: $2\sum \limits^n_{i=1} y_i\log(y_i/\hat{\mu}_i)-y_i+\hat{\mu}_i)$

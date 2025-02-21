@@ -131,14 +131,20 @@ He tells us that the true proportion of orchids is 0.4.
 \end{itemize}
 \columnsend
 
+## The data
+
+For such (binary) data: $y_i \sim Binom(\pi_i, n_{picks})$, with $p(orchid) = \pi_i$
+
 ## The binomial distribution
 
 \begin{equation}
 f(y_i;n_{picks},\pi) = y_i\log\{\pi\}+(n_{picks}-y_i)\log\{1-\pi\} +constant
 \end{equation}
 
+### R-functions 
+
 - Density: `dbinom`
-- Number generator: `rbinom``
+- Number generator: `rbinom`
 
 ## Simulation: counting orchids once
 
@@ -179,7 +185,7 @@ hist(y, xlab = "Proportion of orchids",
 
 ## Simulation: counting orchids 50x10 times
 
-```{r, echo = FALSE, fig.height = 5}
+```{r, echo = FALSE, fig.height = 4}
 plot(table(y/n.picks), xlab = "Proportion of orchids", ylab = "Number of samplings")
 abline(v= 0.4, col = "red", lty = "dashed")
 ```
@@ -211,6 +217,8 @@ quantile(y/n.picks,c(0.025,.975))
 So 50 times 10 picks tell us little.
 
 ## Q: Are more than half of the flowers in this field orchids?
+
+\small
 
 ```{r, cache=TRUE}
 set.seed(12345)
@@ -277,7 +285,7 @@ We just multiply! (assumes independence)
 ## The likelihood (3)
 
 
-```{r, echo = FALSE, fig.height = 5}
+```{r, echo = FALSE, fig.height = 4.5}
 plot(dnorm, from = -1, to = 1, xlab = "Some parameter", ylab = "Likelihood")
 ```
 
@@ -292,6 +300,7 @@ Likelihood tells us about:
 \log\{\mathcal{L}(\textbf{y};\Theta)\} = \sum \limits^n_i \log\{f(y_i;\Theta)\}
 \end{equation}
 
+\vspace*{-\baselineskip}
 
 ```{r, echo = FALSE, fig.height=4}
 ll <- function(x)dnorm(x, log = TRUE)
@@ -431,7 +440,7 @@ optimize(ll, n.picks = n.picks, y=y,
 
 (an estimate of) Width of the likelihood:
 \begin{equation}
-\frac{\partial\log\{\mathcal{L}(\textbf{y};n_{picks})\}}{\partial\pi^2} = \sum \limits^{n_{times}}_{i=1} -\frac{y_i}{\pi^2}-\frac{n_{picks}-y_i}{(1-\pi)^2} 
+\frac{\partial^2\log\{\mathcal{L}(\textbf{y};n_{picks})\}}{\partial\pi^2} = \sum \limits^{n_{times}}_{i=1} -\frac{y_i}{\pi^2}-\frac{n_{picks}-y_i}{(1-\pi)^2} 
 \end{equation}
 
 ```{r, cache = TRUE, echo = FALSE, fig.height = 5}
@@ -563,7 +572,7 @@ Be careful with interpretation, and with assumptions.
 
 ## Repetition
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.height = 7}
 p.orchid = 0.4
 n.times <- 10
 n.picks = 10

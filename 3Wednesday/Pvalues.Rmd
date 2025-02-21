@@ -88,7 +88,7 @@ amodel <- glm(cbind(grahami, opalinus)~Time*Site,
 ## Lizards: LRT
 
 ```{r}
-(Lambda <- 2*(logLik(amodel)-logLik(nmodel)))
+(Lambda <- 2*(c(logLik(amodel))-c(logLik(nmodel))))
 k <- attr(logLik(amodel),"df")-attr(logLik(nmodel),"df")
 pchisq(Lambda, k,lower.tail=FALSE)
 ```
@@ -189,6 +189,8 @@ When the alternative hypothesis is true, the distribution is clustered near zero
 - Depends on sample size
 - Depends on **effect size**
 
+# Example 1
+
 ## Example: Lizards
 
 Fit $M_0$:
@@ -243,15 +245,10 @@ abline(v=0.05, col="red")
 
 ```
 
-\footnotesize
-```{r, echo = FALSE}
-cat("P-values larger than 0.05:", sum(Ps>0.05)/1000)
-```
-
 \column{0.5\textwidth}
 
 ```{r, cache=TRUE, echo = FALSE}
-Ps <- NULL
+Ps1 <- NULL
 for(i in 1:1000){
 set.seed(i)
 ynew <- as.matrix(stats::simulate(amodel))
@@ -261,22 +258,23 @@ amodel2 <- update(nmodel2, formula = .~Time+Site+Diameter)
 # Store P-value
 (Lambda <- 2*(logLik(amodel2)-logLik(nmodel2)))
 k <- attr(logLik(amodel2),"df")-attr(logLik(nmodel2),"df")
-Ps <- c(Ps, pchisq(Lambda, k,lower.tail=FALSE))
+Ps1 <- c(Ps1, pchisq(Lambda, k,lower.tail=FALSE))
 }
-hist(Ps, main = "P-values when M1 is true", cex.main = 3)
+hist(Ps1, main = "P-values when M1 is true", cex.main = 3)
 abline(v=0.05, col="red")
 
 ```
 
-\footnotesize
-
-```{r, echo = FALSE}
-cat("P-values larger than 0.05:", sum(Ps>0.05)/1000)
-```
 
 \columnsend
 
-## To conclude
+\footnotesize
+```{r, echo = FALSE}
+cat("P-values larger than 0.05:\n", sum(Ps>0.05)/1000, "                              ", sum(Ps1>0.05)/1000)
+```
+
+
+# Conclusion
 
 \small
 

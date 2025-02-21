@@ -59,9 +59,7 @@ knit_hooks$set(
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Outline
-
-## Recap
+# Recap
 
 ## The problem of model complexity
 
@@ -148,23 +146,27 @@ R^2 = 1 - \frac{\sum \limits^n_{i=1}  (y_i - \mu_i)^2}{\sum \limits^n_{i=1}  (y_
 - the numerator represents the explainable variation of a model
 - One minus their fraction is the explained variation
 
-## partial $R^2$
-
-How much variation is explained by a covariate?
-
-\begin{equation}
-R^2_k = 1 - \frac{\sum \limits^n_{i=1}  (y_i - \alpha_i)^2 - \sum \limits^n_{i=1}  (y_i - \mu_i)^2}{\sum \limits^n_{i=1}  (y_i - \alpha_i)^2}
-\end{equation}
-
-Allows us to partition the explained variation over the covariates.
-
-- Quantifies the variation additionally explained in a more complex models
-- Is sensitive to order of covariates
-- Multicollinearity: two covariates can explain similar variation
-
 ## Adjusted $R^2$
 
-```{r, echo=FALSE}
+\center
+**Similar to information criteria, we can add a penalty for complexity**
+
+\pause
+
+\begin{equation}
+R^2_{adjusted} = 1-(1-R^2)\frac{(n-1)}{n-p-1}
+\end{equation}
+
+\pause 
+
+- Native with $p>n$, otherwise always lower than $R^2$
+- Penalize the statistic for increased complexity
+- Penalty is large when $p$ approaches $n$
+- Such as for small samples
+
+## Visually: $R^2$ and adjusted
+
+```{r, echo=FALSE, fig.height = 6.5}
 # Adapted from Bob Ohara
 set.seed(12345)
 N <- 100; P <- 90
@@ -184,16 +186,38 @@ lines(2:P, R2[5,], col ="blue", lty = "dashed")
 legend("topleft", col = c("red","blue"), lty = c("solid","dashed"), legend = c(expression(R^2),expression(R[adjusted]^2)), cex = 2)
 ```
 
-## Adjusted $R^2$
+
+## partial $R^2$
+
+\center
+
+**How much variation is explained by a covariate?**
 
 \begin{equation}
-R^2_{adjusted} = 1-(1-R^2)\frac{(n-1)}{n-p-1}
+R^2_k = 1 - \frac{\sum \limits^n_{i=1}  (y_i - \mu_i)^2}{\sum \limits^n_{i=1}  (y_i - \alpha - x_{ik}\beta_k)^2}
 \end{equation}
 
-- Can be negative, always lower than $R^2$
-- Penalize the statistic for increased complexity
-- Penalize for small samples
-- Most for small $n$ and large $p$
+\alt<2>{
+
+\begin{itemize}
+\itemsep-0.5em 
+\item the numerator represents the unexplained variation of a model
+\item the numerator represents the explainable variation of a \textbf{covariate}
+\item One minus their fraction is the explained variation
+\end{itemize}
+
+}{
+
+Allows us to partition the explained variation over the covariates.
+
+\begin{itemize}
+\itemsep-0.5em 
+\item Quantifies the variation additionally explained in a more complex models
+\item Is sensitive to order of covariates
+\item Multicollinearity: two covariates can explain similar variation
+\end{itemize}
+
+}
 
 ## Connection to Variance Inflation Factor (VIF)
 
@@ -214,6 +238,15 @@ Concepts and name remain the same.
 
 # GLM $R^2$
 
+$R^2$ is linear models is based on the error \newline
+
+- GLMs do not have an explicit error term
+- Defining an $R^2$ thus not as intuitive
+- A similar interpretation not possible
+
+**But, we can still use it as an explorative statistic**
+
+
 ## A few GLM $R^2$'s
 
   - Deviance $R^2$
@@ -232,15 +265,25 @@ Concepts and name remain the same.
 
 Remember: **deviance** is the GLM equivalent of RSS!
 
+\pause
+
 \begin{equation}
-\begin{aligned}
-\text{deviance }R^2 &= 1- \frac{D(\textbf{y};\hat{\symbf{\mu}})}{D(\textbf{y};\hat{\alpha})}\\
-\text{Cohen }R^2 &= \frac{D(\textbf{y};\hat{\alpha})-D(\textbf{y};\hat{\symbf{\mu}})}{D(\textbf{y};\hat{\alpha})}
-\end{aligned}
+\text{deviance }R^2 = 1- \frac{D(\textbf{y};\hat{\symbf{\mu}})}{D(\textbf{y};\hat{\alpha})}
+\nonumber
 \end{equation}
+
+\pause
+
+\begin{equation}
+\text{Cohen }R^2 = \frac{D(\textbf{y};\hat{\alpha})-D(\textbf{y};\hat{\symbf{\mu}})}{D(\textbf{y};\hat{\alpha})}
+\nonumber
+\end{equation}
+
+\pause
 
 \begin{equation}
 \text{deviance }R^2_{adjusted} = 1- \biggr\{1- \frac{D(\textbf{y};\hat{\symbf{\mu}})}{D(\textbf{y};\hat{\alpha})}\biggl\}\frac{n-1}{n-p}
+\nonumber
 \end{equation}
 
 Based on reduction in deviance
@@ -258,6 +301,8 @@ Based on reduction in the ratio of log-likelihoods.
 All quantify change in fit due to increased model complexity, in one way or another.
 
 Which one do we use?
+
+# Example 1
 
 ## Example: Lizards interaction
 
@@ -295,7 +340,7 @@ nullmodel <- update(model1, formula = .~1)
 ## Variability of $R^2$
 
 $R^2$ is a statistic of the data\newline
-So it is susceptible to sampling variation!
+So it is susceptible to sampling variation! (such like LRT and information criteria)
 
 Veall and Zimmermann (1992)
 
@@ -311,14 +356,13 @@ set.seed(i)
 ynew <- as.matrix(stats::simulate(model2))
 model2s <- update(model2, formula = ynew~.)
 nullmodels <- update(model2s, formula = .~1)
-R2s <- c(R2s, 1-deviance(model2s)/deviance(nullmodels))
-}
+R2s <- c(R2s, 1-deviance(model2s)/deviance(nullmodels))}
 ```
 
 
 ```{r, echo = FALSE, fig.height = 3}
-hist(R2s, xlab = expression(R[deviance]^2), breaks = 100, cex.main = 1.5)
-abline(v=devianceR2[2], col = "red", lty="dashed", lwd = 3,main="Red line = observed R2")
+hist(R2s, xlab = expression(R[deviance]^2), breaks = 100, cex.main = 1.5, main="Red line = observed R2")
+abline(v=devianceR2[2], col = "red", lty="solid", lwd = 3)
 ```
 
 ## Lizards: McKelvey-Zavoina $R^2$

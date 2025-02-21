@@ -1,5 +1,5 @@
 # Physalia Generalised Linear Model workshop by Bert van der Veen
-This repository includes material for the Physalia workshop on Generalized linear models, 6-10 May 2024. Feel free to share, alter, or re-use this material with appropriate referencing of this repository.
+This repository includes material for the Physalia workshop on Generalized linear models, 24-28 February 2025. Feel free to share, alter, or re-use this material with appropriate referencing of this repository.
 
 Workshop webpage: https://www.physalia-courses.org/courses-workshops/glm-in-r-1
 
@@ -112,7 +112,7 @@ On the first day we will go through R basics and background theory of frequentis
 |         |19:15 - 20:00| Q & A / Practical 9: Repeat practical 5 with GLM      |
 |---------|-------------|-------------------------------------------------------|
 |Thursday |14:00 - 14:45| Models for unbounded count data                       |
-|         |15:00 - 16:00| Practical 10: log-linear regression                   | <!--get people to interpret/discuss the results with CIs -->
+|         |15:00 - 16:00| Practical 10: log-linear regression                   | <!--get people to interpret/discuss the results with CIs, try a genomics  dataset for the exercise -->
 |         |16:00 - 16:15| Break                                                 |
 |         |16:15 - 17:00| Residuals diagnostics in GLMs                         |
 |         |17:00 - 17:45| Practical 11: Residuals diagnostics in GLMs           |
@@ -135,8 +135,6 @@ own practice after seeing a demonstration and discussion/correction after that
 <!--
 separate r packages in "we will use' and "might be useful"?
 add a table of example data for each presentation, after the "data" slide
-I will start with the suggestions from isabella
-Then think if those can be incorporated in the rest of the material
 then find examples beyond ecology
 think about the hypothesis testing
 Generally, I should swap to short exercises first + discussion, and a longer exercise after that?

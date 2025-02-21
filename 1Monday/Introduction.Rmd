@@ -62,7 +62,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Outline
 
-[See github for all material](https://github.com/BertvanderVeen/GLM-workshop)
+[See github for all material](https://github.com/BertvanderVeen/GLM-workshop-1)
 
 Sessions from 14:00 to 20:00 (Monday to Thursday), 14:00 to 18:00 on Friday (Berlin time). Sessions will consist of a mix of lectures, in-class discussion, and practical exercises / case studies over Slack and Zoom.
 
@@ -70,7 +70,7 @@ Sessions from 14:00 to 20:00 (Monday to Thursday), 14:00 to 18:00 on Friday (Ber
 * Tuesday: Multiple linear regression (ANOVA, ANCOVA) + GLM introduction
 * Wednesday: Binomial regression, model comparison
 * Thursday: Discrete responses (Poisson, NB) and other useful models (e.g., beta)
-* Friday: Bring your own data, looking beyond (GLMMs, GAMs, Bayesian statistics, and such)
+* Friday: Bring your own data, looking beyond (GLMMs? or GAMs, Bayesian statistics..)
 
 ## How we will do it
 
@@ -80,14 +80,12 @@ Practicals of about 45 minutes: datasets and R
   - Practical "tasks" serve as guideline, not as exhaustive exercise
   - I do not provide a lot of \texttt{R} code. We will figure that out together!
 
-
 ## Friday
 
-1. Looking beyond (GLMMs, GAMs, Bayesian statistics, and such)
+1. Looking beyond (GLMMs? or GAMs, Bayesian statistics..)
 2. Bring your own data
 
-Which topics should we look into on Friday?
-
+Which topic(s) should we look into on Friday?
 
 ## Disclaimer
 
@@ -133,29 +131,13 @@ Please make sure you've downloaded data and updated R/packages
 \columnsbegin
 \column{0.5\textwidth}
 
-- car
-- visreg
-- effects
-- emmeans
-- DHARMa
-- MuMIn
-- performance
-- stargazer
-- apaTables
-- ggplot2
-- AICcmodavg
+
 
 \column{0.5\textwidth}
 
 \textcolor{red}{New}
 
-- glmtoolbox
-- patchwork
-- DescTools
-- VGAM/glmmTMB
-- tweedie
-- statmod
-- arm
+
 
 \columnsend
 

@@ -103,12 +103,24 @@ lines(density(y), col = "red", lty = "dashed")
 
 The Binomial distribution is approximately normal for large $n_{picks}$ and $\pi$ away from 0 and 1
 
+**Many distributions are approximately normal** under some conditions
+
+## Normal approximation
+
+```{r, echo = FALSE}
+par(mfrow=c(2,2), mar =  c(6,4,4,2))
+plot(table(rbinom(1000,10,0.5)), ylab="Frequency", main=expression(paste("Binomial with N = 10, ", p, " = 0.5")), xlab="rbinom(1000, 10, 0.5)")
+plot(table(rpois(1000,20)), ylab="Frequency", main=expression(paste("Poisson with ", lambda, " = 10")), xlab = "rpois(1000, 20)")
+hist(rchisq(1000, 50), ylab="Frequency", main=expression(paste(chi^2, " with  k = 50")))
+hist(rt(1000, 30), ylab="Frequency", main=expression(paste("Student's t with ", nu, " = 30")))
+```
+
 
 ## Normality
 
 \columnsbegin
 \column{0.5\textwidth}
-\textbf{Real ecological observations are rarely normally distributed.}\newline
+\textbf{Real data is rarely normally distributed.}\newline
 But it is a nice starting point when learning GLMs.\newline
 We can use it (e.g.,) when the mean is far enough from zero.
 \column{0.5\textwidth}
@@ -157,7 +169,7 @@ Giving..
 \hat{\mu} = \frac{1}{n}\sum \limits^n_{i=1}y_i
 \end{equation}
 
-It is a linear function of $y_i$ so is normally distributed.
+It is a linear function of $y_i$ so it follows a normal distribution.
 
 ## Estimating $\sigma^2$
 
@@ -199,10 +211,10 @@ plot(dt(x, 4), x = x, type="l", main = "df = 4")
 
 ## The t-test
 
-- The t-test is type of linear regression
-- With one covariate and two groups
+A t-test is used to test the mean difference of two groups
 
 \tiny
+
 ```{r}
 set.seed(12345)
 y <- rnorm(10)
@@ -212,28 +224,65 @@ t.test(x, y)
 
 \normalsize
 
-## t-test visualized
+# Example 1
+
+## Example 1: Alaskan pipeline
+
+Depth of pipeline defects
+
+![insideclimatenews.org](alaskapipeline.jpg)
+
+## Example 1: the data
+
+Data from http://www.itl.nist.gov/div898/handbook/
+
+- 107 defects
+- Measured in the field (ultrasonic)
+- And in the lab re-measured
+
+\tiny
+
+```{r, echo  =FALSE, message=FALSE, warning=FALSE}
+data("alaska.pipeline", package="UsingR")
+library(tidyr)
+knitr::kable(head(alaska.pipeline, 7), format="latex", booktabs = T)%>%kableExtra::kable_styling(position="center")
+```
+
+\normalsize
+
+## Alaska pipline: t-test
+
+
+```{r, echo = TRUE, eval = FALSE}
+t.test(alaska.pipeline$field.defect, 
+       alaska.pipeline$lab.defect, paired=TRUE)
+```
+
+## Alaska pipline: t-test output
+
+\small
 
 ```{r, echo = FALSE}
-set.seed(12345)
-y <- rnorm(10)
-x <- rnorm(10, mean = 2)
-plot(c(1,2), y = range(c(x,y)), type="n", xaxt="n", ylab="Some variable", xlim = c(0,3), xlab="Groups")
-axis(1, at = c(1,2), labels = c("x","y"))
-points(rep(1:2,each=10),c(x,y))
-points(c(1,2), c(mean(x),mean(y)), col="red", pch=16)
-lines(c(1,2), c(mean(x),mean(y)), col="red")
+data(alaska.pipeline, package="UsingR")
+t.test(alaska.pipeline$field.defect, 
+       alaska.pipeline$lab.defect, paired=TRUE)
+```
+
+## Alaska pipeline: t-test visually
+
+```{r, echo = FALSE}
+plot(c(1,2), y = range(alaska.pipeline[,c("field.defect","lab.defect")]), type="n", xaxt="n", ylab="Defect depth", xlim = c(0,3), xlab=NA)
+axis(1, at = c(1,2), labels = c("Field","Lab"))
+
+points(rep(1, nrow(alaska.pipeline)), alaska.pipeline$field.defect)
+points(1, mean(alaska.pipeline$field.defect), pch = 16, col = "red", cex = 1.3)
+points(rep(2, nrow(alaska.pipeline)), alaska.pipeline$lab.defect)
+points(2, mean(alaska.pipeline$lab.defect), pch = 16, col = "red", cex = 1.3)
+
+lines(c(1,2), c(mean(alaska.pipeline$field.defect), mean(alaska.pipeline$lab.defect)), col="red")
 ```
 
 # Simple linear regression
-
-## t-test as linear regression
-
-```{r}
-data <- data.frame(y = c(x, y), 
-                   var = c(rep(c("x","y"),each=10)))
-lm(y~0+var, data = data)
-```
 
 ## What is a linear regression?
 
@@ -251,7 +300,7 @@ Models with a continuous \textbf{response variable} as a function of one or more
 \columnsend
 
 \begin{equation}
-y_i = \textcolor{red}{\alpha + x_i\beta} + \textcolor{blue}{\epsilon_i}\sim \mathcal{N}(0,\sigma^2)
+y_i = \textcolor{red}{\alpha + x_i\beta} + \textcolor{blue}{\epsilon_i \sim \mathcal{N}(0,\sigma^2)}
 \end{equation}
 
 
@@ -295,11 +344,11 @@ $$
 $$
 \column{0.6\textwidth}
 
-$y_i = (1-x_i)\beta_0 + x_i\beta_1 + \epsilon_i\sim \mathcal{N}(0,\sigma^2)$
+$y_i = (1-x_i)\beta_0 + x_i\beta_1 + \textcolor{blue}{\epsilon_i\sim \mathcal{N}(0,\sigma^2)}$
 
 \vspace{2\baselineskip}
 
-$y_i = \alpha+ x_i\beta_1 + \epsilon_i\sim \mathcal{N}(0,\sigma^2)$
+$y_i = \alpha+ x_i\beta_1 + \textcolor{blue}{\epsilon_i\sim \mathcal{N}(0,\sigma^2)}$
 
 \columnsend
 
@@ -310,7 +359,7 @@ set.seed(12345)
 x <- rbinom(50, 0.5, size = 1)
 y = 20 + 5*x + rnorm(50)
 Means <- aggregate(y,list(x),mean)
-par(mfrow=c(1,1), mar=c(4.1,4,1,1), oma=c(0,0,0,0))
+par(mfrow=c(1,1), mar=c(4.1,7,1,1), oma=c(0,0,0,0))
 plot(y, jitter(1*x), yaxt="n", ann=FALSE, 
      col="grey50") 
 points(Means[,2], c(0,1), col=2, pch=3, cex=4)
@@ -330,7 +379,7 @@ set.seed(12345)
 x <- rbinom(50, 0.5, size = 1)
 y = 20 + 5*x + rnorm(50)
 Means <- aggregate(y,list(x),mean)
-par(mfrow=c(1,1), mar=c(4.1,4,1,1), oma=c(0,0,0,0))
+par(mfrow=c(1,1), mar=c(4.1,7,1,1), oma=c(0,0,0,0))
 plot(y, jitter(1*x), yaxt="n", ann=FALSE, 
      col="grey50") 
 points(Means[,2], c(0,1), col=2, pch=3, cex=4)
@@ -342,6 +391,41 @@ axis(2, c("Something", "Something else"), at=c(0,1), las=1)
 
 - $\alpha$ is the mean of the first group
 - $\beta$ is the deviation from the mean of the first group
+
+## Linear regression and the t-test
+
+Sounds familiar to the t-test?
+
+\pause
+
+- t-test is a type of linear regression
+- Namely where we have a categorical covariate with two categories
+
+## Alaska pipline: t-test as linear regression
+
+$$
+depth_i =
+  \begin{cases}
+    \alpha       & \quad \text{if } measured \; in \; the \; field \\
+    \alpha + \beta       & \quad \text{if } measured \; in \; the \; lab
+  \end{cases}
+  + left.over.stuff_i
+$$
+
+So, $\beta$ is how much deeper (-) or less deep (+) the defect is detected when measured in the lab
+
+## Alaska pipline: t-test with `lm()`
+
+\tiny
+
+```{r}
+alaska <- rbind(data.frame(id = 1:nrow(alaska.pipeline), 
+                           lab = "lab", depth = alaska.pipeline$lab.defect),
+                data.frame(id = 1:nrow(alaska.pipeline), 
+                           lab="field", depth = alaska.pipeline$field.defect))
+alaska$lab <- as.factor(alaska$lab)
+lm(depth~lab, data = alaska)
+```
 
 ## Examples of linear models: continuous $x_i$
 
@@ -357,7 +441,7 @@ text(y=predict(model,data.frame(x=-1)), -1, expression(alpha), adj = c(0.5,-1), 
 
 ```
 
-$y_i = \textcolor{darkorange}{\alpha} + x_i\beta + \epsilon_i\sim \mathcal{N}(0,\sigma^2)$
+$y_i = \textcolor{darkorange}{\alpha} + x_i\beta + \textcolor{blue}{\epsilon_i\sim \mathcal{N}(0,\sigma^2)}$
 
 - $\textcolor{darkorange}{\alpha}$: the intercept is the value of $y_i$ where $x_i = 0$
 
@@ -374,10 +458,26 @@ segments(y0=predict(model,data.frame(x=2)),y1=predict(model,data.frame(x=3)), x0
 text(y=predict(model,data.frame(x=2.5)), 2.5, expression(beta), cex=3, adj=c(0,1.5), col = "darkorange")
 ```
 
-$y_i = \alpha + x_i\textcolor{darkorange}{\beta} + \epsilon_i\sim \mathcal{N}(0,\sigma^2)$
+$y_i = \alpha + x_i\textcolor{darkorange}{\beta} + \textcolor{blue}{\epsilon_i\sim \mathcal{N}(0,\sigma^2)}$
 
 - $\alpha$: the intercept is the value of $y_i$ where $x_i = 0$
 - $\textcolor{darkorange}{\beta}$: the slope is the change in $y_i$ for a unit increase in $x_i$
+
+## Alaska pipeline: lab and field defects
+
+\begin{equation}
+\begin{aligned}
+y_i &= \textcolor{red}{\alpha + x_i\beta} + \textcolor{blue}{\epsilon_i\sim \mathcal{N}(0,\sigma^2)}\\
+lab.defect_i &= \textcolor{red}{\alpha + field.defect_i *\beta} + \textcolor{blue}{left.over.stuff}
+\end{aligned}
+\end{equation}
+
+\pause
+\small
+
+```{r}
+lm(lab.defect~field.defect, data = alaska.pipeline)
+```
 
 ## What is the best line?
 

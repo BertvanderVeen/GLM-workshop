@@ -172,10 +172,24 @@
 \setbeamercolor{enumerate subitem}{fg=orange}
 \tcbuselibrary{skins}
 \usepackage{emoji}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
-\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\usepackage{bookmark}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
 \hypersetup{
@@ -196,11 +210,10 @@
 \begin{document}
 \frame{\titlepage}
 
-\hypertarget{introduction}{%
-\section{Introduction}\label{introduction}}
+\section{Introduction}\label{introduction}
 
 \begin{frame}[fragile]{The orchids example}
-\protect\hypertarget{the-orchids-example}{}
+\phantomsection\label{the-orchids-example}
 \begin{codebox}
 
 \begin{Shaded}
@@ -221,7 +234,7 @@
 \end{frame}
 
 \begin{frame}[fragile]{The orchids example}
-\protect\hypertarget{the-orchids-example-1}{}
+\phantomsection\label{the-orchids-example-1}
 \begin{codebox}
 
 \begin{Shaded}
@@ -242,34 +255,41 @@
 \end{frame}
 
 \begin{frame}{The orchids example}
-\protect\hypertarget{the-orchids-example-2}{}
+\phantomsection\label{the-orchids-example-2}
 The Binomial distribution is approximately normal for large
 \(n_{picks}\) and \(\pi\) away from 0 and 1
+
+\textbf{Many distributions are approximately normal} under some
+conditions
+\end{frame}
+
+\begin{frame}{Normal approximation}
+\phantomsection\label{normal-approximation}
+\includegraphics{IntroLM_files/figure-beamer/unnamed-chunk-5-1.pdf}
 \end{frame}
 
 \begin{frame}{Normality}
-\protect\hypertarget{normality}{}
+\phantomsection\label{normality}
 \columnsbegin
 \column{0.5\textwidth}
 
-\textbf{Real ecological observations are rarely normally distributed.}\newline
-But it is a nice starting point when learning GLMs.\newline We can use
-it (e.g.,) when the mean is far enough from zero. \column{0.5\textwidth}
-\centering \includegraphics{normal.jpeg} \columnsend
+\textbf{Real data is rarely normally distributed.}\newline But it is a
+nice starting point when learning GLMs.\newline We can use it (e.g.,)
+when the mean is far enough from zero. \column{0.5\textwidth} \centering
+\includegraphics{normal.jpeg} \columnsend
 \end{frame}
 
-\hypertarget{mathcalnmusigma2}{%
-\section{\texorpdfstring{\(\mathcal{N}(\mu,\sigma^2)\)}{\textbackslash mathcal\{N\}(\textbackslash mu,\textbackslash sigma\^{}2)}}\label{mathcalnmusigma2}}
+\section{\texorpdfstring{\(\mathcal{N}(\mu,\sigma^2)\)}{\textbackslash mathcal\{N\}(\textbackslash mu,\textbackslash sigma\^{}2)}}\label{mathcalnmusigma2}
 
 \begin{frame}{The normal distribution}
-\protect\hypertarget{the-normal-distribution}{}
+\phantomsection\label{the-normal-distribution}
 \begin{equation}
 f(y_i;\mu, \sigma) = \frac{1}{\sigma\sqrt{2\pi}}\exp\biggl\{\frac{(y_i-\mu)^2}{2\sigma^2}\biggr\}
 \end{equation}
 \end{frame}
 
 \begin{frame}{The normal distribution (2)}
-\protect\hypertarget{the-normal-distribution-2}{}
+\phantomsection\label{the-normal-distribution-2}
 Likelihood: \begin{equation}
 f(y_i;\mu, \sigma) = \frac{1}{\sigma\sqrt{2\pi}}\exp\biggl\{\frac{(y_i-\mu)^2}{2\sigma^2}\biggr\}
 \end{equation}
@@ -291,7 +311,7 @@ asymptotic sampling distributions)
 \end{frame}
 
 \begin{frame}{Estimating \(\mu\)}
-\protect\hypertarget{estimating-mu}{}
+\phantomsection\label{estimating-mu}
 Same process as before: calculate gradient and find estimator
 
 \begin{equation}
@@ -304,11 +324,11 @@ Giving..
 \hat{\mu} = \frac{1}{n}\sum \limits^n_{i=1}y_i
 \end{equation}
 
-It is a linear function of \(y_i\) so is normally distributed.
+It is a linear function of \(y_i\) so it follows a normal distribution.
 \end{frame}
 
 \begin{frame}{Estimating \(\sigma^2\)}
-\protect\hypertarget{estimating-sigma2}{}
+\phantomsection\label{estimating-sigma2}
 Same process as before. MLE is biased so gets a small correction.
 
 \begin{equation}
@@ -319,7 +339,7 @@ Is it a quadratic function of \(y_i\) so is \(\chi^2\)-distributed.
 \end{frame}
 
 \begin{frame}{Uncertainty of \(\hat{\mu}\)}
-\protect\hypertarget{uncertainty-of-hatmu}{}
+\phantomsection\label{uncertainty-of-hatmu}
 \begin{equation}
 \begin{aligned}
 \text{var}(\hat{\mu}) &= \mathams{E}(\hat{\mu}^2)-\mathams{E}(\hat{\mu})\mathams{E}(\hat{\mu})\\
@@ -345,19 +365,13 @@ uncertainty.
 \end{frame}
 
 \begin{frame}{The t-distribution}
-\protect\hypertarget{the-t-distribution}{}
-\includegraphics{IntroLM_files/figure-beamer/unnamed-chunk-5-1.pdf}
+\phantomsection\label{the-t-distribution}
+\includegraphics{IntroLM_files/figure-beamer/unnamed-chunk-6-1.pdf}
 \end{frame}
 
 \begin{frame}[fragile]{The t-test}
-\protect\hypertarget{the-t-test}{}
-\begin{itemize}
-\tightlist
-\item
-  The t-test is type of linear regression
-\item
-  With one covariate and two groups
-\end{itemize}
+\phantomsection\label{the-t-test}
+A t-test is used to test the mean difference of two groups
 
 \tiny
 
@@ -395,45 +409,106 @@ uncertainty.
 \normalsize
 \end{frame}
 
-\begin{frame}{t-test visualized}
-\protect\hypertarget{t-test-visualized}{}
-\includegraphics{IntroLM_files/figure-beamer/unnamed-chunk-7-1.pdf}
+\section{Example 1}\label{example-1}
+
+\begin{frame}{Example 1: Alaskan pipeline}
+\phantomsection\label{example-1-alaskan-pipeline}
+Depth of pipeline defects
+
+\begin{figure}
+\centering
+\includegraphics{alaskapipeline.jpg}
+\caption{insideclimatenews.org}
+\end{figure}
 \end{frame}
 
-\hypertarget{simple-linear-regression}{%
-\section{Simple linear regression}\label{simple-linear-regression}}
+\begin{frame}{Example 1: the data}
+\phantomsection\label{example-1-the-data}
+Data from \url{http://www.itl.nist.gov/div898/handbook/}
 
-\begin{frame}[fragile]{t-test as linear regression}
-\protect\hypertarget{t-test-as-linear-regression}{}
+\begin{itemize}
+\tightlist
+\item
+  107 defects
+\item
+  Measured in the field (ultrasonic)
+\item
+  And in the lab re-measured
+\end{itemize}
+
+\tiny
+
+\begin{codebox}
+
+\begin{table}
+\centering
+\begin{tabular}{rrr}
+\toprule
+field.defect & lab.defect & batch\\
+\midrule
+18 & 20.2 & 1\\
+38 & 56.0 & 1\\
+15 & 12.5 & 1\\
+20 & 21.2 & 1\\
+18 & 15.5 & 1\\
+\addlinespace
+36 & 39.0 & 1\\
+20 & 21.0 & 1\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{codebox}
+
+\normalsize
+\end{frame}
+
+\begin{frame}[fragile]{Alaska pipline: t-test}
+\phantomsection\label{alaska-pipline-t-test}
 \begin{codebox}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{data }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{y =} \FunctionTok{c}\NormalTok{(x, y), }
-                   \AttributeTok{var =} \FunctionTok{c}\NormalTok{(}\FunctionTok{rep}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"x"}\NormalTok{,}\StringTok{"y"}\NormalTok{),}\AttributeTok{each=}\DecValTok{10}\NormalTok{)))}
-\FunctionTok{lm}\NormalTok{(y}\SpecialCharTok{\textasciitilde{}}\DecValTok{0}\SpecialCharTok{+}\NormalTok{var, }\AttributeTok{data =}\NormalTok{ data)}
+\FunctionTok{t.test}\NormalTok{(alaska.pipeline}\SpecialCharTok{$}\NormalTok{field.defect, }
+\NormalTok{       alaska.pipeline}\SpecialCharTok{$}\NormalTok{lab.defect, }\AttributeTok{paired=}\ConstantTok{TRUE}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
 \end{codebox}
+\end{frame}
+
+\begin{frame}[fragile]{Alaska pipline: t-test output}
+\phantomsection\label{alaska-pipline-t-test-output}
+\small
 
 \begin{codebox}
 
 \begin{verbatim}
 ## 
-## Call:
-## lm(formula = y ~ 0 + var, data = data)
+##  Paired t-test
 ## 
-## Coefficients:
-##    varx     vary  
-##  2.2860  -0.1329
+## data:  alaska.pipeline$field.defect and alaska.pipeline$lab.defect
+## t = -6.4454, df = 106, p-value = 3.486e-09
+## alternative hypothesis: true mean difference is not equal to 0
+## 95 percent confidence interval:
+##  -7.217460 -3.821792
+## sample estimates:
+## mean difference 
+##       -5.519626
 \end{verbatim}
 
 \end{codebox}
 \end{frame}
 
+\begin{frame}{Alaska pipeline: t-test visually}
+\phantomsection\label{alaska-pipeline-t-test-visually}
+\includegraphics{IntroLM_files/figure-beamer/unnamed-chunk-11-1.pdf}
+\end{frame}
+
+\section{Simple linear regression}\label{simple-linear-regression}
+
 \begin{frame}{What is a linear regression?}
-\protect\hypertarget{what-is-a-linear-regression}{}
+\phantomsection\label{what-is-a-linear-regression}
 \columnsbegin
 \column{0.6\textwidth}
 
@@ -457,12 +532,12 @@ equations.
 \columnsend
 
 \begin{equation}
-y_i = \textcolor{red}{\alpha + x_i\beta} + \textcolor{blue}{\epsilon_i}\sim \mathcal{N}(0,\sigma^2)
+y_i = \textcolor{red}{\alpha + x_i\beta} + \textcolor{blue}{\epsilon_i \sim \mathcal{N}(0,\sigma^2)}
 \end{equation}
 \end{frame}
 
 \begin{frame}{Synonyms}
-\protect\hypertarget{synonyms}{}
+\phantomsection\label{synonyms}
 \begin{itemize}
 \tightlist
 \item
@@ -479,7 +554,7 @@ They all refer to \(x_i\).
 \end{frame}
 
 \begin{frame}{What is the goal of regression?}
-\protect\hypertarget{what-is-the-goal-of-regression}{}
+\phantomsection\label{what-is-the-goal-of-regression}
 We measure data \(y_i\) and want to infer its with \(x_i\)
 
 Steps:
@@ -499,7 +574,7 @@ Steps:
 \end{frame}
 
 \begin{frame}{Examples of linear models: categorical \(x_i\)}
-\protect\hypertarget{examples-of-linear-models-categorical-x_i}{}
+\phantomsection\label{examples-of-linear-models-categorical-x_i}
 \columnsbegin
 \column{0.4\textwidth}
 
@@ -517,18 +592,18 @@ Steps:
   \end{cases}
 \] \column{0.6\textwidth}
 
-\(y_i = (1-x_i)\beta_0 + x_i\beta_1 + \epsilon_i\sim \mathcal{N}(0,\sigma^2)\)
+\(y_i = (1-x_i)\beta_0 + x_i\beta_1 + \textcolor{blue}{\epsilon_i\sim \mathcal{N}(0,\sigma^2)}\)
 
 \vspace{2\baselineskip}
 
-\(y_i = \alpha+ x_i\beta_1 + \epsilon_i\sim \mathcal{N}(0,\sigma^2)\)
+\(y_i = \alpha+ x_i\beta_1 + \textcolor{blue}{\epsilon_i\sim \mathcal{N}(0,\sigma^2)}\)
 
 \columnsend
 \end{frame}
 
 \begin{frame}{Examples of linear models: categorical \(x_i\)}
-\protect\hypertarget{examples-of-linear-models-categorical-x_i-1}{}
-\includegraphics{IntroLM_files/figure-beamer/unnamed-chunk-9-1.pdf}
+\phantomsection\label{examples-of-linear-models-categorical-x_i-1}
+\includegraphics{IntroLM_files/figure-beamer/unnamed-chunk-12-1.pdf}
 
 \begin{itemize}
 \tightlist
@@ -540,8 +615,8 @@ Steps:
 \end{frame}
 
 \begin{frame}{Examples of linear models: categorical \(x_i\)}
-\protect\hypertarget{examples-of-linear-models-categorical-x_i-2}{}
-\includegraphics{IntroLM_files/figure-beamer/unnamed-chunk-10-1.pdf}
+\phantomsection\label{examples-of-linear-models-categorical-x_i-2}
+\includegraphics{IntroLM_files/figure-beamer/unnamed-chunk-13-1.pdf}
 
 \begin{itemize}
 \tightlist
@@ -552,11 +627,75 @@ Steps:
 \end{itemize}
 \end{frame}
 
+\begin{frame}{Linear regression and the t-test}
+\phantomsection\label{linear-regression-and-the-t-test}
+Sounds familiar to the t-test?
+
+\pause
+
+\begin{itemize}
+\tightlist
+\item
+  t-test is a type of linear regression
+\item
+  Namely where we have a categorical covariate with two categories
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Alaska pipline: t-test as linear regression}
+\phantomsection\label{alaska-pipline-t-test-as-linear-regression}
+\[
+depth_i =
+  \begin{cases}
+    \alpha       & \quad \text{if } measured \; in \; the \; field \\
+    \alpha + \beta       & \quad \text{if } measured \; in \; the \; lab
+  \end{cases}
+  + left.over.stuff_i
+\]
+
+So, \(\beta\) is how much deeper (-) or less deep (+) the defect is
+detected when measured in the lab
+\end{frame}
+
+\begin{frame}[fragile]{Alaska pipline: t-test with \texttt{lm()}}
+\phantomsection\label{alaska-pipline-t-test-with-lm}
+\tiny
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{alaska }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}\AttributeTok{id =} \DecValTok{1}\SpecialCharTok{:}\FunctionTok{nrow}\NormalTok{(alaska.pipeline), }
+                           \AttributeTok{lab =} \StringTok{"lab"}\NormalTok{, }\AttributeTok{depth =}\NormalTok{ alaska.pipeline}\SpecialCharTok{$}\NormalTok{lab.defect),}
+                \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{id =} \DecValTok{1}\SpecialCharTok{:}\FunctionTok{nrow}\NormalTok{(alaska.pipeline), }
+                           \AttributeTok{lab=}\StringTok{"field"}\NormalTok{, }\AttributeTok{depth =}\NormalTok{ alaska.pipeline}\SpecialCharTok{$}\NormalTok{field.defect))}
+\NormalTok{alaska}\SpecialCharTok{$}\NormalTok{lab }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(alaska}\SpecialCharTok{$}\NormalTok{lab)}
+\FunctionTok{lm}\NormalTok{(depth}\SpecialCharTok{\textasciitilde{}}\NormalTok{lab, }\AttributeTok{data =}\NormalTok{ alaska)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = depth ~ lab, data = alaska)
+## 
+## Coefficients:
+## (Intercept)       lablab  
+##       33.58         5.52
+\end{verbatim}
+
+\end{codebox}
+\end{frame}
+
 \begin{frame}{Examples of linear models: continuous \(x_i\)}
-\protect\hypertarget{examples-of-linear-models-continuous-x_i}{}
+\phantomsection\label{examples-of-linear-models-continuous-x_i}
 \includegraphics{IntroLM_files/figure-beamer/reg-1.pdf}
 
-\(y_i = \textcolor{darkorange}{\alpha} + x_i\beta + \epsilon_i\sim \mathcal{N}(0,\sigma^2)\)
+\(y_i = \textcolor{darkorange}{\alpha} + x_i\beta + \textcolor{blue}{\epsilon_i\sim \mathcal{N}(0,\sigma^2)}\)
 
 \begin{itemize}
 \tightlist
@@ -567,10 +706,10 @@ Steps:
 \end{frame}
 
 \begin{frame}{Examples of linear models: continuous \(x_i\)}
-\protect\hypertarget{examples-of-linear-models-continuous-x_i-1}{}
+\phantomsection\label{examples-of-linear-models-continuous-x_i-1}
 \includegraphics{IntroLM_files/figure-beamer/reg2-1.pdf}
 
-\(y_i = \alpha + x_i\textcolor{darkorange}{\beta} + \epsilon_i\sim \mathcal{N}(0,\sigma^2)\)
+\(y_i = \alpha + x_i\textcolor{darkorange}{\beta} + \textcolor{blue}{\epsilon_i\sim \mathcal{N}(0,\sigma^2)}\)
 
 \begin{itemize}
 \tightlist
@@ -582,13 +721,50 @@ Steps:
 \end{itemize}
 \end{frame}
 
+\begin{frame}[fragile]{Alaska pipeline: lab and field defects}
+\phantomsection\label{alaska-pipeline-lab-and-field-defects}
+\begin{equation}
+\begin{aligned}
+y_i &= \textcolor{red}{\alpha + x_i\beta} + \textcolor{blue}{\epsilon_i\sim \mathcal{N}(0,\sigma^2)}\\
+lab.defect_i &= \textcolor{red}{\alpha + field.defect_i *\beta} + \textcolor{blue}{left.over.stuff}
+\end{aligned}
+\end{equation}
+
+\pause
+\small
+
+\begin{codebox}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{lm}\NormalTok{(lab.defect}\SpecialCharTok{\textasciitilde{}}\NormalTok{field.defect, }\AttributeTok{data =}\NormalTok{ alaska.pipeline)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{codebox}
+
+\begin{codebox}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = lab.defect ~ field.defect, data = alaska.pipeline)
+## 
+## Coefficients:
+##  (Intercept)  field.defect  
+##       -1.967         1.223
+\end{verbatim}
+
+\end{codebox}
+\end{frame}
+
 \begin{frame}{What is the best line?}
-\protect\hypertarget{what-is-the-best-line}{}
+\phantomsection\label{what-is-the-best-line}
 \includegraphics{IntroLM_files/figure-beamer/norm2-1.pdf}
 \end{frame}
 
 \begin{frame}{How good is the line?}
-\protect\hypertarget{how-good-is-the-line}{}
+\phantomsection\label{how-good-is-the-line}
 \includegraphics{IntroLM_files/figure-beamer/norm-1.pdf}
 
 Distance from model (line) to data: ``error''
@@ -596,7 +772,7 @@ Distance from model (line) to data: ``error''
 \end{frame}
 
 \begin{frame}{Least squares estimation}
-\protect\hypertarget{least-squares-estimation}{}
+\phantomsection\label{least-squares-estimation}
 Minimize the sum of squared residuals: \begin{equation}
 RSS = \sum \limits^n_{i=1} \epsilon_i^2
 \end{equation} which is the same to maximizing the normal likelihood!
@@ -615,7 +791,7 @@ RSS = \sum \limits^n_{i=1} \epsilon_i^2
 \end{frame}
 
 \begin{frame}{Our model}
-\protect\hypertarget{our-model}{}
+\phantomsection\label{our-model}
 \begin{equation}
 y_i = \alpha + \beta x_i + \epsilon_i\sim \mathcal{N}(0,\sigma^2)
 \end{equation}
@@ -632,7 +808,7 @@ y_i = \alpha + \beta x_i + \epsilon_i\sim \mathcal{N}(0,\sigma^2)
 \end{frame}
 
 \begin{frame}{Assumptions}
-\protect\hypertarget{assumptions}{}
+\phantomsection\label{assumptions}
 We make some critical assumptions here
 
 \begin{enumerate}
@@ -646,7 +822,7 @@ We make some critical assumptions here
 \end{frame}
 
 \begin{frame}{Other assumptions for the Errors}
-\protect\hypertarget{other-assumptions-for-the-errors}{}
+\phantomsection\label{other-assumptions-for-the-errors}
 \begin{equation}
 \epsilon_i \overset{iid}{\sim} \mathcal{N}(0, \sigma^2)
 \end{equation}
@@ -665,7 +841,7 @@ We make some critical assumptions here
 \end{frame}
 
 \begin{frame}{Assumptions for the errors}
-\protect\hypertarget{assumptions-for-the-errors}{}
+\phantomsection\label{assumptions-for-the-errors}
 \textbf{all the errors together tell us how good the line is}
 
 \begin{itemize}
@@ -681,7 +857,7 @@ y_i \sim \mathcal{N}(\alpha+x_i\beta, \sigma^2)
 \end{frame}
 
 \begin{frame}{Summary simple linear models}
-\protect\hypertarget{summary-simple-linear-models}{}
+\phantomsection\label{summary-simple-linear-models}
 \begin{itemize}
 \tightlist
 \item
@@ -696,7 +872,7 @@ y_i \sim \mathcal{N}(\alpha+x_i\beta, \sigma^2)
 \end{frame}
 
 \begin{frame}[fragile]{Summary}
-\protect\hypertarget{summary}{}
+\phantomsection\label{summary}
 \begin{itemize}
 \tightlist
 \item
@@ -723,7 +899,7 @@ y_i \sim \mathcal{N}(\alpha+x_i\beta, \sigma^2)
 \end{frame}
 
 \begin{frame}{Summary (2)}
-\protect\hypertarget{summary-2}{}
+\phantomsection\label{summary-2}
 t-test: linear model with categorical covariate of two groups ANOVA:
 linear model with categorical covariate of multiple groups ANCOVA:
 linear model with categorical and continuous covariate (interaction)

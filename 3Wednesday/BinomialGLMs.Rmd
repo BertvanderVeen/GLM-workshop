@@ -25,7 +25,6 @@ header-includes:
   - \setbeamercolor{enumerate subitem}{fg=orange}
   - \tcbuselibrary{skins}
   - \usepackage{emoji}
-  - \usepackage{ulem}
   - \usepackage{longtable, booktabs}
 editor_options: 
   chunk_output_type: console
@@ -101,30 +100,116 @@ Generalised linear models are a unifying class
 
 ## The binomial GLM
 
-\textbf{Data}: $r$ the number of successes in $N$ trials\newline
-\textbf{Parameters}: probability $p$ (now: $\pi_i$)\newline
-\textbf{Goal}: estimate $\pi_i$ for each observation
+\textbf{Response data}: $r$ the number of successes in $N$ trials\newline
+\textbf{Predictor variables}: $x_i$ albeit continuous and/or categorical \newline
+\textbf{Parameters}: probability of success $p_i$ in trial $i$\newline
+\textbf{Goal}: estimate $p_i$ for each observation
 
-![Jacob Bernoulli](Bernoulli.jpg)
+![Jacob Bernoulli](Bernoulli.jpg){height=80%}
 
 ## Binomial GLM use
 
 - When a linear regression is not appropriate :)
-- For binary data or counts of successes/failures 
+- For binary data or (bounded) counts of successes/failures
 
-### In ecology
+## Common examples
 
-- Predicting species' distributions
+- Occurrence of species: orchids \emoji{upside-down-face}
 - Number of germinated plant seeds
-- Prevalence of disease in a population
+- Prevalence of disease in a population: cancer rates
+- Drug trials (effect or no effect)
 - Probability of observing a behavior
-- Proportion of orchids \emoji{upside-down-face}
 
-## Is binomial regression really a GLM?
+# Example 1
+
+## Binomial GLM data example
+
+\center
+Dataset from the MASS R-package
+
+- OME: Otitis Media with Effusion
+- Children were stimulated with sound signals
+- Signals included either coherent or incoherent noise
+- The number of correct signal identifications
+
+\tiny
+```{r, echo  =FALSE, message=FALSE, warning=FALSE}
+data(OME,package="MASS")
+library(tidyr)
+knitr::kable(head(OME), format="latex", booktabs = T)%>%kableExtra::kable_styling(position = "center")
+```
+\normalsize
+
+Which is the response and which are the covariates?
+
+## OME: visually inspect the data
+
+```{r, echo = FALSE, fig.height = 6}
+par(mfrow=c(1,2))
+plot(OME$Correct, x=OME$Noise, ylab = "Correct identifications", xlab="Noise stimulus", ylim = c(0, 13))
+plot(OME$Trials-OME$Correct, x=OME$Noise, ylab = "Incorrect identifications", xlab="Noise stimulus", ylim = c(0, 13))
+```
+
+## OME: fit the model
+
+\footnotesize
+
+```{r, echo = TRUE, fig.height = 6}
+model <- glm(cbind(Correct, Trials-Correct)~Noise,
+             data = OME, family="binomial")
+```
+
+- cbind: combines two vectors as columns
+- Incorrect identifications $=$ Total - Correct identifications
+
+## OME: visually inspect the data
+
+```{r, echo = FALSE, fig.height = 6}
+par(mfrow=c(1,2))
+boxplot(Correct~Noise+Age, ylab = "Correct identifications", xlab="Noise stimulus and Age (months)", OME, col = as.numeric(OME$Noise)+2, ylim = c(0,13))
+boxplot(Trials-Correct~Noise+Age, ylab = "Incorrect identifications", xlab="Noise stimulus and Age (months)", OME, col = as.numeric(OME$Noise)+2, ylim = c(0,13))
+```
+
+## OME: predicting with age
+
+\footnotesize
+
+```{r, echo = TRUE}
+model <- glm(cbind(Correct, Trials-Correct)~Noise*Age,
+             data = OME, family="binomial")
+```
+
+```{r, echo = FALSE, fig.height = 5.5}
+par(mfrow=c(1,1))
+plot(predict(model, newdata = data.frame(Noise = "coherent", Age = c(1:60)), type = "response"), xlim = c(1,60), type = "l", ylim = c(0.5,1), col = 3, ylab = "Probability of correct detection", xlab = "Age")
+text(x=55,y=0.75, "Coherent")
+lines(predict(model, newdata = data.frame(Noise = "incoherent", Age = c(1:60)), type = "response"), x=1:60, col = 4)
+rug(OME$Age, lwd = 2)
+text(x=55,y=0.94, "Incoherent")
+```
+
+## Binomial GLM data example
+
+\center
+
+```{r, echo  =FALSE, message=FALSE, warning=FALSE}
+data(OME,package="MASS")
+knitr::kable(head(OME), format="latex", booktabs = T)%>%kableExtra::kable_styling(position = "center")
+```
+
+What would this data look like if there was only one child in each row?
+
+# Technicalities
+
+## Is binomial regression in the EF?
+
+<!--Incoherent signals are on average well identified, but coherent signals aren't -->
 
 \begin{equation}
-\mathcal{L}(y_i;\Theta) = \text{exp}\biggl\{\textcolor{orange}{\log\binom{N}{r}} + \frac{\frac{r}{N}\textcolor{blue}{\log(\frac{\pi_i}{1-\pi_i})}+\textcolor{red}{\log(1-\pi_i)}}{\textcolor{pink}{1/N}}\biggr\}
+\mathcal{L}(y_i;\Theta) = \text{exp}\biggl\{\textcolor{orange}{\log\binom{N}{r}} + \frac{\frac{r}{N}\textcolor{blue}{\log(\frac{p_i}{1-p_i})}+\textcolor{red}{\log(1-p_i)}}{\textcolor{pink}{1/N}}\biggr\}
 \end{equation}
+
+\pause
 
 All GLMs can be formulated as:
 
@@ -132,37 +217,41 @@ All GLMs can be formulated as:
 \mathcal{L}(y_i;\Theta) = \text{exp}\{\frac{y_i\textcolor{blue}{\eta_i}-\textcolor{red}{b(\eta_i)}}{\textcolor{pink}{a(\phi)}} +\textcolor{orange}{c(y_i,\phi)}\}
 \end{equation}
 
-- for some known functions $\textcolor{pink}{a(\cdot)}$, $\textcolor{red}{b(\cdot)}$ and $\textcolor{orange}{c(\cdot)}$
-- for binomial distribution: $\textcolor{blue}{\eta_i = \log(\frac{\pi_i}{1-\pi_i})}$, $\textcolor{pink}{a(\phi) = 1/N}$, $\textcolor{red}{b(\eta_i) = -\log(1-\pi_i)}$, $\textcolor{orange}{c(y_i, \phi) = \log\binom{N}{r}}$
-- canonical link
-
-## Bernoulli
-
-- $r \in \{0,1\}$: Bernoulli (presence-absence)
-- $N = 1$
-
-\begin{equation}
-\mathcal{L}(y_i;\Theta) = \text{exp}\biggl\{\log(1) + \frac{r\textcolor{blue}{\log(\frac{\pi_i}{1-\pi_i})}+\textcolor{red}{\log(1-\pi_i)}}{1}\biggr\}
-\end{equation}
-
-All GLMs can be formulated as:
-
-\begin{equation}
-\mathcal{L}(y_i;\Theta) = \text{exp}\{\frac{y_i\textcolor{blue}{\eta_i}-\textcolor{red}{b(\eta_i)}}{\textcolor{pink}{a(\phi)}} +\textcolor{orange}{c(y_i,\phi)}\}
-\end{equation}
+\pause 
 
 - for some known functions $\textcolor{pink}{a(\cdot)}$, $\textcolor{red}{b(\cdot)}$ and $\textcolor{orange}{c(\cdot)}$
-- for Bernoulli distribution: $\textcolor{blue}{\eta_i = \log(\frac{\pi_i}{1-\pi_i})}$, $\textcolor{pink}{a(\phi) = 1}$, $\textcolor{red}{b(\eta_i) = -\log(1-\pi_i)}$, $\textcolor{orange}{c(y_i, \phi) = \log(1)} = 0$
+- for binomial distribution: $\textcolor{blue}{\eta_i = \log(\frac{p_i}{1-p_i})}$, $\textcolor{pink}{a(\phi) = 1/N}$, $\textcolor{red}{b(\eta_i) = -\log(1-p_i)}$, $\textcolor{orange}{c(y_i, \phi) = \log\binom{N}{r}}$
 - canonical link
 
-## The binomial GLM
+<!-- ## Bernoulli -->
 
-Link functions:
+<!-- - $r \in \{0,1\}$: Bernoulli (presence-absence) -->
+<!-- - $N = 1$ -->
+
+<!-- \begin{equation} -->
+<!-- \mathcal{L}(y_i;\Theta) = \text{exp}\biggl\{\log(1) + \frac{r\textcolor{blue}{\log(\frac{p_i}{1-p_i})}+\textcolor{red}{\log(1-p_i)}}{1}\biggr\} -->
+<!-- \end{equation} -->
+
+<!-- All GLMs can be formulated as: -->
+
+<!-- \vspace*{-\baselineskip} -->
+
+<!-- \begin{equation} -->
+<!-- \mathcal{L}(y_i;\Theta) = \text{exp}\{\frac{y_i\textcolor{blue}{\eta_i}-\textcolor{red}{b(\eta_i)}}{\textcolor{pink}{a(\phi)}} +\textcolor{orange}{c(y_i,\phi)}\} -->
+<!-- \end{equation} -->
+
+<!-- - for some known functions $\textcolor{pink}{a(\cdot)}$, $\textcolor{red}{b(\cdot)}$ and $\textcolor{orange}{c(\cdot)}$ -->
+<!-- - for Bernoulli distribution: $\textcolor{blue}{\eta_i = \log(\frac{p_i}{1-p_i})}$, $\textcolor{pink}{a(\phi) = 1}$, $\textcolor{red}{b(\eta_i) = -\log(1-p_i)}$, $\textcolor{orange}{c(y_i, \phi) = \log(1)} = 0$ -->
+<!-- - canonical link -->
+
+## Link functions
+
+In a binomial GLM we can change the link function
 
 \begin{itemize}
-\item Logit: $\log(\frac{\pi_i}{1-\pi_i})$ and inverse $\frac{\exp(\eta_i)}{1+\exp(\eta_i)}$ - \textit{the canonical link}
-\item Probit: $\Phi^{-1}(\pi_i)$ and inverse  $\Phi(\eta_i)$
-\item Complementary log-log: $\log(-\log(1-\pi_i)$ and inverse $1-\exp(-\exp(\eta_i))$
+\item Logit: $\log(\frac{p_i}{1-p_i})$ and inverse $\frac{\exp(\eta_i)}{1+\exp(\eta_i)}$ - \textit{the canonical link}
+\item Probit: $\Phi^{-1}(p_i)$ and inverse  $\Phi(\eta_i)$
+\item Complementary log-log: $\log(-\log(1-p_i)$ and inverse $1-\exp(-\exp(\eta_i))$
 \item \sout{Log-log}
 \end{itemize}
 
@@ -237,76 +326,113 @@ lines(x = c(2, -6), y=c(binomial(link=cloglog)$linkinv(2),binomial(link=cloglog)
 
 <!-- - Cloglog is asymmetrical -->
 
-## Binomial link functions: logit
+## Link functions: logit
 
 \begin{equation}
 \begin{aligned}
-\text{pr}(y_i = 1) = \pi_i &= \frac{\exp(\eta_i)}{1+\exp(\eta_i)}\\
-\log(\frac{\pi_i}{1-\pi_i}) = \eta_i &= \textbf{x}_i\symbf{\beta}
+\text{pr}(y_i = 1) = p_i &= \frac{\exp(\eta_i)}{1+\exp(\eta_i)}\\ \pause
+\log(\frac{p_i}{1-p_i}) = \eta_i &= \textbf{x}_i^\top\symbf{\beta}
 \end{aligned}
 \end{equation}
 
+\pause
+
 - $\eta$ is the log odds
-- Odds ratio: $\frac{\pi_i}{1-\pi_i} = \exp(\eta_i)$
+- Odds ratio: $\frac{p_i}{1-p_i} = \exp(\eta_i)$
   - E.g., horse races: 10:1 (for every 1 dollar spent, you get 10 if won)
   - I.e., you think that horse 1 is 10 times more likely to win than horse 2
-- $\text{pr}(y_i = 0) = 1-\pi$
+- $\text{pr}(y_i = 0) = 1-p_i$
 
-## Binomial link functions: probit
+## Link functions: probit
+
+In probit regression, we use a latent variable $\eta^\star_i$ for thresholding. \pause
 
 \columnsbegin
 \column{0.5\textwidth}
 \begin{equation}
-\begin{aligned}
-\pi_i &= \Phi(\eta_i)\\
-\eta_i &= \textbf{x}_i\symbf{\beta}\\
-\eta^\star_i &= \textbf{x}_i\symbf{\beta} + \epsilon_i\sim\mathcal{N}(0,1)
-\end{aligned}
-\end{equation}
-\begin{equation}
 y_i =
 \begin{cases}
 1, & \text{if}\ \eta^\star_i>0\\
 0, & \text{otherwise}\\
 \end{cases}
+\nonumber
 \end{equation}
+
+\pause
+
+and we model this latent variable:
+\begin{equation}
+\eta^\star_i = \textbf{x}_i^\top\symbf{\beta} + \epsilon_i\sim\mathcal{N}(0,1)
+\nonumber
+\end{equation}
+
+\pause
+
+Which is the same as:
+\begin{equation}
+\begin{aligned}
+p_i &= \Phi(\eta_i)\\
+\eta_i &= \textbf{x}_i^\top\symbf{\beta}
+\nonumber
+\end{aligned}
+\end{equation}
+
 \column{0.5\textwidth}
 ```{r, echo = FALSE}
+par(mar=c(5,5,4,2))
 eta = -1
 x <- seq(-5,5,length.out=1000)
-plot(y=dnorm(x),x,type="l", ylab = "dnorm(x)", xaxt="n")
+plot(y=dnorm(x),x,type="l", ylab = expression(paste("dnorm(", eta[i]^"*", ")")), xlab=expression(eta[i]^"*"))
+axis(1, at = c(-4,-2,-1,0,1,2,4))
 polygon(c(x[x<eta],rev(x[x<eta])),c(rep(0,sum(x<eta)),rev(dnorm(x[x<eta]))), col = "red")
-axis(1, at = c(-4,-2,-1,0,2,4), labels = c(-4,-2,expression(eta[i]==-1),0,2,4))
 ```
-\columnsend
 
+\pause
 \vspace{2\baselineskip}
 \centering
 **if $\eta^\star_i$ is positive, we have 1 and 0 if it is negative**
 
-## Binomial: Logit LVM
+\columnsend
+
+## Logit latent variable model
+
+In logistic regression, we can also use a latent variable $\eta^\star_i$ for thresholding. \pause
+
+Probit regression: $\epsilon \sim \mathcal{N}(0,1)$ \newline
+Logistic regression: $\epsilon \sim \mathcal{Logistic}(0,1)$
+
+\pause
+
+\columnsbegin
+\column{0.5\textwidth}
+
+```{r, echo = FALSE}
+par(mar=c(5,5,4,2))
+eta = -1
+x <- seq(-5,5,length.out=1000)
+plot(y=dlogis(x),x,type="l", ylab = expression(paste("dlogis(", eta[i]^"*", ")")), xlab=expression(eta[i]^"*"))
+axis(1, at = c(-4,-2,-1,0,1,2,4))
+polygon(c(x[x<eta],rev(x[x<eta])),c(rep(0,sum(x<eta)),rev(dlogis(x[x<eta]))), col = "red")
+```
+
+\column{0.5\textwidth}
 
 \begin{equation}
 \begin{aligned}
-\pi_i &= \frac{\exp(\eta_i)}{1+\exp(\eta_i)}\\
-\eta_i &= \textbf{x}_i\symbf{\beta}\\
-\eta^\star_i &= \textbf{x}_i\symbf{\beta} + \epsilon_i\sim\mathcal{Logistic}(0,1)
+p_i &= \frac{\exp(\eta_i)}{1+\exp(\eta_i)}\\
+\eta_i &= \textbf{x}_i^\top\symbf{\beta}\\
+\eta^\star_i &= \textbf{x}_i^\top\symbf{\beta} + \epsilon_i\sim\mathcal{Logistic}(0,1)
 \end{aligned}
 \end{equation}
-\begin{equation}
-y_i =
-\begin{cases}
-1, & \text{if}\ \eta^\star_i>0\\
-0, & \text{otherwise}\\
-\end{cases}
-\end{equation}
+
+\columnsend
 
 ## Binomial link functions: complementary log-log
 
 \begin{equation}
 \begin{aligned}
-\log(\lambda_i) &= \log(-\log(1-\pi_i))\\
-\lambda_i &= -\log(1-\pi_i) = \exp(\eta_i)
+\log(\lambda_i) &= \log(-\log(1-p_i))\\
+\lambda_i &= -\log(1-p_i) = \exp(\eta_i)
 \end{aligned}
 \end{equation}
 
@@ -328,7 +454,7 @@ Cumulative link functions facilitate this kind of response by introducing **orde
 
 \textbf{More on Friday}
 
-# Example
+# Example 2
 
 ## Example: Lizard habitat preference
 
@@ -354,7 +480,7 @@ Dataset also covered in McCullagh and Nelder (1989)
 \tiny
 ```{r, echo  =FALSE, message=FALSE, warning=FALSE}
 data(lizards, package="aods3")
-lizards <- lizards[-11, ]# remove siites without any lizards
+lizards <- lizards[-11, ]# remove sites without any lizards
 knitr::kable(lizards, format="latex", booktabs = T)
 ```
 \normalsize
@@ -468,7 +594,7 @@ cloglog=signif(binomial(link=cloglog)$linkinv(cloglog_est@linfct%*%cloglog_est@b
 In a binomial glm we (amongst others) assume:
 
 - Independent Bernoulli trials
-- $\text{var}(y_i) = N_i\pi_i(1-\pi_i)$
+- $\text{var}(y_i) = N_ip_i(1-p_i)$
 
 If these are violated, we can have overdispersion. And due to omitted covariates.
 
@@ -506,7 +632,7 @@ performance::check_overdispersion(model)
 
 - Beta-binomial GLM
 - Quasibinomial GLM
-- Mixed-effects model See [GLMM workshop by Physalia](https://www.physalia-courses.org/courses-workshops/glmms-in-r/)
+- Mixed-effects model See [GLMM workshop](https://www.physalia-courses.org/courses-workshops/glmms-in-r/)
 
 ## Perfect separation
 

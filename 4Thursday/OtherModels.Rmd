@@ -25,7 +25,6 @@ header-includes:
   - \setbeamercolor{enumerate subitem}{fg=orange}
   - \tcbuselibrary{skins}
   - \usepackage{emoji}
-  - \usepackage{ulem}
   - \usepackage{longtable,booktabs}
 editor_options: 
   chunk_output_type: console
@@ -66,37 +65,34 @@ knitr::opts_chunk$set(echo = TRUE)
 - Other useful models
 - Some other approaches (\textbf{tomorrow})
 
-# Generalised linear models so far
+## Covered GLMs
 
 - Linear regression
 - Binomial regression
 - Poisson regression
 - Negative-binomial regression (for fixed dispersion)
 
-## Other GLMS not covered so far
+## Other models 
 
-- Gamma regression
-- Log-normal regression
-- Inverse Gaussian regression
-- Tweedie regression
+\begin{itemize}
+\itemsep-0.5em
+\item \textcolor{red}{Log-normal regression}
+\item \textcolor{blue}{Inverse Gaussian regression}
+\item \textcolor{blue}{Gamma regression}
+\item \textcolor{blue}{Tweedie regression}
+\item \textcolor{red}{beta-binomial regression}
+\item \textcolor{blue}{Multinomial regression}
+\item \textcolor{blue}{Ordinal regression}
+\item \textcolor{red}{Zero-inflated regression}
+\item \textcolor{red}{Zero-truncated regression}
+\item Hurdle models
+\item \textcolor{red}{Conway-Maxwell-Poisson regression}
+\item \textcolor{orange}{Beta regression}
+\end{itemize}
 
-- Multinomial regression
-- Ordinal regression
+\textcolor{blue}{is EF and GLM}, \textcolor{orange}{is EF but not GLM}, \textcolor{red}{is not EF or GLM}
 
-- Conway-Maxwell-Poisson regression (not included here)
-
-## Other useful models
-
-- beta regression
-- beta-binomial regression (overdispersed binomial, not covered here)
-- Zero-inflated models
-- Hurdle models
-
-## Other useful methods
-
-\textbf{more tomorrow}
-
-# GLMs for positive continuous data
+# Positive continuous data
 
 Data bounded at zero $y_i>0$, and might or might not include zeros.
 
@@ -126,21 +122,6 @@ Options:
 - Gamma GLM
 - __Tweedie GLMs__
 
-## Our example data: soil nitrogen
-
-Originally by Lane et al. (2002)
-
-- Soil nitrogen in kilograms per hectare
-- Nitrogen fertilizer dose in kilograms per hectare
-
-```{r,echo=FALSE}
-data(nitrogen, package="GLMsData")
-```
-
-```{r, echo = FALSE}
-knitr::kable(head(nitrogen, 8), format="latex", booktabs = T)
-```
-
 ## Log-normal regression
 
 Connected to the normal distribution, in the sense:
@@ -152,37 +133,11 @@ y_i &\sim \mathcal{Lognormal}(\mu_i,\sigma^2)
 \end{equation}
 
 - So, easy to fit!
-- I don't generally recommend response transformations
 - Two parameters: $\mu_i$ and $\sigma^2$
 - $\mathams{E}(y_i\vert x_i) = \exp(\mu_i + \frac{\sigma^2}{2})$
 - $\text{var}(y_i\vert x_i) = \{\exp(\sigma^2)-1\}\exp(2\mu_i+\sigma^2)$
 
 \textbf{We are not modeling the mean but the location parameter $\mu_i$}
-
-## Log-normal regression in \texttt{R}
-
-```{r}
-model1 <- lm(log(SoilN)~Fert, data = nitrogen)
-fitted <- exp(predict(model1)) #We need to backtransform ourselves
-cbind(est=coef(model1), confint(model1))
-```
-
-- Soil nitrogen increases with supplied nitrogen
-- $\log(2)/0.007234334 \approx 95$
-- Soil nitrogen doubles for almost every 100 kg/hectare fertilizer
-
-## Log-normal regression: results
-
-```{r, echo = FALSE}
-plot(nitrogen$Fert,nitrogen$SoilN, xlab="FertN", ylab="SoilN", cex = 2, cex.lab=2, cex.axis=2)
-segments(x0=100,x1=100,y0=0,y1=exp(predict(model1,newdata=data.frame(Fert=100))),col="red")
-segments(x0=100,x1=-10,y0=exp(predict(model1,newdata=data.frame(Fert=100))),y1=exp(predict(model1,newdata=data.frame(Fert=100))),col="red")
-
-segments(x0=200,x1=200,y0=0,y1=exp(predict(model1,newdata=data.frame(Fert=200))),col="red")
-segments(x0=200,x1=-10,y0=exp(predict(model1,newdata=data.frame(Fert=200))),y1=exp(predict(model1,newdata=data.frame(Fert=200))),col="red")
-
-lines(seq(0,max(nitrogen$Fert),length.out=100), exp(predict(model1,newdata=data.frame(Fert=seq(0,max(nitrogen$Fert),length.out=100)))),type="l",ylim=c(0,70), lwd = 2, xlab  ="FertN", ylab="SoilN", cex.lab=1.5, cex = 2)
-```
 
 ## Inverse Gaussian GLM
 
@@ -202,52 +157,13 @@ lines(seq(0,max(nitrogen$Fert),length.out=100), exp(predict(model1,newdata=data.
 
 $\text{var}(y_i\vert \textbf{x}_i) = \frac{\mu_i^3}{\phi}$
 
-## Inverse Gaussian GLM in \texttt{R}
-
-\tiny
-
-```{r}
-model2 <- glm(SoilN~Fert, data = nitrogen, family = "inverse.gaussian")
-summary(model2)
-```
-
-\normalsize
-
-Interpretation is -very- difficult with inverse-type link functions
-
-## Inverse Gaussian GLM: results
-
-```{r, echo  =FALSE}
-plot(seq(0,max(nitrogen$Fert),length.out=100), predict(model2,newdata=data.frame(Fert=seq(0,max(nitrogen$Fert),length.out=100)),type="response"),type="l",ylim=c(0,70), lwd = 2, xlab  ="FertN", ylab="SoilN", cex.lab=1.5, cex = 2)
-
-points(nitrogen$Fert,nitrogen$SoilN,col="red", cex = 2,pch=16)
-```
-
 ## Gamma GLM
 
 - (negative) Inverse link is canonical
   - provide starting positive values `mustart`
 - Log-link is more stable
 
-\tiny
-
-```{r}
-model3 <- glm(SoilN~Fert, data = nitrogen, family = "Gamma")
-summary(model3)
-```
-
-\normalsize
-
-## Gamma GLM: results
-
-```{r, echo  =FALSE}
-plot(seq(0,max(nitrogen$Fert),length.out=100), predict(model3,newdata=data.frame(Fert=seq(0,max(nitrogen$Fert),length.out=100)),type="response"),type="l",ylim=c(0,70), lwd = 2, xlab  ="FertN", ylab="SoilN", cex.lab=1.5, cex = 2)
-
-points(nitrogen$Fert,nitrogen$SoilN,col="red", cex = 2,pch=16)
-```
-
 ## Tweedie distributions
-
 
 Many of the distributions so far are special forms of the *Tweedie family* of distributions:
 
@@ -271,16 +187,120 @@ With Tweedie we can:
 - Analyse positive continuous data (with zeros!)
 - Counts
 
+# Example 1
+
+## Our example data: soil nitrogen
+
+Originally by Lane et al. (2002)
+
+- Soil nitrogen in kilograms per hectare
+- Nitrogen fertilizer dose in kilograms per hectare
+
+\center
+
+```{r,echo=FALSE}
+data(nitrogen, package="GLMsData")
+```
+
+```{r, echo = FALSE}
+knitr::kable(head(nitrogen, 8), format="latex", booktabs = T)
+```
+
+## Log-normal regression in \texttt{R}
+
+```{r}
+model1 <- lm(log(SoilN)~Fert, data = nitrogen)
+fitted <- exp(predict(model1)) #We need to backtransform
+exp(cbind(est=coef(model1), confint(model1)))
+```
+
+- Soil nitrogen increases with supplied nitrogen
+- $\log(2)/0.007234334 \approx 96$
+- Soil nitrogen doubles for almost every 100 kg/hectare fertilizer
+
+<!-- ## Doubling soil nitrogen  -->
+
+<!-- \begin{equation} -->
+<!-- \begin{aligned} -->
+<!-- \exp((x_i+\Delta)\beta) &= \exp(x_i\beta)2\\ -->
+<!-- \exp(x_i\beta)\exp(\Delta\beta) &= \exp(x_i\beta)2\\ -->
+<!-- \exp(-\Delta\beta) &= \frac{1}{2}\\ -->
+<!-- \Delta\beta &= \log(2)\\ -->
+<!-- \Delta = \log(2)/\beta -->
+<!-- \end{aligned} -->
+<!-- \end{equation} -->
+
+
+## Log-normal regression: results
+
+```{r, echo = FALSE, fig.height = 6}
+plot(nitrogen$Fert,nitrogen$SoilN, xlab="FertN", ylab="SoilN", cex = 2, cex.lab=2, cex.axis=2)
+segments(x0=100,x1=100,y0=0,y1=exp(predict(model1,newdata=data.frame(Fert=100))),col="red")
+segments(x0=100,x1=-10,y0=exp(predict(model1,newdata=data.frame(Fert=100))),y1=exp(predict(model1,newdata=data.frame(Fert=100))),col="red")
+
+segments(x0=200,x1=200,y0=0,y1=exp(predict(model1,newdata=data.frame(Fert=200))),col="red")
+segments(x0=200,x1=-10,y0=exp(predict(model1,newdata=data.frame(Fert=200))),y1=exp(predict(model1,newdata=data.frame(Fert=200))),col="red")
+
+lines(seq(0,max(nitrogen$Fert),length.out=100), exp(predict(model1,newdata=data.frame(Fert=seq(0,max(nitrogen$Fert),length.out=100)))),type="l",ylim=c(0,70), lwd = 2, xlab  ="FertN", ylab="SoilN", cex.lab=1.5, cex = 2)
+```
+
+## Data-transformed linear regression
+
+- I don't generally recommend response transformations
+- Works poorly for a range of data-types
+- GLMs are there to avoid this sort of thing
+- But it usually works well for data with a large mean
+
+## Inverse Gaussian GLM in \texttt{R}
+
+\tiny
+
+```{r}
+model2 <- glm(SoilN~Fert, data = nitrogen, family = "inverse.gaussian")
+summary(model2)
+```
+
+\normalsize
+
+Interpretation is -very- difficult with inverse-type link functions
+
+## Inverse Gaussian GLM: results
+
+```{r, echo  =FALSE, fig.height = 6}
+plot(seq(0,max(nitrogen$Fert),length.out=100), predict(model2,newdata=data.frame(Fert=seq(0,max(nitrogen$Fert),length.out=100)),type="response"),type="l",ylim=c(0,70), lwd = 2, xlab  ="FertN", ylab="SoilN", cex.lab=1.5, cex = 2)
+
+points(nitrogen$Fert,nitrogen$SoilN,col="red", cex = 2,pch=16)
+```
+
+## Gamma GLM
+
+\tiny
+
+\hfill (note, uppercase Gamma)
+
+```{r}
+model3 <- glm(SoilN~Fert, data = nitrogen, family = "Gamma")
+summary(model3)
+```
+
+\normalsize
+
+## Gamma GLM: results
+
+```{r, echo  =FALSE}
+plot(seq(0,max(nitrogen$Fert),length.out=100), predict(model3,newdata=data.frame(Fert=seq(0,max(nitrogen$Fert),length.out=100)),type="response"),type="l",ylim=c(0,70), lwd = 2, xlab  ="FertN", ylab="SoilN", cex.lab=1.5, cex = 2)
+
+points(nitrogen$Fert,nitrogen$SoilN,col="red", cex = 2,pch=16)
+```
+
 ## Tweedie GLM in \texttt{R}: finding $\xi$
 
-
-```{r, cache = TRUE, warning=FALSE, echo = FALSE}
+```{r, cache = TRUE, warning=FALSE, echo = FALSE, fig.height = 4}
 out.est <- tweedie::tweedie.profile(SoilN ~ Fert, xi.vec = seq(2.01, 4, by=0.05), data = nitrogen)
 out.est2 <- tweedie::tweedie.profile(SoilN ~ Fert, xi.vec =  seq(out.est$xi.max-0.5, out.est$xi.max+0.5, by=0.01), data = nitrogen, verbose = FALSE)
 plot(out.est2, xlab = expression(xi), ylab="Log-likelihood", type = "l")
 abline(v=out.est2$xi.max, col = "red")
 ```
-
 
 ## Tweedie GLM in \texttt{R}: fitting
 
@@ -315,9 +335,10 @@ legend("topleft", lty = c("solid", "dashed", "dotted", "dotdash"), col = c("blac
 
 \textbf{Tweedie for flexible modeling of positive data (potentially with zeros)}
 
-# GLMs for categorical data
+# Categories
 
-Binomial models assume \textbf{dichotomy}. Alternative: \textbf{polychotomy}, multiple groups.
+Binomial models assume \textbf{dichotomy} \newline 
+Alternative: \textbf{polychotomy}, multiple groups
 
 ## Multinomial
 
@@ -343,9 +364,14 @@ The model we assume is:
 - Equivalent to using a Poisson regression with fixed total
 
 
-## Cumulative link models
+## Cumulative link models, such as:
 
-- Add order to the probabilities
+For ordered data
+
+-
+-
+-
+
 
 ## Ordinal: proportional odds
 
@@ -407,23 +433,117 @@ legend("topleft", lty=c("solid","solid","dashed","dashed","dotted"),col=c("red",
 
 Note that ordering has introduced some shapes.
 
-# Proportions: brief mentioning
+# Proportions
 
-Sometimes, mistakenly, logistic regression is referred to as "modeling proportions"
+We cannot analyse proportion data with linear regression; might get something below zero or above one 
 
-- Binomial responses are dichotomous (either 0 or 1)
 - Proportions usually include 0 and/or 1, but also everything between
+- Binomial responses are dichotomous (either 0 or 1), not proportions
+- If we know the total, we can specify the Binomial directly in terms of proportions
+
+## Recall: binomial GLM
 
 \begin{equation}
-y_i \sim \mathcal{Beta}(\mu_i, \phi)
+\mathcal{L}(y_i;\Theta) = \text{exp}\biggl\{\textcolor{orange}{\log\binom{N}{r}} + \frac{\frac{r}{N}\textcolor{blue}{\log(\frac{p_i}{1-p_i})}+\textcolor{red}{\log(1-p_i)}}{\textcolor{pink}{1/N}}\biggr\}
 \end{equation}
 
+\pause
+in terms of proportion of successes:
+\begin{equation}
+\mathcal{L}(Ny_i;\Theta) = \text{exp}\biggl\{\textcolor{orange}{\log\binom{N}{N y_i}} + \frac{y_i\textcolor{blue}{\log(\frac{p_i}{1-p_i})}+\textcolor{red}{\log(1-p_i)}}{\textcolor{pink}{1/N}}\biggr\}
+\end{equation}
+
+\pause
+
+\center
+
+\textbf{So, we still model the successes and failures}
+
+## Unknown total
+
+If the number of trials is unknown, we cannot specify a binomial glm
+
+- We can model the proportions directly
 - "beta regression", which is not a GLM
-- various packages implement it
-- Require data between 0 and 1 (i.e., without 0 or 1)
+- Various packages implement it, with logit or probit link-functions
+- Requires data between 0 and 1 (i.e., without 0 or 1)
 
 When there are zeros and/or ones..zero-inflated models or hurdle models (ZIB or ordered beta regression).
  
+## Beta distribution 
+
+Two parameter distribution with mean and variance
+
+```{r, echo = FALSE, fig.height=5, fig.align="center"}
+par(mfrow=c(2,2))
+meanb <- function(shape1, shape2)shape1/(shape1+shape2)
+varb <- function(shape1, shape2)(shape1*shape2)/((shape1+shape2)^2*(shape1+shape2+1))
+shape1 <- 0.5;shape2<-0.5
+hist((y<-rbeta(1000,shape1, shape2)), xlab = expression(y[i]), main = bquote(mu == .(meanb(1,1)) ~ "," ~ sigma^2 == .(varb(shape1,shape2))), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")
+shape1 <- 5;shape2<-1
+hist((y<-rbeta(1000,shape1, shape2)), xlab = expression(y[i]), main = bquote(mu == .(meanb(1,1)) ~ "," ~ sigma^2 == .(varb(shape1,shape2))), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")
+shape1 <- 1;shape2<-3
+hist((y<-rbeta(1000,shape1, shape2)), xlab = expression(y[i]), main = bquote(mu == .(meanb(1,1)) ~ "," ~ sigma^2 == .(varb(shape1,shape2))), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")
+shape1 <- 2;shape2<-2
+hist((y<-rbeta(1000,shape1, shape2)), xlab = expression(y[i]), main = bquote(mu == .(meanb(1,1)) ~ "," ~ sigma^2 == .(varb(shape1,shape2))), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")
+```
+
+# Example 2
+ 
+## Example: Baseball game wins
+
+Wins of baseball games
+
+![community.jmp.com](baseball.png)
+
+## Baseball wins: the data
+
+Data from Cochran (2002)
+
+- 838 games
+- Many variables: team, league, division, year, runs scores, wins
+- Response variable: attendance
+
+\tiny
+
+```{r, echo  =FALSE, message=FALSE, warning=FALSE}
+data("MLBattend", package="UsingR")
+MLBattend <- cbind(MLBattend, prop_wins = MLBattend$wins/(MLBattend$wins+MLBattend$losses))
+library(tidyr)
+knitr::kable(head(MLBattend, 7), format="latex", booktabs = T)%>%kableExtra::kable_styling(position="center")
+```
+
+\normalsize
+
+\center
+\textbf{Note the new column $prop_wins = \frac{wins}{wins+losses}$}
+
+## Baseball wins: binomial GLM
+
+Without weights
+\tiny
+```{r}
+model6 <- glm(prop_wins ~ attendance, family="binomial", data = MLBattend)
+```
+\normalsize
+With weights
+\tiny
+```{r}
+model6 <- glm(prop_wins ~ scale(attendance), family="binomial", weights = wins + losses, data = MLBattend)
+```
+
+## Baseball wins: beta regression
+
+\tiny
+```{r, message=FALSE, warning=FALSE}
+library(glmmTMB)
+model7 <- glmmTMB(prop_wins ~ scale(attendance), family=beta_family(), data = MLBattend)
+```
+
+```{r, echo = FALSE}
+cbind(data.frame(binomial = coef(model6)), data.frame(beta=fixef(model7)$cond))
+```
+
 # Excess zeros
 
 When there are more zeros than the selected distribution can generate.
@@ -460,7 +580,14 @@ p\exp(-\lambda_{i}) & \text{if}\ \nu_{i} = 1\\
 - can choose to separately model $p$ as a logistic regression
 - quadratic mean-variance as in NB
 
-## Example: Mistletoe infection data
+# Example 3
+
+## Example: Mistletoe infections
+
+Counts of mistletoe infections
+
+![wikipedia.org](mistletoe.jpg)
+## Mistletoe: the data
 
 Mistletoe data covered in Zuur (2021)
 
@@ -472,52 +599,50 @@ data <- read.csv("../data/MistletoeV2.csv", header = TRUE)
 knitr::kable(head(data, 8), format="latex", booktabs = T)
 ```
 
-## Example: Mistletoe infections
+## Mistletoe: visually
 
 ```{r, echo = FALSE, fig.height = 6}
 hist(data$No.of.mistletoes, xlab="Count", main = "Mistletoe infections")
 ```
 
-## Example: Mistletoe infections
+## Mistletoe: poisson regression
 
 \tiny
 ```{r}
-model6 <- glm(No.of.mistletoes~DBH, family="poisson", data = data)
+model8 <- glm(No.of.mistletoes~DBH, family="poisson", data = data)
 ```
 
-```{r, eval = FALSE}
-DHARMa::testZeroInflation(model6)
-```
-
-```{r, eval = TRUE, echo = FALSE, fig.height = 3}
-invisible(DHARMa::testZeroInflation(model6))
+```{r, eval = FALSE, echo = FALSE}
+DHARMa::testZeroInflation(model8)
 ```
 
 ```{r, eval = TRUE, echo = FALSE, fig.height = 3}
-DHARMa::testZeroInflation(model6, plot = FALSE)
+invisible(DHARMa::testZeroInflation(model8))
 ```
 
-## Example: Mistletoe infections
+```{r, eval = TRUE, echo = FALSE, fig.height = 3}
+DHARMa::testZeroInflation(model8, plot = FALSE)
+```
+
+## Mistletoe: zero-inflated poisson regression
 
 \tiny
 ```{r}
-model7 <- glmmTMB::glmmTMB(No.of.mistletoes~DBH,ziformula=~1, family="poisson", data = data)
+model9 <- glmmTMB::glmmTMB(No.of.mistletoes~DBH,ziformula=~1, family="poisson", data = data)
 ```
 
 ```{r, eval = TRUE, echo = FALSE, fig.height = 3}
-invisible(DHARMa::testZeroInflation(model7))
+invisible(DHARMa::testZeroInflation(model9))
 ```
 
 ```{r, eval = TRUE, echo = FALSE, fig.height = 3}
-DHARMa::testZeroInflation(model7, plot = FALSE)
+DHARMa::testZeroInflation(model9, plot = FALSE)
 ```
-
-
 
 ## Summary
-
 
 - At least not mentioned: Generalized and Conway-Maxwell Poisson
 - Ordered beta
 - Truncation
+- Many, many others
 

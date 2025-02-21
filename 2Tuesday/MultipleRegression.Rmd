@@ -183,8 +183,8 @@ y_i &= \alpha + \sum_{k=1}^p \beta_k x_{ik} + \epsilon_i
 $$
 
 - we have $p$ covariates, labelled from $k=1$ to $p$
-- we have $p$ covariate effects
 - the $k^{th}$ covariate values for the $i^{th}$ observation is $x_{ik}$
+- we also have $p$ covariate effects $\beta_k$
 
 ## Design Matrices
 
@@ -201,9 +201,6 @@ $$
    1 & 8.4 & 1.2 \\
   \end{array}  \right)
 $$
-
-So, the first column is the intercept, and the second and third columns are two covarias.
-
 This is called the *Design Matrix*: it helps to write down the model
 
 ## Writing the Model 
@@ -220,17 +217,18 @@ We will not look at the mathematics in any detail: the point here is that the mo
 
 ## The Solution (just so you can see it)
 
-After a bit of matrix algebra, one can find the ML solution:
+After a bit of matrix algebra, one can find the MLE:
 
-$$
+\begin{equation}
 \hat{\textbf{b}} = (\textbf{X}^\top \textbf{X})^{-1}\textbf{X}^\top \textbf{y}
-$$
+\eqref{mle}
+\end{equation}
 where $\textbf{b}$ is the MLE for $\symbf{\beta}$.
 
 In practice:
 
-- you won't have to calculate this: the computer does it, and 
-- the computer actually doesn't use this
+- you don't have to calculate this: the computer does it
+- the computer actually doesn't use equation \eqref{mle}
 
 # Examples
 
@@ -397,7 +395,7 @@ Here, $\alpha$ is the intercept for the first category at $x_3 = 0$, $\beta_1$ i
 
 ## Writing the Model: continuous and categorical
 
-```{r, echo = FALSE,cache=TRUE}
+```{r, echo = FALSE,cache=TRUE, fig.height  =6}
 set.seed(1234)
 x <- data.frame(x1 = as.factor(sample(rep(1:2,15, replace=TRUE))), x2 = rnorm(30))
 beta = rnorm(3)
@@ -412,7 +410,69 @@ abline(a = coef(model)[1]+coef(model)[2], b = coef(model)[3], col = "purple", lt
 legend("topright", lty = c("solid","dashed"),col=c("red","purple"), legend=c("Group 1", "Group 2"))
 ```
 
-## Interactions
+# Example 1
+
+## Example 1: body temperature and heart rate
+
+Data by Mackowiak et al. (1992) via the UsingR package
+
+![<a href="https://www.vecteezy.com/free-vector/coronavirus">by Vecteezy</a>](temperature.jpg)
+
+## Body temperature: the data
+
+- 130 individuals
+- Body temperature
+- Resting heart rate
+
+\tiny
+
+```{r, echo  =FALSE, message=FALSE, warning=FALSE}
+data(normtemp, package = "UsingR")
+library(tidyr)
+knitr::kable(head(normtemp, 7), format="latex", booktabs = T)%>%kableExtra::kable_styling(position="center")
+
+normtemp$celsius <- (normtemp$temperature- 32) * 5/9;normtemp$gender<-factor(normtemp$gender, labels=c("Male","Female"))
+```
+
+\normalsize
+
+
+## Body temperature: two simple models
+
+\begin{equation}
+y_i = \alpha_i + x_i\beta_i + \epsilon_i
+\end{equation}
+
+For this data that means:
+
+$y_i = \alpha + female*\beta + left.over.stuff_i$
+\newline
+and \newline
+$y_i = \alpha + heart.rate*\beta + left.over.stuff_i$
+
+## Body temperature: fit the two models
+
+
+```{r}
+model1 <- lm(celsius ~ gender, data = normtemp)
+coef(model1)
+model2 <- lm(celsius ~ hr, data = normtemp)
+coef(model2)
+```
+
+
+## Body temperature: fit one model and compare
+
+```{r}
+model3 <- lm(celsius ~ hr + gender, data = normtemp)
+```
+```{r echo = FALSE}
+printCoefmat(rbind(gender=c(coef(model1)[1], hr=NA, coef(model1)[2]),
+                   hr = c(coef(model2), NA),
+                   both = coef(model3)), digits=3)
+```
+
+# Interactions
 
 An interaction is when we have the product of two (or more) covariates in the model:
 
@@ -458,8 +518,17 @@ $$
    \epsilon_n \\
   \end{array}  \right)
 $$
-$\beta_1$ is the slope for $x_2$, $\beta_2$ is the slope of $x_3$, $\beta_3$ is their joint parameter. It represents how
-the effect of $x_1$ or $x_2$ changes with the other covariate. E.g., water and fertilizer on plant growth.
+
+## Interactions: continuous-continuous
+
+$y_i = \alpha + x_{i1}\beta_1 + x_{i2}\beta_2 + x_{i1}x_{i2}\beta_3 + \epsilon_i$
+
+- $\beta_1$ is the slope for $x_1$
+- $\beta_2$ is the slope of $x_2$
+- $\beta_3$ is their joint parameter
+
+$\beta_3$ represents how the effect of $x_1$ or $x_2$ changes with the other covariate. E.g., body size and heart rate on body temperature
+
 
 ## Interactions: categorical-continuous
 
@@ -497,7 +566,7 @@ $\alpha+\beta_1$ is the intercept and $\beta_3+\beta_4$ is the slope of the regr
 
 ## Interactions: categorical-continuous
 
-```{r, echo = FALSE,cache=TRUE}
+```{r, echo = FALSE,cache=TRUE, fig.height=6}
 set.seed(1234)
 x <- data.frame(x1 = as.factor(sample(rep(1:2,15, replace=TRUE))), x2 = rnorm(30))
 beta = rnorm(4)
@@ -516,10 +585,10 @@ legend("topright", lty = c("solid","dashed"),col=c("red","purple"), legend=c("Gr
 
 As long as the model is linear in the parameters, we can also have functions:
 
-- Quadratic: $y_i = x_i\beta + x_i^2\beta_2$
-- Centering: $y_i = (x_i-\bar{\textbf{x}})\beta$
-- Exponential: $y_i = \exp(x_i)\beta$
-  - or logarithmic: $y_i = \log(x_i)\beta$
+- Quadratic: $y_i = x_i\beta + x_i^2\beta_2 + \epsilon_i$
+- Centering: $y_i = (x_i-\bar{\textbf{x}})\beta+ \epsilon_i$
+- Exponential: $y_i = \exp(x_i)\beta+ \epsilon_i$
+  - or logarithmic: $y_i = \log(x_i)\beta+ \epsilon_i$
 
 ## Surface: quadratic effects
 
@@ -553,7 +622,9 @@ $$
 
 ![](wiggly.png){width=80%}
 
-See [GAM workshop by Physalia](https://www.physalia-courses.org/courses-workshops/gams-in-r/)
+See [GAM workshop](https://www.physalia-courses.org/courses-workshops/gams-in-r/)
+
+# Next steps
 
 ## Finding a "good" model
 

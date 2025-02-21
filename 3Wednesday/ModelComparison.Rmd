@@ -25,7 +25,6 @@ header-includes:
   - \setbeamercolor{enumerate subitem}{fg=orange}
   - \tcbuselibrary{skins}
   - \usepackage{emoji}
-  - \usepackage{ulem}
 editor_options: 
   chunk_output_type: console
 urlcolor: orange
@@ -140,21 +139,16 @@ Highly cited. Perhaps because this is a difficult subject?
 
 ## What makes a good statistical model?
 
-\center
-
-![](menti2.png){width=60%}
-
-https://www.menti.com/alrfxf8u5y9j
-
-## What makes a good statistical model?
-
 For prediction or for inference?
 
 - A model is usually only good at one thing
-- Prediction
-- Inference
+  - Prediction
+  - Inference
+- But it can do both
 
-\textbf{In my experience, most Biologists are interested in inference}.
+\pause
+
+This is a matter for **calibration**
 
 ## What makes a good statistical model?
 
@@ -190,7 +184,7 @@ If two competing models fit the data equally well, we continue with the simpler 
 
 A model with always fit better if you add a parameter
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height = 6}
 # Adapted from Bob Ohara
 set.seed(12345)
 N <- 100; P <- 90
@@ -216,7 +210,7 @@ plot(2:P, R2[4,], ylab="Explained variation", xlab = "Number of parameters", typ
 
 \column{0.6\textwidth}
 
-```{r, echo = FALSE, fig.height = 4}
+```{r, echo = FALSE, fig.height = 3.8}
 set.seed(12345)
 x = rnorm(30)
 y = 2+x*4 + x^2*-3 + rnorm(30, sd=3)
@@ -230,6 +224,58 @@ points(x,y)
 ```
 
 \columnsend
+
+# Example 1
+
+## Example: Baseball game attendance
+
+Attendance to baseball games
+
+![community.jmp.com](baseball.png)
+
+## Baseball attendance: data from yesterday
+
+Data from Cochran (2002)
+
+- 838 games
+- Many variables: team, league, division, year, runs scores, wins
+- Response variable: attendance
+
+\tiny
+
+```{r, echo  =FALSE, message=FALSE, warning=FALSE}
+data("MLBattend", package="UsingR")
+library(tidyr)
+knitr::kable(head(MLBattend, 7), format="latex", booktabs = T)%>%kableExtra::kable_styling(position="center")
+```
+
+\normalsize
+
+
+## Baseball attendance: log-likelihoods
+
+```{r, echo = FALSE}
+model1 <- glm(cbind(wins, wins+losses)~games.behind,data=MLBattend, family="binomial")
+model2 <- update(model1, formula = .~. + attendance)
+model3 <- update(model2, formula = .~. + runs.scored)
+
+plot(y=c(logLik(model1), logLik(model2), logLik(model3)),x=c(1,2,3), xaxt="n", type = "b", xlab = NA, ylab = "log(likelihood)")
+axis(1, at = c(1, 2, 3), labels = c("Model 1", "Model 2", "Model 3"))
+```
+
+## Baseball attendance: deviances
+
+```{r, echo = FALSE}
+plot(y=c(deviance(model1), deviance(model2), deviance(model3)),x=c(1,2,3), xaxt="n", type = "b", xlab = NA, ylab = "deviance")
+axis(1, at = c(1, 2, 3), labels = c("Model 1", "Model 2", "Model 3"))
+```
+
+## Baseball attendance: explained variance
+
+```{r, echo = FALSE}
+plot(y=c(1-model1$deviance/model1$null.deviance, 1-model2$deviance/model2$null.deviance, 1-model3$deviance/model3$null.deviance),x=c(1,2,3), xaxt="n", type = "b", xlab = NA, ylab = expression(paste("Deviance ", R^2)))
+axis(1, at = c(1, 2, 3), labels = c("Model 1", "Model 2", "Model 3"))
+```
 
 ## \textcolor{blue}{Confirmatory} vs. \textcolor{red}{Exploratory analysis}
 
@@ -271,13 +317,59 @@ Procedure
 - $-2\Lambda \sim \mathcal{\chi}^2(k_1-k_0)$ under the null
 - $p\geq0.05$ difference in likelihood is due to sampling
 
+## LRT approximation assumptions
+
+- $n\to\infty$
+- $\Theta_0$ contained in $\Theta_1$: nested models
+- The true parameter is in the interior of the parameter space
+- Model is "identifiable"
+- Hessian matrix is sufficiently close to the Fisher information
+- $y_i$ are independent
+
+\textbf{These assumptions may fail, especially in models more complex than GLMs} \newline
+Alternatively: LRT by simulation.
+
+## LRT and deviance
+
+\begin{equation}
+\Lambda = \frac{D(\textbf{y};\hat{\symbf{\mu}}_{M0})-D(\textbf{y};\hat{\symbf{\mu}_{M1}})}{\phi}
+\end{equation}
+
+# Example 2 
+
+## Example: Lizard habitat preference
+
+- Data originally by Schoener (1970)
+- Counts of two species of lizard in Jamaica
+
+\columnsbegin
+\column{0.5\textwidth}
+
+![wikipedia.org: grahami](grahami.JPG){width=80%}
+
+\column{0.5\textwidth}
+
+![wikipedia.org: opalinus](opalinus.jpeg){width=60%}
+
+\columnsend
+
+## Lizards: the data
+
+\center
+Dataset also covered in McCullagh and Nelder (1989)
+
+\tiny
+```{r, echo  =FALSE, message=FALSE, warning=FALSE}
+data(lizards, package="aods3")
+lizards <- lizards[-11, ]# remove sites without any lizards
+knitr::kable(lizards, format="latex", booktabs = T)
+```
+\normalsize
+
 ## Example: Lizards
 
 ```{r, echo = FALSE}
-data(lizards, package="aods3")
-lizards <- lizards[-11,]
-SiteTime = as.factor(paste(lizards$Site, lizards$Time, sep=" "))
-plot(grahami~SiteTime, data = lizards, xlab= "Site:Time", ylab="Number of grahami lizards")
+boxplot(grahami~Site:Time, data = lizards, xlab= "Site:Time", ylab="Number of grahami lizards")
 ```
 
 ## Lizards: interaction
@@ -322,25 +414,7 @@ We reject the alternative hypothesis.
 
 <!-- Allows parameter estimates on the boundary. -->
 
-## LRT approximation assumptions
-
-- $n\to\infty$
-- $\Theta_0$ contained in $\Theta_1$: nested models
-- The true parameter is in the interior of the parameter space
-- Model is "identifiable"
-- Hessian matrix is sufficiently close to the Fisher information
-- $y_i$ are independent
-
-\textbf{These assumptions may fail, especially in models more complex than GLMs} \newline
-Alternatively: LRT by simulation.
-
-## LRT and deviance
-
-\begin{equation}
-\Lambda = \frac{D(\textbf{y};\hat{\symbf{\mu}}_{M0})-D(\textbf{y};\hat{\symbf{\mu}_{M1}})}{\phi}
-\end{equation}
-
-## LRT by simulation
+## Lizards: LRT simulation
 
 \small
 ```{r, cache=TRUE}
@@ -358,7 +432,7 @@ Lambdas <- c(Lambdas,
 sum(Lambdas>Lambda)/1000
 ```
 
-## LRT by simulation
+## Lizards: LRT simulation
 
 \textcolor{red}{Red}: Observed statistic \newline
 \textcolor{blue}{Blue}: $\chi^2(2)$
@@ -376,7 +450,7 @@ Find the best model amongst a set of models.
 
 Best:
 
-- Penalise complexity (# parameters)
+- Penalise complexity (number of parameters)
 - By fit (likelihood)
 
 Most commonly:
@@ -419,14 +493,6 @@ So the penalty is different. \newline
 
 \textbf{Find the model closest to the "true" model}
 
-## Lizards: interaction selection
-
-```{r, echo = FALSE}
-AIC(nmodel, amodel)
-MuMIn::AICc(nmodel, amodel)
-BIC(nmodel, amodel)
-```
-
 ## Connection of AIC and LRT
 
 Rule of thumb: difference of 2 points means a model is better
@@ -441,12 +507,49 @@ Rule of thumb: difference of 2 points means a model is better
 
 \textbf{So AIC with a rule of \delta = 2 can be seen as a more liberal LRT} \footnotesize (Sutherland et al. 2023) \normalsize
 
-## $\Delta$AIC by simulation under the better model
+## The cult of (A)IC
+
+[Presentation by Mark Brewer](https://www.youtube.com/watch?v=lEDpZmq5rBw)
+
+\textbf{"Always use (A)IC for model comparison"}
+
+\columnsbegin
+\column{0.5\textwidth}
+My perspectives
+
+- Use common sense
+- Do not blindly test all models ("dredging")
+- Use model comparison techniques in moderation
+
+\column{0.5\textwidth}
+
+![](cult.jpg)
+
+\columnsend
+
+\textbf{Don't take the "best" model paradigm too seriously}
+
+## Freedman's paradox
+
+Just by chance, predictors with no relationship to the response will be selected.
+
+# Example 3
+
+
+## Lizards: interaction selection
+
+```{r, echo = FALSE}
+AIC(nmodel, amodel)
+MuMIn::AICc(nmodel, amodel)
+BIC(nmodel, amodel)
+```
+
+## $\Delta$AIC by simulation under the simpler model
 
 Solid: observed $\Delta$AIC \newline
 Dashed: -2 $\Delta$AIC
 
-```{r, cache=TRUE, echo = FALSE, fig.height = 3}
+```{r, cache=TRUE, echo = FALSE, fig.height = 3.5}
 Lambdas <- NULL
 for(i in 1:1000){
 set.seed(i)
@@ -460,17 +563,27 @@ Lambdas <- c(Lambdas,
 }
 # if <0.05 our test statistic in the tail.
 dAIC <- 2*(logLik(nmodel)-logLik(amodel)) + 2*(attr(logLik(amodel), "df") - attr(logLik(nmodel), "df"))
-hist(Lambdas, xlab = expression(AIC(M[1])-AIC(M[0])), main = "Positive: M0 is better. Negative: M1 is better.", breaks = 100, cex.main = 1.5)
-abline(v=dAIC, col = "red", lty="dashed", lwd = 3)
-abline(v=-2, col = "red", lty="solid", lwd = 3)
+h <- hist(Lambdas, breaks = 100, plot = FALSE)
+cuts <- cut(h$breaks, c(-Inf,-2,dAIC, Inf))
+plot(h, col = as.character(factor(as.factor(cuts),labels=c("black","white", "gray"))), xlab = expression(AIC(M[1])-AIC(M[0])), main = "Positive: M0 is better. Negative: M1 is better.", cex.main = 1.5)
+abline(v=dAIC, col = "red", lty="solid", lwd = 3)
+abline(v=-2, col = "red", lty="dashed", lwd = 3)
 ```
+
+Black: We would incorrectly select the more complex model (7%) \newline
+White: We would consider the models equivalent (34%)\newline
+Gray: Under a 2 $\Delta$AIC rule we would select the more simpler model (59%) \newline
+
+## $\Delta$AIC by simulation under the additive model
 
 ```{r, echo = FALSE}
 cat("Models with a more extreme test statistic:", sum(Lambdas<=dAIC)/1000)
 cat("Models with more than 2 AIC difference:", sum(Lambdas>2)/1000)
 ```
 
-## $\Delta$AICc by simulation under the better model
+93% of the time we would have selected the simpler model <!--sum(Lambdas>(-2))/1000-->
+
+## $\Delta$AICc by simulation under the simpler model
 
 Solid: observed $\Delta$AICc \newline
 Dashed: -2 $\Delta$AICc
@@ -483,40 +596,44 @@ n <- nrow(lizards)
 dAICc = dAIC + (2*k1*(k1+1)/(n-k1-1)- 2*k0*(k0+1)/(n-k0-1))
 Lambdas2 <- Lambdas + (2*k1*(k1+1)/(n-k1-1)- 2*k0*(k0+1)/(n-k0-1))
 
-hist(Lambdas2, xlab = expression(AIC[c](M[1])-AIC[c](M[0])), main = "Positive: M0 is better. Negative: M1 is better.", cex.main = 1.5, breaks = 100)
-abline(v=dAICc, col = "red", lty="dashed", lwd = 3)
-abline(v=-2, col = "red", lty="solid", lwd = 3)
+h <- hist(Lambdas2, breaks = 100, plot = FALSE)
+cuts <- cut(h$breaks, c(-Inf,-2,dAICc, Inf))
+plot(h, col = as.character(factor(as.factor(cuts),labels=c("black","white", "gray"))), xlab = expression(AIC[c](M[1])-AIC[c](M[0])), main = "Positive: M0 is better. Negative: M1 is better.", cex.main = 1.5)
+
+abline(v=dAICc, col = "red", lty="solid", lwd = 3)
+abline(v=-2, col = "red", lty="dashed", lwd = 3)
 ```
+
+Black: We would incorrectly select the more complex model (1%) \newline <!--sum(Lambdas2<=(-2))/1000-->
+White: We would consider the models equivalent (40%)\newline <!--sum(Lambdas2>(-2)&Lambdas<=2)/1000-->
+Gray: Under a 2 $\Delta$AIC rule we would select the more simpler model (89%) \newline<!--sum(Lambdas2>(2))/1000-->
+
+## $\Delta$AICc by simulation under the simpler model
 
 ```{r, echo = FALSE}
 cat("Models with more than 2 AIC difference:", sum(Lambdas>2)/1000)
 cat("Models with more than 2 AICc difference:", sum(Lambdas2>2)/1000)
 ```
 
-## The cult of (A)IC
+99% of the time we would select the simpler model. <!--sum(Lambdas2>(-2))/1000-->
 
-[Presentation by Mark Brewer](https://www.youtube.com/watch?v=lEDpZmq5rBw)
+## Lizards: interaction and height
 
-\columnsbegin
-\column{0.5\textwidth}
+```{r, echo = TRUE}
+model1 <- glm(cbind(grahami, opalinus)~Time+Site, 
+             data = lizards, family="binomial")
+model2 <- update(model1, formula = . ~ Time*Site)
+model3 <- update(model2, formula = ~.+Height)
+```
 
-\textbf{"Always use (A)IC for model comparison"}
+## Lizards: AIC plotted
 
-- Use common sense
-- Do not blindly test all models ("dredging")
-- Use model comparison techniques in moderation
+```{r, echo = FALSE, fig.heigh = 5}
+plot(y=c(AIC(model1), AIC(model2), AIC(model3)),x=c(1,2,3), xaxt="n", type = "b", xlab = NA, ylab = "AIC")
+axis(1, at = c(1, 2, 3), labels = c("Model 1", "Model 2", "Model 3"))
+```
 
-\column{0.5\textwidth}
-
-![](cult.jpg)
-
-\columnsend
-
-\textbf{Don't take "best" model paradigm too seriously}
-
-## Freedman's paradox
-
-Just by chance, predictors with no relationship to the response will be selected.
+# Final
 
 ## Omitted variable bias
 
@@ -541,7 +658,7 @@ y_i = \alpha + x_{i1}\beta_1+\epsilon_i, \qquad \text{with } \epsilon_i = x_{i2}
 What to do when you have multiple models that are equally good?
 
 - The simpler model
-- Do not "model average" for inference \footnotesize [a rant](https://twitter.com/vdVeenB/status/1557656200619212800) \normalsize
+- Do not "model average" for inference \footnotesize<!-- [a rant](https://twitter.com/vdVeenB/status/1557656200619212800) \normalsize-->
 - Report multiple models
 
 ## Summary

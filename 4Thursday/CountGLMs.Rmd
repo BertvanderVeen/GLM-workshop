@@ -1,5 +1,5 @@
 ---
-title: "Models for count data"
+title: "Models for unbounded count data"
 institute: "Department of Mathematical Sciences, NTNU"
 author: "Bert van der Veen"
 output: 
@@ -25,7 +25,6 @@ header-includes:
   - \setbeamercolor{enumerate subitem}{fg=orange}
   - \tcbuselibrary{skins}
   - \usepackage{emoji}
-  - \usepackage{ulem}
   - \usepackage{longtable,booktabs}
 editor_options: 
   chunk_output_type: console
@@ -76,17 +75,20 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## The binomial GLM
 
-\textbf{Data}: $r$ the number of successes in $N$ trials\newline
-\textbf{Parameters}: probability $p$ (now: $\pi_i$)\newline
-\textbf{Goal}: estimate $\pi_i$ for each observation
+\textbf{Response data}: $r$ the number of successes in $N$ trials\newline
+\textbf{Predictor variables}: $x_i$ albeit continuous and/or categorical \newline
+\textbf{Parameters}: probability of success $p_i$ in trial $i$\newline
+\textbf{Goal}: estimate $pi_i$ for each observation
 
 ## Binomial GLM use
 
 - When a linear regression is not appropriate :)
 - For binary data or counts of successes/failures 
 
-### In ecology
+### Common examples
 
+- OME signal identification
+- cancer rates
 - Predicting species' distributions
 - Number of germinated plant seeds
 - Prevalence of disease in a population
@@ -108,33 +110,23 @@ abline(v= 0, lty="dashed")
 legend("bottomright", lty=c(1,2,3,4), legend = c("Logit","Probit", "Complementary log-log", "Log-log"))
 ```
 
-# Log-linear regression
-
-Log-linear regression is a class of models that uses the log-link function:
-
-\begin{equation}
-\begin{aligned}
- \log\{\mathams{E}(y_i\vert x_i)\} &= \eta_i = \alpha + x_i\beta\\
- \mathams{E}(y_i\vert x_i) &= \lambda_i = \exp(\alpha + x_i\beta)
- \end{aligned}
-\end{equation}
-
-\textbf{Log-linear regression is commonly used to analyse count data}
-
 # Poisson
 
 ## Typical count cases
 
-- Caught fish
-- Plants at a site
-- Pidgeons in a city
-- [Bigfoot reports](https://zslpublications.onlinelibrary.wiley.com/doi/abs/10.1111/jzo.13148)
-- Wrongful convictions
-- Stars in the night sky
+- Number of caught fish
+- Number of deaths due to lung cancer or other diseases
+- Seizure counts
+- Times a behavior is expressed
+- Number of pidgeons in a city
+- Number of [Bigfoot reports](https://zslpublications.onlinelibrary.wiley.com/doi/abs/10.1111/jzo.13148)
+- Number of wrongful convictions
+- Number of stars in the night sky
 
 ## The Poisson GLM
 
-\textbf{Data}: $k_i$ the count\newline
+\textbf{Response data}: $k_i$ the count\newline
+\textbf{Predictor variables}: $x_i$ albeit continuous and/or categorical \newline
 \textbf{Parameters}: mean $\lambda$ \newline
 \textbf{Goal}: estimate $\lambda_i$ for each observation
 
@@ -156,25 +148,7 @@ Log-linear regression is a class of models that uses the log-link function:
 
 \textbf{The Poisson paramater $\lambda$ is the mean of the counting process}
 
-## The Poisson distribution: rates
-
-Alternatively we can write:
-
-\begin{equation}
-\mathcal{L}(y_i;\Theta) = \text{exp}\{y_i\log(rt) - rt - \log(y_i!)\}
-\end{equation}
-
-so, $\lambda = rt$
-
-- $r$ is the rate at which counts occur, per time period $t$
-- we could also record counts within a certain period, instead of the total
-
-## Catching fish
-
-- We go fishing for an hour and catch $\lambda = 5$ fish
-- On average we caught $r = \frac{5}{60}$ fish per $t = 1$
-
-## Is Poisson regression really a GLM?
+## Is Poisson regression in the EF?
 
 \begin{equation}
 \mathcal{L}(y_i;\Theta) = \text{exp}\biggl\{\frac{y_i\textcolor{blue}{\log(\lambda)}+\textcolor{red}{\log(\lambda)}}{1} + \textcolor{orange}{\log(y_i!)}\biggr\}
@@ -186,11 +160,21 @@ All GLMs can be formulated as:
 \mathcal{L}(y_i;\Theta) = \text{exp}\{\frac{y_i\textcolor{blue}{\eta_i}-\textcolor{red}{b(\eta_i)}}{\textcolor{pink}{a(\phi)}} +\textcolor{orange}{c(y_i,\phi)}\}
 \end{equation}
 
+## The Poisson distribution visually
+
+```{r, echo = FALSE, fig.height=5, fig.align="center"}
+par(mfrow=c(2,2))
+plot(table(y<-rpois(1000,1)), xlab = expression(y[i]), main = expression(lambda == 1), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")
+plot(table(y<-rpois(1000,5)), xlab = expression(y[i]), main = expression(lambda == 5), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")
+plot(table(y<-rpois(1000,10)), xlab = expression(y[i]), main = expression(lambda == 10), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")
+plot(table(y<-rpois(1000,100)), xlab = expression(y[i]), main = expression(lambda == 100), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")
+```
+
 ## Log-link function
 
 So log is the canonical link. This looks like:
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height = 6}
 x <- seq(-5,5,length.out=1000)
 plot(x, exp(x), type = "l", xlab = expression(eta[i]), ylab = expression(lambda[i]))
 segments(x0=0,x1=0, y0=-10, y1 = 1, col = "red")
@@ -202,7 +186,103 @@ segments(x0=4,x1=-10, y0=exp(4), y1 =exp(4) , col = "red")
 
 ```
 
-## Counts: a multiplicative process
+## square root-link function
+
+An alternative is the square root-link function $\lambda_i = (\alpha + x_i\beta)^2$
+
+```{r, echo=FALSE, fig.height = 6}
+x <- seq(-5,5,length.out=1000)
+plot(x, (x)^2, type = "l", xlab = expression(eta[i]), ylab = expression(lambda[i]))
+segments(x0=0,x1=0, y0=-10, y1 = 0, col = "red")
+segments(x0=0,x1=-10, y0=0, y1 = 0, col = "red")
+segments(x0=2,x1=2, y0=-10, y1 =4 , col = "red")
+segments(x0=2,x1=-10, y0=4, y1 =4 , col = "red")
+segments(x0=4,x1=4, y0=-10, y1 =16 , col = "red")
+segments(x0=4,x1=-10, y0=16, y1 =16 , col = "red")
+```
+
+## Poisson assumptions
+
+- An event can occur $0 \ldots\infty$ times
+- Events are independent
+- Events cannot occur simultaneously
+- Variance equals the mean
+- The rate of events is constant
+
+# Rates
+
+## The rate of events
+
+Counts are usually collected over time or space:
+
+- The amount of fish we catch in an hour
+- The number of deaths on a population of 10.000
+- The number of seizures a patient has during the night
+- The number of times a behavior is expressed during a treatment
+- Number of pidgeons in a city the size of Los Angeles
+- The number of bigfoot reports collected in a small forest, yesterday, by 3 people
+- Number of wrongful convictions in Germany last year
+- Number of starts in the night sky
+
+## The Poisson distribution: rates
+
+Alternatively we can write:
+
+\begin{equation}
+\mathcal{L}(y_i;\Theta) = \text{exp}\{y_i\log(rt) - rt - \log(y_i!)\}
+\end{equation}
+
+so, $\lambda = rt$
+
+- $r$ is the rate at which counts occur, per time period $t$
+- we can instead write $\lambda = t\exp(\eta)  = \exp\{\eta + \log(t)\}$
+- $\log(t)$ is called an \textbf{offset}
+
+## Example: going out fishing
+
+- On average we catch 1 fish in 20 minutes $\lambda = 1 = \exp\{-2.99+\log(20)\}$
+- If we go fishing for an hour we catch $\exp(-2.99)*60 = 3$ fish
+- If we go fishing for one minute we catch $\exp(-2.99) = \frac{1}{20}$ fish
+- Here, $r = \exp(-2.99)$ and $t$ is the time we want to spend fishing
+- We can also find the amount of time we need to spend to catch 5 fish
+  - $\exp\{-2.99+\log(t)\} = 5$, so $t = \frac{5}{\exp(-2.99)} = 100$ minutes
+
+# Log-linear regression
+
+Log-linear regression is a class of models that uses the log-link function:
+
+\begin{equation}
+\begin{aligned}
+ \log\{\mathams{E}(y_i\vert x_i)\} &= \eta_i = \alpha + x_i\beta\\
+ \mathams{E}(y_i\vert x_i) &= \lambda_i = \exp(\alpha + x_i\beta)
+ \end{aligned}
+\end{equation}
+
+\textbf{Log-linear regression is commonly used to analyse count data}
+
+## Log-linear regression
+
+Log-linear regression is a "multiplicative" model
+
+\begin{equation}
+\begin{aligned}
+\lambda_i &= \exp(\alpha + x_i\beta) \\ 
+& = \exp(\alpha)\exp(x_i\beta)
+\end{aligned}
+\end{equation}
+
+\pause
+
+\textbf{A unit increase in $x_i$ scales $\lambda_i$ by $\exp(\beta)$}
+
+So, when $\exp(\beta) = \frac{1}{2}$, $\exp(\alpha)$ halves for every unit of $x_i$\newline
+So, when $\exp(\beta) = 2$, $\exp(\alpha)$ doubles for every unit of $x_i$
+
+\pause
+
+\textbf{Of course, this is more involved with multiple predictors}
+
+## Example of a multiplicative process
 
 Say that we have the model:
 
@@ -210,134 +290,131 @@ Say that we have the model:
 \log(\lambda) = \alpha+x_i\beta
 \end{equation}
 
-- with $\alpha = 1$ and $\beta = \log(2) \approx 0.693$
+- with $\alpha = -2.99$ and $\beta = \log(2) \approx 0.693$
 - $x_i$ is either 0 or 1: either I was fishing or you were
-- `exp(1) = 2.71828` the average number of fish I caught
-- `exp(1+\log{2}) = exp(1)*2 = 5.437` the average number of fish you caught
+- $\exp(-2.99) = 0.05$ the average number of fish I caught in the time I spent fishing
+- $\exp(-2.99+\log{2}) = \exp(-2.99)*2 = 0.1$ the average number of fish you caught
+- So, you caught twice as many fish! I am not very good at fishing
 
-So, you caught twice as many fish!
 
-## The Poisson distribution visually
+# Example 1
 
-```{r, echo = FALSE, fig.height=5, fig.align="center"}
-par(mfrow=c(2,2))
-hist(rpois(1000,1), xlab = expression(y[i]), main = expression(lambda == 1), cex.main = 2, cex.lab = 1.5)
-hist(rpois(1000,5), xlab = expression(y[i]), main = expression(lambda == 5), cex.main = 2, cex.lab = 1.5)
-hist(rpois(1000,10), xlab = expression(y[i]), main = expression(lambda == 10), cex.main = 2, cex.lab = 1.5)
-hist(rpois(1000,100), xlab = expression(y[i]), main = expression(lambda == 100), cex.main = 2, cex.lab = 1.5)
-```
+## Example: campus crime
 
-## Poisson assumptions
-
-- An event can occur $0 \ldots\infty$ times
-- Events are independent
-- The rate of events is constant
-- Events cannot occur simultaneously
-- Variance equals the mean
-
-# Example
-
-## Example: horseshoe crabs 
-
-Counts of male crabs ("satellites") near female crabs
+Count of violent crimes for an academic year
 
 \columnsbegin
 \column{0.5\textwidth}
 
-![nwf.org](Horseshoecrab.jpg)
+![freepik.com](criminal.jpeg)
 
 \column{0.5\textwidth}
 
-![uwm.edu](Horseshoecrab2.jpeg)
+![campussecuritytoday.com](campuscrime.jpg)
 
 
 \columnsend
 
-## Horseshoe crabs: the data
+## Campus crime: the data
 
-Data originally from Brunswick  (1996) via Agresti (2007) via Dunn and Smyth (2018)
+Data via Legler and Roback (2021)
 
-- 173 observations
-- 4 traits: colour, spine condition, width (cm), weight (g)
+- 81 observations
+- Number of violent crimes, Total number of crimes, Number of property crimes
+- Student enrollment
+- Type (University or College)
+- Region of the country
 
 \tiny
 
 ```{r, echo  =FALSE, message=FALSE, warning=FALSE}
-data(hcrabs, package="GLMsData")
-knitr::kable(head(hcrabs, 7), format="latex", booktabs = T)
-hcrabs$Col <-factor(hcrabs$Col, levels= c("LM","M","DM","D"))
-levels(hcrabs$Col) <- c("Light medium","Medium","Dark medium","Dark")
-hcrabs$Spine <-factor(hcrabs$Spine, levels= c("BothOK","OneOK","NoneOK"))
-colnames(hcrabs)<-c("Colour","Spine","Width","Sat","Weight")
+campus <- read.csv("../data/c_data2.csv")[,c("num_viol","total_crime","num_prop","Enrollment","type","region")]
+campus$region <- as.factor(campus$region)
+campus$type <- as.factor(campus$type)
+library(tidyr)## Campus crime: the data
+
+knitr::kable(head(campus, 7), format="latex", booktabs = T)%>%kableExtra::kable_styling(position="center")
 ```
 
 \normalsize
 
-## Horseshoe crabs: the data
+## How could these data be analysed with a binomial regression?
+
+\tiny
+
+```{r, echo  =FALSE, message=FALSE, warning=FALSE}
+campus <- read.csv("../data/c_data2.csv")[,c("num_viol","total_crime","num_prop","Enrollment","type","region")]
+campus$region <- as.factor(campus$region)
+campus$type <- as.factor(campus$type)
+library(tidyr)
+knitr::kable(head(campus, 7), format="latex", booktabs = T)%>%kableExtra::kable_styling(position="center")
+```
+
+\normalsize
+
+## What is the relationship between violent crimes and school variables?
 
 ```{r, echo  =FALSE, message=FALSE, warning=FALSE, fig.width=13, fig.height=8}
 par(mfrow=c(2,2))
-plot(jitter(log1p(Sat)) ~Weight, data = hcrabs, ylab = "log(Number of satellites+1)", cex.lab=1.5, cex.axis = 2.5, cex = 2)
-plot(jitter(log1p(Sat)) ~Colour, data = hcrabs, ylab = NA, yaxt="n", cex.lab=2.5, cex.axis=2.5, cex = 2)
-plot(jitter(log1p(Sat)) ~Spine, data = hcrabs, ylab = NA, yaxt="n", cex.lab=2.5, cex.axis=2.5, cex = 2)
-plot(jitter(log1p(Sat)) ~Width, data = hcrabs, ylab = NA, yaxt="n", cex.lab=2.5, cex.axis=2.5, cex = 2)
+plot(jitter(log1p(num_viol)) ~type, data = campus, ylab = "log(Number of violent crimes+1)", cex.lab=1.5, cex.axis = 2.5, cex = 2, xlab="Type")
+plot(jitter(log1p(num_viol)) ~Enrollment, data = campus, ylab = NA, yaxt="n", cex.lab=2.5, cex.axis=2.5, cex = 2)
+plot(jitter(log1p(num_viol)) ~log1p(total_crime), data = campus, ylab = NA, yaxt="n", cex.lab=2.5, cex.axis=2.5, cex = 2, xlab = "log(Total crime count + 1)")
+plot(jitter(log1p(num_viol)) ~region, data = campus, ylab = NA, yaxt="n", cex.lab=2.5, cex.axis=2.5, cex = 2, xlab = "Region")
 ```
 
-
-What can we tell about the number of satellites?
-
-## Horseshoe crabs: fit the model
+## Campus crime: fit the model
 
 ```{r}
-model <- glm(Sat ~ Spine + Colour + Width + Weight, 
-             family = "poisson", data = hcrabs)
+model <- glm(num_viol ~ region+type, 
+             family = "poisson", data = campus)
 ```
 
-## Horseshoe crabs: interpreting parameters
+What issue can we identify for this model?
 
-\small
-```{r echo = FALSE}
-signif(summary(model)$coefficients,digits = 2L)
-```
-\normalsize
+## What is the relationship between violent crimes per 1000 enrolled and school variables?
 
-(Intercept) = Light-medium coloured females with both spines in good condition, Width and Weight = 0
-
-## Horseshoe crabs: interpreting parameters, centered
-
-\small
-```{r echo = FALSE}
-hcrabs$Weight<-scale(hcrabs$Weight, scale = FALSE)
-hcrabs$Width<-scale(hcrabs$Width, scale = FALSE)
-model <- glm(Sat ~ Spine + Colour + Width + Weight, 
-             family = "poisson", data = hcrabs)
-signif(summary(model)$coefficients,digits = 2L)
-```
-
-\footnotesize
-- (Intercept) = Light-medium coloured females with both spines in good condition, Weight $\approx$ 2437g, Width $\approx$ 26.3cm
-- Width: `exp(0.0170) = 1.017`, so double the number of satellites by `log(2)/0.01709 = 40.56`cm above average
-- Weight: `exp(0.0005) = 1.0005`, so double the number of satellites by `log(2)/0.0005 = 1386.3`g above average
-
-## Horseshoe crabs: visual interpretation
-
-\small
 ```{r, echo  =FALSE, message=FALSE, warning=FALSE, fig.width=13, fig.height=8}
-par(mfrow=c(1,3))
-plot(effects::allEffects(model))
+par(mfrow=c(2,2))
+plot(jitter(log1p(1000*num_viol/Enrollment)) ~type, data = campus, ylab = "log(1000*Number of violent crimes/Enrollment+1)", cex.lab=1.5, cex.axis = 2.5, cex = 2, xlab="Type")
+plot(jitter(log1p(1000*num_viol/Enrollment)) ~Enrollment, data = campus, ylab = NA, yaxt="n", cex.lab=2.5, cex.axis=2.5, cex = 2)
+plot(jitter(log1p(1000*num_viol/Enrollment)) ~log1p(total_crime), data = campus, ylab = NA, yaxt="n", cex.lab=2.5, cex.axis=2.5, cex = 2, xlab = "log(Total crime count + 1)")
+plot(jitter(log1p(1000*num_viol/Enrollment)) ~region, data = campus, ylab = NA, yaxt="n", cex.lab=2.5, cex.axis=2.5, cex = 2, xlab = "Region")
 ```
 
-## Some other options
+## Campus crime: fit the model
 
-- Negative binomial (two types, with dispersion)
-- Conway-Maxwell Poisson (with dispersion)
-- Generalized Poisson (with dispersion)
-- Skellam distribution (difference of counts)
-- Binomial distribution (counts with a maximum)
-- Truncated distributions
-- Quasi-likelihood models
+```{r}
+modelo <- glm(num_viol ~ region + type 
+              + offset(log(Enrollment)), 
+             family = "poisson", data = campus)
+```
 
-# Practicalities
+```{r, echo = FALSE}
+format(cbind(data.frame("No offset" = coef(model), 
+                        "Offset" = coef(modelo))), digits = 2L)
+```
+
+## Campus crime: per 1000 enrolled
+
+```{r}
+model1000 <- glm(num_viol ~ region + type 
+              + offset(log(Enrollment/1000)), 
+             family = "poisson", data = campus)
+```
+
+$\exp(\alpha_2)*1000 = \exp(\alpha_3)$
+$\exp(\alpha_2) = \exp(\alpha_3)/1000$
+$\exp(\alpha_2) = \exp\{\alpha_3- \log(1000)\}$
+
+## Campus crime: per 1000 enrolled {.t}
+
+```{r, echo = FALSE}
+format(cbind(data.frame("No offset" = coef(model), 
+                        "Offset" = coef(modelo)),
+                        "Per thousand" = coef(model1000)), digits = 2L)
+```
+
+# Overdispersion
 
 ## Do we have a good model?
 
@@ -401,12 +478,133 @@ Introduced by [Wedderburn (1974)](https://academic.oup.com/biomet/article-abstra
 - For large $\phi$ Poisson!
 - Requires more data/information due to extra parameter
 
-## Horseshoe crabs: Negative-binomial
+## Is negative-binomial regression in the EF?
+
+\begin{equation}
+\begin{aligned}
+\mathcal{L}(y_i;\Theta) = \exp[ \frac{y_i\textcolor{blue}{\log\{\frac{\mu_i}{\mu_i+\phi_i}\}} -\textcolor{red}{\phi\log\{\frac{\mu_i+\phi}{\phi}\}}}{1} + \\ \textcolor{orange}{\log\{\Gamma(y_i+\phi)\} - \log\{\Gamma(\phi)\} - \log(y_i!)}]
+\end{aligned}
+\end{equation}
+
+All GLMs can be formulated as:
+
+\begin{equation}
+\mathcal{L}(y_i;\Theta) = \text{exp}\{\frac{y_i\textcolor{blue}{\eta_i}-\textcolor{red}{b(\eta_i)}}{\textcolor{pink}{a(\phi)}} +\textcolor{orange}{c(y_i,\phi)}\}
+\end{equation}
+
+<!-- ## Negative-binomial: alternative parameterization -->
+
+<!-- The negative-binomial is usually parameterized in terms of: -->
+
+<!-- \begin{itemize} -->
+<!-- \itemsep-0.5em -->
+<!-- \item The number of "successes" $r = \phi$ -->
+<!-- \item The number of "failures" $n-r = y_i$ -->
+<!-- \item The probability of "success" $p_i = \frac{\phi}{\mu+\phi}$ -->
+<!-- \item The probability of "failure" $1-p_i = \frac{\mu_i}{\mu_i+\phi}$ -->
+<!-- \end{itemize} -->
+
+# Example 2
+
+## Example: hurricanes 
+
+Deaths due to hurricanes
+
+![climaterealityproject.org](hurricane.jpg){height=70%}
+
+## Hurricanes: the data
+
+Data from Jung et al. (2914)
+
+- 94 observations
+- Year, name, Binary name categorization (male, female), Masulinity-Femininity score, strength of the hurricane, prior air pressure
+- Excluded two outliers
+
+\tiny
+
+```{r, echo  =FALSE, message=FALSE, warning=FALSE}
+data(hurricanes, package="DHARMa")
+hurricanes <- hurricanes[-c(10,34),]
+hurricanes$Gender_MF  <- factor(hurricanes$Gender_MF,levels = c(0,1), labels=c("Male", "Female"))
+hurricanes$Category <- as.factor(hurricanes$Category)
+library(tidyr)
+knitr::kable(head(hurricanes[,-5], 7), format="latex", booktabs = T)%>%kableExtra::kable_styling(position="center")
+```
+
+\normalsize
+
+## Are female hurricanes more deadline than male hurricanes?
+
+\vspace*{-\baselineskip}
+
+```{r, echo  =FALSE, message=FALSE, warning=FALSE, fig.width=13, fig.height=8}
+par(mfrow=c(2,2))
+plot(jitter(log1p(alldeaths)) ~Gender_MF, data = hurricanes, ylab = "log(Total deaths+1)", cex.lab=1.5, cex.axis = 2.5, cex = 2)
+plot(jitter(log1p(alldeaths)) ~Category, data = hurricanes, ylab = NA, yaxt="n", cex.lab=2.5, cex.axis=2.5, cex = 2)
+plot(jitter(log1p(alldeaths)) ~MinPressure_before, data = hurricanes, ylab = NA, yaxt="n", cex.lab=2.5, cex.axis=2.5, cex = 2)
+plot(jitter(log1p(alldeaths)) ~NDAM, data = hurricanes, ylab = NA, yaxt="n", cex.lab=2.5, cex.axis=2.5, cex = 2)
+```
+
+## Hurricanes: fit the model
+
+```{r}
+modelp <- glm(alldeaths ~ Gender_MF + MinPressure_before, 
+             family = "poisson", data = hurricanes)
+```
+
+## Hurricanes: interpreting parameters
+
+\small
+```{r echo = FALSE}
+signif(summary(modelp)$coefficients, digits = 2L)
+```
+\normalsize
+
+How do we interpret the intercept?
+
+## Hurricanes: interpreting parameters
+
+\small
+```{r echo = FALSE}
+hurricanes$MinPressure_beforeC <- hurricanes$MinPressure_before-mean(hurricanes$MinPressure_before)
+modelp1 <- glm(alldeaths ~ Gender_MF + MinPressure_beforeC, 
+             family = "poisson", data = hurricanes)
+signif(summary(modelp1)$coefficients,digits = 2L)
+```
+
+<!-- (Intercept) = Light-medium coloured females with both spines in good condition\newline -->
+
+__Average prior air pressure: `r round(mean(hurricanes$MinPressure_before),2)` knots __ \newline
+
+How do we interpret the intercept? \newline
+And its standard error?
+
+\textcolor{red}{Prior air pressure centered}
+ 
+## Hurricanes: interpreting parameters on the __response scale__
+
+\footnotesize
+- (Intercept) = Male-named hurricanes, prior air pressure $\approx$ 965
+- Female-named hurricanes: $\exp(0.27) = 1.3$, so 30% more deadly
+
+## Hurricanes: visual interpretation
+
+\small
+```{r, echo  =FALSE, message=FALSE, warning=FALSE, fig.width=13, fig.height=8}
+plot(effects::allEffects(modelp1))
+```
+
+## Hurricanes: checking overdispersion
+
+```{r}
+performance::check_overdispersion(modelp1)
+```
+
+## Hurricanes: Negative-binomial
 
 \small
 ```{r}
-modelnb <- MASS::glm.nb(Sat ~ Spine + Colour + Width + Weight,
-                        data = hcrabs)
+modelnb <- MASS::glm.nb(alldeaths ~ Gender_MF + MinPressure_beforeC, data = hurricanes)
 ```
 
 \normalsize
@@ -414,29 +612,37 @@ modelnb <- MASS::glm.nb(Sat ~ Spine + Colour + Width + Weight,
 and compare the models:
 
 ```{r}
-AIC(model, modelnb)
+AIC(modelp1, modelnb)
 ```
 
-## Horseshoe crabs: comparing estimates
+## Hurricanes crabs: comparing estimates
 
 \footnotesize
 
 ```{r, echo = FALSE}
-cbind("Poisson estimate"=signif(coef(model), 2L), "NB estimate" = signif(coef(modelnb), 2L), "Poisson SE" = signif(summary(model)$coef[,2],2L), "NB SE"= signif(summary(modelnb)$coef[,2],2L))
+cbind("Poisson estimate"=signif(coef(modelp1), 2L), "NB estimate" = signif(coef(modelnb), 2L), "Poisson SE" = signif(summary(modelp1)$coef[,2],2L), "NB SE"= signif(summary(modelnb)$coef[,2],2L))
 ```
 
-\normalsize 
+\normalsize
 
-- SEs have doubled
-- Coefficients have changed, but largely the same conclusions
-- Except perhaps for the effect of "Width"
+- SEs have increased
+- Coefficients have changed
+- \textbf{Female and male-named hurricanes are equally deadly}
+- Effect of pressure has remained
+
+## Count distributions
+
+- Poisson
+- Negative binomial (two types, with dispersion)
+- Conway-Maxwell Poisson (with dispersion)
+- Generalized Poisson (with dispersion)
+- Skellam distribution (difference of counts)
+- Binomial distribution (counts with a maximum)
+- Truncated distributions (e.g., without zeros)
+- Quasi-likelihood models
 
 # Summary
 
 - Counts are analysed with log-linear models
-- Due to the Poisson assumption, dispersion issues can arise
-- This biases parameter and uncertainty estimates
-- Negative-binomial models are useful for overdispersion problems
-- Conway-Maxwell & Generalized Poisson can be used as well, and for underdispersion
-  - \texttt{glmmTMB} or \texttt{VGAM} packages
-- Zero-inflation (later)
+- The collection effort of counts needs to be considered (offset)
+- When the Poisson assumption is violated, we change to another count distribution

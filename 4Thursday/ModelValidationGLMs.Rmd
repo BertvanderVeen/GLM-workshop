@@ -107,9 +107,11 @@ as long as $\mathams{E}(\epsilon_i) = 0$.
 - Dharma/quantile residuals
 - Prediction error
 
-# Residual diagnostics in GLMs
+## Modeling checking
 
 ![McCullagh and Nelder (1989) workflow](workflow.png)
+
+# Residuals
 
 ## Methods for checking GLM assumptions
 
@@ -128,18 +130,23 @@ $$\textcolor{blue}{\epsilon_i} = y_i - \textcolor{red}{\hat{\mu}_i}$$
 
 But we do not expect these to look nice in GLMs.
 
-- Mean depends on variance
-- We would rather have nice looking residuals (when assumptions are not violated)
+- Because the variance depends on the mean
+- We want nice looking residuals when a model is good
+- We want bad looking residuals otherwise
 
-## Defining GLM residuals: Pearson's
+## GLM residuals: Pearson's
 
-We do not have a $\epsilon_i$ term in GLMs, but we still calculate the residual similarly:
+Even though we lack the $\epsilon_i$ term in GLMs, we still calculate the residuals similarly
+
+\pause
 
 \begin{equation}
-\epsilon_{i,pearson} = \frac{y_i-\hat{\mu}_i}{\sqrt{\text{var}(y_i;\mu_i,\phi)}}
+\hat{\epsilon_{i,pearson}} = \frac{y_i-\hat{\mu}_i}{\sqrt{\text{var}(y_i;\hat{\mu_i},\hat{\phi})}}
 \end{equation}
 
-as the scale difference between data and mean.
+as the scaled difference between data and mean
+
+\pause
 
 \center
 
@@ -147,27 +154,34 @@ as the scale difference between data and mean.
 
 ## Recall deviance?
 
-We do not have a $\epsilon_i$ term in GLMs, but we do have the deviance function:
+We do not have a $\epsilon_i$ term in GLMs, but we do have the deviance function
+
+\pause
 
 \begin{equation}
 D(\textbf{y};\hat{\symbf{\mu}}) = \sum \limits^n_{i=1} 2y_i\{g(y_i)-g(\hat{\mu}_i)\} - y_i + \hat{\mu}_i
 \end{equation}
 
-Which represents distance to the saturated model.
+Which represents distance to the saturated model
 
-## Defining GLM residuals: deviance
+## GLM residuals: deviance
 
 \begin{equation}
 D(\textbf{y};\hat{\symbf{\mu}}) = \sum \limits^n_{i=1} 2y_i\{g(y_i)-g(\hat{\mu}_i)\} - y_i + \hat{\mu}_i
 \end{equation}
+
+\pause
 
 - Note the summation over the observations
-- We can split this per observation!
+- Each observation has a defined contribution to the deviance
 - $d_i = 2y_i\{g(y_i)-g(\hat{\mu}_i)\} - y_i + \hat{\mu}_i$
+- We can use this to define a residual
+
+\pause
 
 \textbf{Deviance residuals}\newline
 \begin{equation}
-\epsilon_{i,deviance} = \text{sign}(y_i - \hat{\mu}_i)\sqrt{d_i}, \qquad \text{so that } \sum \limits^n_{i=1} \epsilon_{deviance,i}^2
+\hat{\epsilon_{i,deviance}} = \text{sign}(y_i - \hat{\mu}_i)\sqrt{d_i}, \qquad \text{so that } \sum \limits^n_{i=1} \hat{\epsilon_{deviance,i}}^2
 \end{equation}
 
 \center
@@ -177,92 +191,16 @@ D(\textbf{y};\hat{\symbf{\mu}}) = \sum \limits^n_{i=1} 2y_i\{g(y_i)-g(\hat{\mu}_
 ## Why deviance residuals
 
 - Converges faster to approximate normality \tiny \newline (Dunn and Smyth 2018, Cox and Snell 1968) \normalsize
-- Otherwise, adjusted deviance residual
-- Good for small samples \tiny (Pierce and Schafer 1986) \normalsize
+- Can be adjusted for small samples \tiny (Pierce and Schafer 1986) \normalsize
   - e.g. Poisson $\mu_i^{-0.5}/6$
+
+\pause
 
 \textbf{Still inappropriate for discrete data and small samples}
 
 ## In practice
 
 In practice, both Pearson's and Deviance residuals are often non-normally distributed.
-
-# Trying it out
-
-\columnsbegin
-\column{0.5\textwidth}
-
-![Lizards in the sun](lizzy.jpeg)
-\column{0.5\textwidth}
-
-![nwf.org](Horseshoecrab.jpg)
-
-\columnsend
-
-## Lizards: recap
-
-```{r, echo = FALSE, fig.height = 4}
-par(mfrow=c(1,2))
-data(lizards, package="aods3")
-lizards <- lizards[-11,]
-plot(lizards$grahami, x=lizards$Time, ylab = "Observed grahami lizards", xlab="Time")
-plot(lizards$grahami, x=lizards$Site, ylab = "Observed grahami lizards", xlab="Site")
-```
-
-```{r}
-model1 <- glm(cbind(grahami, opalinus)~Time+Site, 
-             data = lizards, family="binomial")
-```
-
-## Lizards: residuals
-
-```{r, echo = FALSE, fig.height = 8, fig.width = 13}
-par(mfrow=c(1,3))
-car::residualPlot(model1, type="response", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Response")
-car::residualPlot(model1, type="deviance", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Deviance")
-car::residualPlot(model1, type="pearson", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Pearson")
-```
-
-## Horseshoe crabs: recap
-
-```{r, echo  =FALSE, message=FALSE, warning=FALSE, fig.width=13, fig.height=7}
-data(hcrabs, package="GLMsData")
-hcrabs$Col <-factor(hcrabs$Col, levels= c("LM","M","DM","D"))
-levels(hcrabs$Col) <- c("Light medium","Medium","Dark medium","Dark")
-hcrabs$Spine <-factor(hcrabs$Spine, levels= c("BothOK","OneOK","NoneOK"))
-colnames(hcrabs)<-c("Colour","Spine","Width","Sat","Weight")
-par(mfrow=c(2,2))
-plot(jitter(log1p(Sat)) ~Weight, data = hcrabs, ylab = "log(Number of satellites+1)", cex.lab=1.5, cex.axis = 2.5, cex = 2)
-plot(jitter(log1p(Sat)) ~Colour, data = hcrabs, ylab = NA, yaxt="n", cex.lab=1.5, cex.axis=2.5, cex = 2)
-plot(jitter(log1p(Sat)) ~Spine, data = hcrabs, ylab = NA, yaxt="n", cex.lab=1.5, cex.axis=2.5, cex = 2)
-plot(jitter(log1p(Sat)) ~Width, data = hcrabs, ylab = NA, yaxt="n", cex.lab=1.5, cex.axis=2.5, cex = 2)
-```
-
-```{r}
-model2 <- glm(Sat ~ Spine + Colour + Width + Weight, 
-             family = "poisson", data = hcrabs)
-```
-
-## Horseshoe crabs: Poisson model residuals
-
-```{r, echo = FALSE, fig.height = 8, fig.width = 13}
-par(mfrow=c(1,3))
-car::residualPlot(model2, type="response", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Response")
-car::residualPlot(model2, type="deviance", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Deviance")
-car::residualPlot(model2, type="pearson", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Pearson")
-```
-
-## Horseshoe crabs: NB model residuals
-
-```{r, echo = FALSE, fig.height = 8, fig.width = 13}
-model3 <- MASS::glm.nb(Sat ~ Spine + Colour + Width + Weight,
-                        data = hcrabs)
-par(mfrow=c(1,3))
-car::residualPlot(model3, type="response", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Response")
-car::residualPlot(model3, type="deviance", cex.main = 2, cex = 2, cex.lab = 1.5, ylab = NA, main = "Deviance")
-car::residualPlot(model3, type="pearson", cex.main = 2, cex = 2, cex.lab = 1.5, ylab = NA, main = "Pearson")
-```
-
 
 ## Randomized Quantile residual \tiny (Dunn and Smyth 1996) \normalsize
 
@@ -277,32 +215,187 @@ r_Q = \Phi^{-1}\biggl\{\mathcal{F}\biggl(y_i;\hat{\mu_i},\hat{\phi}\biggr)\biggr
 \end{equation}
 
 ```{r pgamma, eval=T, fig.align="center",out.width="30%", echo=F, warning=F,message=F, fig.show="hold"}
-hist(qnorm(ppois(hcrabs$Sat, predict.glm(model2,type="response"))), main="", cex.main=2, cex.lab=1.5, col="white", xlab="Normal deviates", ylab="")
-hist(ppois(hcrabs$Sat, predict.glm(model2,type="response")), main="", cex.main=2, cex.lab=1.5, col="white", xlab="Quantiles", ylab="")
+mu <- 2
+y <- rpois(100,mu)
+
+hist(qnorm(ppois(y,mu)), main="", cex.main=2, cex.lab=1.5, col="white", xlab="Normal deviates", ylab="")
+hist(ppois(y, mu), main="", cex.main=2, cex.lab=1.5, col="white", xlab="Quantiles", ylab="")
 ```
 
-## Lizards and Horseshoe crabs
+# Example 2
+
+## Example: horseshoe crabs 
+
+Counts of male individuals ("satellites") near females (Note: not a crab)
+
+\columnsbegin
+\column{0.5\textwidth}
+
+![nwf.org](Horseshoecrab.jpg)
+
+\column{0.5\textwidth}
+
+![uwm.edu](Horseshoecrab2.jpeg)
+
+
+\columnsend
+
+## Horseshoe crabs: the data
+
+Data originally from Brunswick  (1996) via Agresti (2007) via Dunn and Smyth (2018)
+
+- 173 observations
+- 4 traits: colour, spine condition, width (cm), weight (g)
+
+\tiny
+
+```{r, echo  =FALSE, message=FALSE, warning=FALSE}
+data(hcrabs, package="GLMsData")
+library(tidyr)
+knitr::kable(head(hcrabs, 7), format="latex", booktabs = T)%>%kableExtra::kable_styling(position="center")
+hcrabs$Col <-factor(hcrabs$Col, levels= c("LM","M","DM","D"))
+levels(hcrabs$Col) <- c("Light medium","Medium","Dark medium","Dark")
+hcrabs$Spine <-factor(hcrabs$Spine, levels= c("BothOK","OneOK","NoneOK"))
+colnames(hcrabs)<-c("Colour","Spine","Width","Sat","Weight")
+```
+
+\normalsize
+
+## What is the relationship between the number of satellites and the female crabs' traits?
+
+\vspace*{-\baselineskip}
+
+```{r, echo  =FALSE, message=FALSE, warning=FALSE, fig.width=13, fig.height=8}
+par(mfrow=c(2,2))
+plot(jitter(log1p(Sat)) ~Weight, data = hcrabs, ylab = "log(Number of satellites+1)", cex.lab=1.5, cex.axis = 2.5, cex = 2)
+plot(jitter(log1p(Sat)) ~Colour, data = hcrabs, ylab = NA, yaxt="n", cex.lab=2.5, cex.axis=2.5, cex = 2)
+plot(jitter(log1p(Sat)) ~Spine, data = hcrabs, ylab = NA, yaxt="n", cex.lab=2.5, cex.axis=2.5, cex = 2)
+plot(jitter(log1p(Sat)) ~Width, data = hcrabs, ylab = NA, yaxt="n", cex.lab=2.5, cex.axis=2.5, cex = 2)
+```
+
+
+## Horseshoe crabs: fit the model
+
+```{r}
+model <- glm(Sat ~ Spine + Colour + Width + Weight, 
+             family = "poisson", data = hcrabs)
+```
+
+## Horseshoe crabs: interpreting parameters
+
+\small
+```{r echo = FALSE}
+signif(summary(model)$coefficients,digits = 2L)
+```
+\normalsize
+
+<!-- (Intercept) = Light-medium coloured females with both spines in good condition \newline -->
+
+How do we interpret the intercept? \newline
+And its standard error?
+
+\textcolor{red}{Weight and Width uncentered}
+
+## Horseshoe crabs: interpreting parameters
+
+\small
+```{r echo = FALSE}
+hcrabs$WeightC<-scale(hcrabs$Weight, scale = FALSE)
+hcrabs$WidthC<-scale(hcrabs$Width, scale = FALSE)
+model <- glm(Sat ~ Spine + Colour + WidthC + WeightC, 
+             family = "poisson", data = hcrabs)
+signif(summary(model)$coefficients,digits = 2L)
+```
+
+<!-- (Intercept) = Light-medium coloured females with both spines in good condition\newline -->
+
+__Average weight: `r round(mean(hcrabs$Weight),2)`g __ \newline
+__Average width: `r round(mean(hcrabs$Width),2)`cm __
+
+How do we interpret the intercept? \newline
+And its standard error?
+
+\textcolor{red}{Weight and Width centered}
+ 
+## Horseshoe crabs: interpreting parameters on the __response scale__
+
+\footnotesize
+- (Intercept) = Light-medium coloured females with both spines in good condition, Weight $\approx$ 2437g, Width $\approx$ 26.3cm
+- Width: `exp(0.0170) = 1.017`, so double the number of satellites by `log(2)/0.01709 = 40.56`cm above average
+- Weight: `exp(0.0005) = 1.0005`, so double the number of satellites by `log(2)/0.0005 = 1386.3`g above average
+
+## Horseshoe crabs: visual interpretation
+
+\small
+```{r, echo  =FALSE, message=FALSE, warning=FALSE, fig.width=13, fig.height=8}
+par(mfrow=c(1,3))
+plot(effects::allEffects(model))
+```
+
+## Horseshoe crabs: Negative-binomial
+
+\small
+```{r}
+modelnb <- MASS::glm.nb(Sat ~ Spine + Colour + Width + Weight,
+                        data = hcrabs)
+```
+
+\normalsize
+
+and compare the models:
+
+```{r}
+AIC(model, modelnb)
+```
+
+## Horseshoe crabs: comparing estimates
+
+\footnotesize
+
+```{r, echo = FALSE}
+cbind("Poisson estimate"=signif(coef(model), 2L), "NB estimate" = signif(coef(modelnb), 2L), "Poisson SE" = signif(summary(model)$coef[,2],2L), "NB SE"= signif(summary(modelnb)$coef[,2],2L))
+```
+
+\normalsize 
+
+- SEs have doubled
+- Coefficients have changed, but largely the same conclusions
+- Except perhaps for the effect of "Width"
+
+## Horseshoe crabs: Poisson model residuals
 
 ```{r, echo = FALSE, fig.height = 8, fig.width = 13}
 par(mfrow=c(1,3))
-# model 1
-b <- pbinom(as.vector(lizards$grahami),size=lizards$grahami+lizards$opalinus, predict(model1, type = "response"))
-a <- pmin(b, pbinom(as.vector(lizards$grahami)-1,size=lizards$grahami+lizards$opalinus, predict(model1, type = "response")))
+car::residualPlot(model, type="response", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Response")
+car::residualPlot(model, type="deviance", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Deviance")
+car::residualPlot(model, type="pearson", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Pearson")
+```
+
+## Horseshoe crabs: NB model residuals
+
+```{r, echo = FALSE, fig.height = 8, fig.width = 13}
+par(mfrow=c(1,3))
+car::residualPlot(modelnb, type="response", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Response")
+car::residualPlot(modelnb, type="deviance", cex.main = 2, cex = 2, cex.lab = 1.5, ylab = NA, main = "Deviance")
+car::residualPlot(modelnb, type="pearson", cex.main = 2, cex = 2, cex.lab = 1.5, ylab = NA, main = "Pearson")
+```
+
+## Horseshoe crabs: Dunn-Smyth residuals
+
+```{r, echo = FALSE, fig.height = 8, fig.width = 13}
+par(mfrow=c(1,3))
+# Poisson
+b <- ppois(as.vector(hcrabs$Sat), predict(model, type = "response"))
+a <- pmin(b, ppois(as.vector(hcrabs$Sat)-1, predict(model, type = "response")))
 u <- runif(length(a),min=a,max=b)
-plot(predict(model1),qnorm(u), ylab = "Quantile residual", xlab  = "Fitted values", main = "Lizards", cex.main = 2, cex = 2, cex.lab = 1.5)
-panel.smooth(y=qnorm(u),predict(model1), cex = 0)
-# model 2
-b <- ppois(as.vector(hcrabs$Sat), predict(model2, type = "response"))
-a <- pmin(b, ppois(as.vector(hcrabs$Sat)-1, predict(model2, type = "response")))
+plot(predict(model),qnorm(u), ylab = NA, xlab  = "Fitted values", main = "Horseshoe crabs Poisson", cex.main = 2, cex = 2, cex.lab = 1.5)
+panel.smooth(y=qnorm(u),predict(model), cex = 0)
+# negative-binomial
+b <- pnbinom(as.vector(hcrabs$Sat), mu = predict(modelnb, type = "response"), size = modelnb$theta)
+a <- pmin(b, pnbinom(as.vector(hcrabs$Sat)-1, mu = predict(modelnb, type = "response"), size = modelnb$theta))
 u <- runif(length(a),min=a,max=b)
-plot(predict(model2),qnorm(u), ylab = NA, xlab  = "Fitted values", main = "Horseshoe crabs Poisson", cex.main = 2, cex = 2, cex.lab = 1.5)
-panel.smooth(y=qnorm(u),predict(model2), cex = 0)
-# model 3
-b <- pnbinom(as.vector(hcrabs$Sat), mu = predict(model3, type = "response"), size = model3$theta)
-a <- pmin(b, pnbinom(as.vector(hcrabs$Sat)-1, mu = predict(model3, type = "response"), size = model3$theta))
-u <- runif(length(a),min=a,max=b)
-plot(predict(model3),qnorm(u), ylab = NA, xlab  = "Fitted values", main = "Horseshoe crabs NB", cex.main = 2, cex = 2, cex.lab = 1.5)
-panel.smooth(y=qnorm(u),predict(model3), cex = 0)
+plot(predict(modelnb),qnorm(u), ylab = NA, xlab  = "Fitted values", main = "Horseshoe crabs NB", cex.main = 2, cex = 2, cex.lab = 1.5)
+panel.smooth(y=qnorm(u),predict(modelnb), cex = 0)
 ```
 
 # Prediction
@@ -311,59 +404,71 @@ When you are only interested in predictions, e.g.:
 
 - 20 years from now
 - on a map
+- new values of predictors $x_i$
 
 Some assumptions might not matter. Generally, we still do not want structural deviations from the model.
 
-## Finding a model that predicts well
+## Finding a model that predicts well\only<2->{: better}
 
-Usual procedure:
+\only<2->{\textcolor{red}{un}}Usual procedure
+\begin{enumerate}
+\itemsep-0.5em
+\item \alt<2->{\textcolor{red}{Fit model to} \sout{a part of} \textcolor{red}{the data} \sout{("train" and "test")} }{Fit model to a part of the data ("train" and "test")}
+\item \alt<2->{\sout{Predict for the remaining part ("test")} \textcolor{red}{Collect new data}}{Predict for the remaining part ("test")}
+\item Quantify prediction error (e.g., RMSE)
+\item Adjust model to minimize 3)
+\end{enumerate}
 
-1) Fit model to a part of the data ("train" and "test")
-2) Predict for the remaining part ("test")
-3) Quantify prediction "error" (e.g., RMSE)
-
-\textbf{Statistically leaving out data is weird. We want as much information for our model as possible.}
+Notes
+\only<3>{
+\begin{enumerate}
+\itemsep-0.5em
+\item Statistically leaving out data is weird
+\item We want as much information for our model as possible.
+\item The model should be applicable beyond just the data that we observed
+\end{enumerate}
+}
 
 ## Quantifying prediction error
 
 MSE: $\frac{1}{n}\sum \limits^n_{i=1}(y_i-\mu_i)^2$\newline
-RMSE: $\sqrt{\frac{1}{n}\sum \limits^n_{i=1}(y_i-\mu_i)^2}$
+RMSE: $\sqrt{\frac{1}{n}\sum \limits^n_{i=1}(y_i-\mu_i)^2}$ \newline
 MAD: $\text{median}(\vert\textbf{y}-\symbf{\mu}\vert)^2$\newline
 
 Or another metric. "AUC" is often used in binomial models.\newline
 
 \textbf{For prediction, we want a model that performs well on one of these metrics.}
 
-## "Test" data is not external/independent
-
-- Test data is usually collected under the same circumstances
-- It is not really external!
-- Better procedure: fit model to all data, collect new data for testing
+# Example
 
 ## Leave-one-out cross-validation Horseshoe crabs
 
 ```{r, echo = FALSE}
 #prevent issues with factors in cross-validation
 hcrabs <- data.frame(cbind(model.matrix(Sat ~ 0+Spine + Colour + Width + Weight, hcrabs), Sat = hcrabs$Sat))
-model3 <- update(model3, formula = Sat~SpineBothOK+SpineOneOK+SpineNoneOK+ColourMedium+ColourDark.medium+ColourDark+Width+Weight)
+model2 <- update(model2, formula = Sat~SpineBothOK+SpineOneOK+SpineNoneOK+ColourMedium+ColourDark.medium+ColourDark+Width+Weight)
 ```
+
 
 ```{r, cache = TRUE, warning=FALSE}
 SE <- NULL
-for(i in 1:1000){
+for(i in 1:nrow(hcrabs)){
 set.seed(i)
-test <- sample(1:nrow(hcrabs), size = 1)
-train <- hcrabs[-test,]
-model <- update(model3, data = train)
-SE <- c(SE,(train[test, "Sat"]-
-  predict(model,newdata = train[test, ], type="response"))^2)
+train <- hcrabs[-i,]
+model2 <- update(model2, data = train)
+SE <- c(SE,(hcrabs[i, "Sat"]-
+  predict(model2,newdata = hcrabs[i, ], type="response"))^2)
 }
 ```
 
 ## Result
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.height  =5}
 hist(SE, main = "Leave-one-out", xlab = "Squared error")
+```
+\tiny
+```{r}
+cat("RMSE: ", sqrt(mean(SE)))
 ```
 
 ## K-fold cross-validation Horseshoe crabs
@@ -371,23 +476,28 @@ hist(SE, main = "Leave-one-out", xlab = "Squared error")
 ```{r, cache = TRUE, warning=FALSE}
 k = 5
 SE <- NULL
-shuffle <- sample(1:nrow(hcrabs), k)
-for(i in seq(1,nrow(hcrabs),by=k)){
-set.seed(i)
-test <- i:min(i+k-1,nrow(hcrabs))
-train <- hcrabs[shuffle, ][-test,]
-model <- update(model3, data = train)
-SE <- c(SE,(hcrabs[shuffle, ][test, "Sat"]-
-  predict(model,newdata = hcrabs[shuffle, ][test, ], type="response"))^2)
+shuffle <- sample(1:nrow(hcrabs), nrow(hcrabs))
+folds <- split(1:nrow(hcrabs), rep(1:k, length.out = nrow(hcrabs)))
+
+for(i in 1:k){
+idx <- folds[[i]]
+test <- hcrabs[idx,]
+train <- hcrabs[-idx, ]
+model <- update(model2, data = train)
+SE <- c(SE,(test$Sat-
+  predict(model, newdata = test, type="response"))^2)
 }
 ```
 
 ## Result
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.height = 5}
 hist(SE, main = "k-fold", xlab = "Squared error")
 ```
-
+\tiny
+```{r}
+cat("RMSE: ", sqrt(mean(SE)))
+```
 
 ## Stratified cross-validation
 
@@ -399,24 +509,32 @@ hist(SE, main = "k-fold", xlab = "Squared error")
 - I.e., blocking for non-independent responses
 
 ## Stratified k-fold cross-validation Horseshoecrabs
+
+Ensure a (roughly) similar distribution in every fold. For binary data, true stratified CV maintains the proportion.
+
 \footnotesize
 ```{r, cache = TRUE, warning=FALSE}
 k = 5
 SE <- NULL
-for(i in seq(1,nrow(hcrabs),by=k)){
-set.seed(i)
-test <- i:min(i+k-1,nrow(hcrabs))
-train <- hcrabs[order(hcrabs$Weight),][-test,]
-model <- update(model3, data = train)
-SE <- c(SE,(hcrabs[order(hcrabs$Weight),][test, "Sat"]-
-predict(model,newdata = hcrabs[order(hcrabs$Weight),][test, ], type="response"))^2)
+folds <- split(1:nrow(hcrabs),sample(rep(1:k, length.out = nrow(hcrabs))))
+
+for(i in 1:k){
+test <- hcrabs[order(hcrabs$Sat),][folds[[i]],]
+train <- hcrabs[order(hcrabs$Sat),][-folds[[i]],]
+model <- update(model2, data = train)
+SE <- c(SE,(test$Sat-
+predict(model, newdata = test, type="response"))^2)
 }
 ```
 
 ## Result
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.height = 5}
 hist(SE, main = "stratified k-fold", xlab = "Squared error")
+```
+\tiny
+```{r}
+cat("RMSE: ", sqrt(mean(SE)))
 ```
 
 # Summary
