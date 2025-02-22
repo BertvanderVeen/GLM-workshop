@@ -1,0 +1,93 @@
+---
+title: "Practical: Visualizing GLM results"
+subtitle: "Physalia workshop on GLMs"
+author: "Bert van der Veen"
+output: html_document
+---
+
+# R functions
+
+This time slot is reserved for questions, answers, and discussions. Alternatively, you can repeat practical 5 but using GLMs, since it is a bit more difficult to visualize GLMs than LMs. With this practical, we will end the third day of the workshop with something fun: making nice plots of our data and model results. 
+
+The base R function you can use include:
+
+- `plot`: draws all kinds of plots (controlled by `type`), but usually a scatterplot
+- `abline`: draws a straight line through a plot. Accepts a model as input (only for simple linear regression)
+- `glm`: fits a generalized linear regression to data
+- `summary`: provides a summary table for a (linear) model
+- `confint`: calculates (estimated) confidence intervals for the parameters of a model
+- `predict`: calculates the predicted values from a regression, potentially for new $X$
+- `pairs`: construct a panel of plots for a dataset
+- `relevel`: changes the reference category for a factor
+- `residuals`: retrieves the residuals of a model (see also `rstandard` and `rstudent`)
+- `cooks.distance`: calculates cook's distance for each observation in the model
+- `qqnorm` and `qqline`: function to construct your own QQ-plot
+- `fitted`: returns the predicted/fitted values from your regression
+- `glmtoolbox::leverage`: calculate leverage for a regression
+. `hatvalues`: returns the influence for each observation in the regression  
+
+If you do not remember what these functions do, or what arguments they take, you can look it up by typing `?functionName` in the console. That will show you the help page of the function, which hopefully clarifies things. If it does not, try a search engine to find online resources, or ask someone. Almost always your question has been asked (and answered) by someone else before. Some hints are given with questions **in bold**.
+
+# R-packages
+
+Some useful R-packages to help with plotting are:
+
+- `car`: avPlots
+- `lattice`: xyplot, dotplot, barchart, stripplot, bwplot, more
+- `emmeans`: function for comparing levels of a categorical predictor. Main function emmeans, of which the results  can be plotted
+- `visreg`: package dedicated to visualizing regression (see main function `visreg`)
+- `effects`: generic function for automatic plotting model results. See function allEffects
+- `arm`: package with loads of tools for regression. Coefplot creates a caterpillar plot of model coefficients
+- `MuMIn`: package for model selection and averaging. Coefplot creates a caterpillar plot of model coefficients
+- `ggplot2`: generic package for flexible plotting, main function ggplot
+- `patchwork`: facilitates combining multiple ggplots
+- probably many, many more
+- `ggeffects`: similar to the effects package, but with ggplot2
+
+# Description
+
+There are all kinds of plots that we can construct for our analysis. First of all, every analysis should start out with exploratory analysis to get familiar with the properties of our dataset. Second, our model: diagnostics plots with the residuals as in the last practical, but also plots of coefficients (hopefully with statistical uncertainties!), or plots of the data together with the regression line.
+
+GLMs are a bit more complex than LMs; residuals do not usually look as nice, even for valid models, and visualisation using the predict function is harder because of the link function that comes into play. Similarly, constructing confidence intervals requires some thought: it happens first on the link scale, and then the endpoints are backtransformed to the response scale.
+
+We will distinguish between "base R" plots and "ggplot2" plots. Base R plots are fine, and in many cases sufficient for publication, or for our purposes here. However, the ggplot2 R-package provides many plotting possibilities that are more difficult to achieve in base R, and has more options for finetuning visualizations.
+
+Don't forget to use `set.seed` for reproducibility if you do simulations. You can answer the questions below for guidance, or just do your own thing!
+
+# Tasks
+
+1. How would you visualize a GLM with only continuous covariates?
+
+2. What plots could you make for a model with a categorical covariate and a continuous covariate?
+
+3. What difficulties arise with visualizing a regression that has both a categorical and a continuous covariate?
+
+4. What plots can you use to visualize a GLM with an interaction?
+
+## base R plotting
+
+5. Plot a GLM together with the data. *Hint: plot your data first, and add the model after. Also remember the "type" argument in `predict`*
+
+6. Use `par(mfrow=c(..,..))` to plot multiple base R plots together.
+
+7. Plot your regression line beyond the range of your data.
+
+8. Change the point shape, size, and color of the observations.
+
+9. Change the line width and color for the regression.
+
+10. Create a caterpillar plot of the coefficients, with confidence intervals. *Hint: see `coefplot` in the arm or MuMIn packages*
+
+## ggplot2 plotting
+
+11. Recreate your plots from 1. and 3. using the `ggplot2` package.
+
+12. Change some graphical parameters, such as the line width, color, or point shape.
+
+13. Create a caterpillar plot of the coefficients, with confidence intervals. *Hint: google for a solution if you cannot manage*
+
+14. Combine two of your plots using the `ggplot2` and `patchwork` packages.
+
+15. Use the `theme_bw`, `theme_classic` or other themes from ggplot2 with your plots.
+
+16. Are there other visualization that you can think of, that you have not yet made?

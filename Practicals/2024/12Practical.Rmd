@@ -1,0 +1,50 @@
+---
+title: "Practical: Other useful models"
+subtitle: "Physalia workshop on GLMs"
+author: "Bert van der Veen"
+output: html_document
+---
+
+# R-packages
+
+Whatever you can think of!
+
+# Description
+
+This is the final practical of the workshop. Here, you can combine everything you have learned so far into the analysis of a single dataset. You will pick a dataset, and analyse it from a-z:
+
+1) data exploration
+2) decide on a research question or hypothesis 
+3) choose a response distribution
+4) fit a model
+5) perform a model comparison
+6) find a valid model
+
+You can choose from the following datasets:
+
+1. lime: foliage measurements of small-leaved lime trees
+2. brachy: cover class data for Brachythecium rutabulum with multiple covariates
+3. r6data: data of two plant species under low and high nitrate supply. Response is the proportion of biomass in roots ("LMF"), stems ("SMF"), and leaves ("LMF").
+4. andrew: Effect grazing sea urchin (density) on the colonization of filamentous algae (cover in 0.25m2 plots subject to sea urchin removal treatment).
+5. any of the count data covered in the practicals
+6. mistletoe: count of mistletoe infections in trees
+
+Each of the datasets has unique properties. You might need to use a modeling approach in a package that we have not used so far. *Hint: the glmmTMB R-package has distributions appropriate for the properties or -most- of these data (not the brachy data, that is even more special).*. Don't forget to use `set.seed` for reproducibility if you do simulations. You can answer the questions below for guidance. You can construct the plots from the presentation yourself with the aforementioned functions, or use the `plot` function on your model.
+
+# Tasks
+
+1. Create some plots of the data. Are there any properties that stand out?
+
+2. What is your research question or hypothesis?
+
+3. What range does the response variable take?
+
+4. Which response distribution will you analyse the data with?
+
+5. Fit one or multiple models and decide on the "final" model.
+
+6. Perform model validation on the model of your choice.
+
+7. Write up a summary of the results from the model.
+
+8. Pick a different dataset and repeat!

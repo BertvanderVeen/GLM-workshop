@@ -1,0 +1,123 @@
+---
+title: "Practical: Simulation and variance"
+subtitle: "Physalia workshop on GLMs"
+author: "Bert van der Veen"
+output: html_document
+---
+
+# R functions
+
+The second presentation of the workshop focused on variation due to sampling, and estimating parameters from a sample. Many of the slides had some code, which included the following functions:
+
+- `rbinom`: (pseudo) random number generator (RNG) based on the binomial distribution
+- `set.seed`: controls the RNG to ensure reproducibility
+- `mean`: calculates the sample mean of a vector
+- `quantile`: calculates the quantiles of a vector
+- `replicate`: execute some code many times
+- `optimize`: single parameter numerical optimisation
+- `hist`: draws a histogram of a vector (this is not a barplot)
+- `plot`: draws all kinds of plots (controlled by `type`), but ususally a scatterplot
+- `abline`: draws a straight line through a plot
+
+If you do not remember what these functions do, or what arguments they take, you can look it up by typing `?functionName` in the console. That will show you the help page of the function, which hopefully clarifies things. If it does not, try a search engine to find online resources, or ask someone. Almost always your question has been asked (and answered) by someone else before. Some hints are given with questions **in bold**.
+
+# Description
+
+Frequentist statistics (that is, ordinary statistics - not Bayesian) is all about summarizing sampling variation. The more sampling variation, the more likely it is that the answer to our question will change if we recollect data. Generally, we want our answer to a question based on a collected dataset to be robust to collecting data again. This practical is all about understanding how sample size, and variation due to sampling, affects our ability to accurately estimate a parameter. 
+
+In the presentation, an example was provided of orchids in a field. By going into the field and recording if you observed an orchid, we managed to estimate the proportion of orchids in the field. That does require that the sample we take is representative for the whole field, because if it is not, we will also not accurately determine the proportion of orchids. However, if our sample is not representative of the whole field, repeated samples can still give an accurate overall picture of the proportion of orchids in the field!
+
+In this practical we do not have a biological example, but feel free to imagine something fun. Instead of generating samples from a binomial distribution, we will instead assume that our population is normally distributed. In part, because our next subject in the workshop is linear regression, and linear regression requires our population to be normally distributed. So, using a normal distribution here means that we can reuse the code in our next practical.
+
+**Follow the code in the presentation, but simulate using the `rnorm` function instead.** Don't forget to use `set.seed` for reproducibility. You can answer the questions below for guidance.
+
+# Tasks
+
+1. Look at </span>`?rnorm`, which arguments does the function take?
+
+```{r}
+# n, mean and sd
+```
+
+
+2. Simulate some normally distributed data $n = 10$, with some mean and standard deviation. Draw a histogram with the simulated data. Does it look like a normal distribution?
+
+```{r}
+hist(y<-rnorm(10)) # does not really look like a normal distribution
+```
+
+3. What is the sample mean of the simulated data? **Hint: use the `mean` function.**
+
+```{r}
+mean(y)
+```
+
+4. What is the sample variance and/or standard deviation of the simulated data? **Hint: use the `variance` and `sd` functions.**
+
+```{r}
+var(y);sd(y)
+```
+
+5. Change $n$ to 1000, and go through questions 2-4 again. What has changed, and why?
+```{r}
+hist(y<-rnorm(1000)) # looks like a normal distribution
+mean(y) # much closer than the 0 mean we simulated from
+var(y);sd(y) # close to 1 that we simulated from
+```
+
+6. Time for new simulations. A 100 times simulate twice: once with a mean of 2 and once with a mean of 6, $n$ can be relatively small (for example 10). Store all simulations. **Hint: you can use a for-loop or the `replicate` function**. Can you calculate the mean for each replicate of the simulation?
+
+```{r}
+sim1 <- replicate(100, rnorm(10, mean = 2))
+sim2 <- replicate(100, rnorm(10, mean = 6))
+apply(sim1, 2, mean)
+apply(sim2, 2, mean)
+```
+
+7. What are the 2.5 and 97.5 percentiles? **Hint: use the `quantile` function.**
+
+```{r}
+quantile(apply(sim1, 2, mean), probs = c(0.025, 0.975))
+quantile(apply(sim2, 2, mean), probs = c(0.025, 0.975))
+```
+
+8. Can you conclude that the two simulations have different means?
+
+```{r}
+# Yes, the mean of sim1 is not included in the intervals of sim2
+# and vice versa
+```
+
+9. Re-do the simulations with a larger standard deviation. How does this affect the estimate for the mean, and its variance?
+
+```{r}
+sim1 <- replicate(100, rnorm(10, mean = 2, sd = 5))
+sim2 <- replicate(100, rnorm(10, mean = 6, sd = 5))
+means1 <- apply(sim1, 2, mean);mean(means1) # pretty close
+means2 <- apply(sim2, 2, mean);mean(means2) # prett close
+quantile(apply(sim1, 2, mean), probs = c(0.025, 0.975))
+quantile(apply(sim2, 2, mean), probs = c(0.025, 0.975))
+# variance of mean estimator has gotten much larger. Interval of sim2 now includes mean of sim1
+```
+
+10. What happens to the variance of the estimates/quantiles when you set $n$ to a very large number (e.g., 1.000.000)? 
+
+```{r}
+# It gets much smaller
+```
+
+11. Plot the likelihood of the simulations against suggested values for the mean. What value of the mean corresponds to the maximum? **Hint: use the `dnorm` function**
+
+```{r}
+# using a new simulation for brevity
+y <- rnorm(100, mean = 5, sd = 2)
+ll <- function(y, mean, sd)sum(dnorm(y, mean, sd, log = TRUE))
+means <- seq(from = -10, to = 10, length.out=1000)
+plot(means, sapply(means, ll, y = y, sd = 2), type = "l")
+```
+
+12. What is the maximum likelihood estimate for the mean of the simulations, calculated by the `optim` function?
+
+```{r}
+optimise(ll, y = y, sd = 2, lower = -100 , upper = 100, maximum = TRUE)
+```

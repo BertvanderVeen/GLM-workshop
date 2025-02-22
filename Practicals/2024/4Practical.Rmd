@@ -1,0 +1,66 @@
+---
+title: "Practical: Checking fitted model assumptions"
+subtitle: "Physalia workshop on GLMs"
+author: "Bert van der Veen"
+output: html_document
+---
+
+# R functions
+
+The fourth presentation of the workshop covered model assumptions of linear regressions in more detail. In this practical, we will use the same real datasets from this morning to again fit multiple regressions, but this time we will focus on inspecting residual plots. Each of the datasets is covered in Zuur et al (2009). For this you will need the following functions:
+
+- `plot`: draws all kinds of plots (controlled by `type`), but usually a scatterplot
+- `abline`: draws a straight line through a plot. Accepts a model as input (only for simple linear regression)
+- `lm`: fits a linear regression to data
+- `summary`: provides a summary table for a (linear) model
+- `confint`: calculates (estimated) confidence intervals for the parameters of a model
+- `predict`: calculates the predicted values from a regression, potentially for new $X$
+- `pairs`: construct a panel of plots for a dataset
+- `relevel`: changes the reference category for a factor
+- `residuals`: retrieves the residuals of a model (see also `rstandard` and `rstudent`)
+- `cooks.distance`: calculates cook's distance for each observation in the model
+- `qqnorm` and `qqline`: function to construct your own QQ-plot
+- `fitted`: returns the predicted/fitted values from your regression
+- `glmtoolbox::leverage`: calculate leverage for a regression
+. `hatvalues`: returns the influence for each observation in the regression  
+
+If you do not remember what these functions do, or what arguments they take, you can look it up by typing `?functionName` in the console. That will show you the help page of the function, which hopefully clarifies things. If it does not, try a search engine to find online resources, or ask someone. Almost always your question has been asked (and answered) by someone else before. Some hints are given with questions **in bold**.
+
+# R-packages
+
+The `car` and `arm` packages have various functions for plotting residuals, such as `car::residualPlots` or `car::qqPlot` and `arm::residual.plot`. 
+
+# Description
+
+In the previous practical we focused on learning to fit different types of multiple linear regression, and the outputs that the models provide such as confidence intervals, coefficient estimates, statistics, p-values, and perhaps $R^2$.
+
+During an analysis we try to use every tool at our disposal to understand a dataset, or rather the process that generated the dataset, as much as possible. However, we should *actually* wait with looking at the results until we have determined if the model is valid! We do this by checking if the assumptions of the model are violated.
+
+In this practical we will reiterate the assumptions of multiple linear regression, and consider what consequences follow when we violate some of those assumptions. We first need to check *if* an assumption is violated, which we do by constructing residual plots. Real data are often messy, so make sure to carefully examine the data for its properties before fitting a model to it, as this can contribute to solving issues in assumption violations later. There are four datasets that you can choose to fit models to in this practical. They are all covered in the book Zuur et al (2008) on mixed-effects models, but originally come from different sources:
+
+1. Clams: Wedge clam data: biomass (AFD) of 398 wedge clams, length of wedge clams in six months. The log-transformed version of length and biomass (AFD) have also been included (Ieno unpublished)
+2. ISIT: Pelagic bioluminescence ("Sources") along a depth gradient in different seasons (Gillibrand et al. 2007)
+3. Nereis: Nutrient concentration of three nutrient types in the marine benthos ($\text{NH}_4$ $\text{PO}_4$, $\text{NO}_3$), with density (biomass) of *Hediste diversicolor* by Ieno et al (2006)
+4. TeethNitrogen: Nitrogen isotope ratios in teeth of stranded whales (Mendes et al. 2007)
+5. Alternatively, you can simulate normally distributed responses from a multiple linear regressionMa
+
+Don't forget to use `set.seed` for reproducibility if you do simulations. You can answer the questions below for guidance. Here, simulating responses might be very useful, as it can help you understand what a certain assumption violations looks like when we inspect residual plots. You can construct the plots from the presentation yourself with the aforementioned functions, or use the `plot` function on your model.
+
+# Tasks
+
+1. What are the assumptions of multiple linear regression?
+
+2. With what plot do we check if the various assumptions are violated? Note, that these might be different plots for different assumptions. *Hint: plot(model) shows various residual plots*
+
+3. Are there violated assumptions in any of the models that you fitted during the last practical? If so, which?
+
+4. What might (biologically) be the cause of violating this particular assumption?
+
+5. What might be the consequences of violating this particular assumption? (this is a rather techical question that might warrant some discussion)
+
+6. Are there assumptions that we can safely violate?
+
+7. Have a look at the `car`, `glmtoolbox`, `arm` or other \texttt{R}-packages that might help you assess assumptions of a linear model. *Hint: e.g., influenceIndexPlot, leveragePlot, mmps, qqPlot, residualPlot, residual.plot*
+
+8. Can you write code for simulating a normally distributed dataset that violates linear regression assumptions?
+

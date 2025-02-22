@@ -1,0 +1,123 @@
+---
+title: "Practical: binomial regression"
+subtitle: "Physalia workshop on GLMs"
+author: "Bert van der Veen"
+output: html_document
+---
+
+# R functions
+
+The first practical on GLMs has arrived! So far, we have This practical goes over binomial regression with different link functions. We will use real datasets regressions, collected from different sources. For this you will need the following functions:
+
+- `plot`: draws all kinds of plots (controlled by `type`), but usually a scatterplot
+- `glm`: fits a generalized linear regression to data
+- `summary`: provides a summary table for a (linear) model
+- `confint`: calculates (estimated) confidence intervals for the parameters of a model
+- `predict`: calculates the predicted values from a regression, potentially for new $X$
+- `pairs`: construct a panel of plots for a dataset
+- `relevel`: changes the reference category for a factor
+
+and perhaps some of the functions or R packages used in the previous practicals.
+
+If you do not remember what these functions do, or what arguments they take, you can look it up by typing `?functionName` in the console. That will show you the help page of the function, which hopefully clarifies things. If it does not, try a search engine to find online resources, or ask someone. Almost always your question has been asked (and answered) by someone else before. Some hints are given with questions **in bold**.
+
+# R-packages
+
+There are no extra R-packages necessary for this practical, but feel free to use any from the previous practicals.
+
+# Description
+
+So far, we have been focusing on models that assume normality, constant variance, linearity, independence, and a few other assumptions. When those assumptions are violated (particularly normality, constant variance, and linearity) we move to models that accommodate that. Here, that is a binomial generalised linear model.
+
+Binomial generalised linear models really cover a bunch of models, which we can specify using the link function. This includes logistic regression, probit regression, cloglog regression, and loglog regression. Each of those link functions is a little different (and some a lot different) as covered in the presentation this morning.
+
+In this practical we will fit these models to real datasets. You can choose:
+
+1. Lizards: Lizard counts, used in the presentation this morning, includes a count of two lizard species and multiple categorical covariates [(Schoener 1970)](https://esajournals.onlinelibrary.wiley.com/doi/10.2307/1935376)
+2. Moose: Data on the detection of GPS collared moose by helicopter. This includes thee covariates: year of the survey, amount of visual obstruction in a 10m radius of the moose, number of moose in the sighted group [(Giudice et al. 2012)](https://wildlife.onlinelibrary.wiley.com/doi/full/10.1002/jwmg.213)
+3. deposit: Number of insects killed and exposed as a function of insecticide types with different doses [(Hewlet and Plackett 1950)](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1744-7348.1950.tb00973.x)
+4. wells: Water quality of contaminated wells (y vs n) in New York with variables of surrounding land use, sewer usage, and nitrate and chloride concentration [(Eckhard et al. 1989)](https://pubs.usgs.gov/publication/wri864142)
+5. Alternatively, you can simulate binomial distributed responses
+
+Don't forget to use `set.seed` for reproducibility if you do simulations. You can answer the questions below for guidance. You can construct the plots from the presentation yourself with the aforementioned functions, or use the `plot` function on your model.
+
+# Tasks
+
+1. What are the assumptions of binomial regression?
+
+```{r}
+# Independence of observations
+# Correct distribution, i.e., binomial
+# Correct link function
+# Constant dispersion (fixed dispersion)
+# Binary outcome
+# No outliers
+```
+
+2. What is the parameter that you are modeling in a binomial regression?
+
+```{r}
+# The parameter pi: probability of success
+```
+
+3. Which link function might be most suitable for your dataset?
+
+```{r}
+# logit for pres-ab
+# cloglog for count interpretation
+# probit as last choice
+# LOG-LOG NEVER
+```
+
+4. Fit binomial regression to one of the aforementioned datasets. Which covariate has the largest, and which the smallest, effect?
+
+```{r}
+lizards <- read.csv("/home/bertv/GLM-workshop/data/lizards.csv", header = TRUE)
+lizards <- lizards[!(lizards$grahami==0&lizards$opalinus==0),] # select only rows with both nonzero
+lizards <- subset(lizards, grahami != 0 | opalinus != 0) # another way
+# tidyverse
+library(dplyr)
+lizards <- lizards %>%  filter(grahami != 0 | opalinus != 0) # the tidyverse way
+
+# fit the model
+model <- glm(cbind(grahami, opalinus) ~ Site + Time + Diameter + Height, family = "binomial", data = lizards)
+```
+
+5. Do these effects have a large statistical uncertainty? *Hint: use the confint function to extract confidence intervals*
+
+```{r}
+confint(model) # get CIs
+# Time mid-day crosses zero
+```
+
+
+6. Can you predict the probability of success for a particular subset of conditions (e.g., wells with used sewers, high nitrate, low chloride)? *Hint: use the predict function and its 'newdata' and 'type' arguments*
+
+```{r}
+# Predict for specific conditions
+predict(model, newdata = data.frame(Site = "Shade", Diameter = "D <= 2", Height = "H < 5", Time = "Mid-day"), type  = "response")
+```
+
+7. Can you draw any conclusions from the predicted probability? *Hint: if you are unsure, also predict for a quite different set of conditions to see a contrasting prediction*
+
+```{r}
+# Compare two predictions
+predict(model, newdata = data.frame(Site = "Shade", Diameter = "D <= 2", Height = "H < 5", Time = "Mid-day"), type  = "response")
+predict(model, newdata = data.frame(Site = "Sun", Diameter = "D <= 2", Height = "H < 5", Time = "Mid-day"), type  = "response") # We are more likely to observe a gramahi lizard in sunny conditions at small low perches on Mid-day than in shady conditions
+
+# Get predict to return SE of prediction
+pred <- predict(model, newdata = data.frame(Site = "Shade", Diameter = "D <= 2", Height = "H < 5", Time = "Mid-day"), se.fit=TRUE)
+
+# Calculate CI of prediction and combine with the prediction
+c(lwr = binomial()$linkinv(pred$fit-1.96*pred$se.fit), pred = binomial()$linkinv(pred$fit), upr = binomial()$linkinv(pred$fit+1.96*pred$se.fit))
+
+```
+
+
+8. Plot the binomial regression against one of the predictor variables.
+
+9. Plot the residuals of the model, how do they look? Can you discern any assumption violations?
+
+```{r}
+plot(model) # All plots look fine!
+```
