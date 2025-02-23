@@ -86,7 +86,7 @@ On the first day we will go through R basics and background theory of frequentis
 |         |15:00 - 15:45| Recap R (coding)                                      |
 |         |15:45 - 16:00| Break                                                 |
 |         |16:00 - 16:45| Sampling theory and Maximum likelihood estimation     |
-|         |16:45 - 17:45| Practical 1: Simulation and variance                  |
+|         |16:45 - 17:45| Practical 1: Sampling and variance                    |
 |         |17:45 - 18:30| Break                                                 |
 |         |18:30 - 19:15| Introduction to Linear models                         |
 |         |19:15 - 20:00| Practical 2: Simple linear regression                 |
@@ -98,10 +98,10 @@ On the first day we will go through R basics and background theory of frequentis
 |         |17:00 - 17:45| Practical 4: Checking fitted models assumptions       |
 |         |17:45 - 18:30| Break                                                 |
 |         |18:30 - 19:15| Introduction to Generalised Linear Models             |
-|         |19:15 - 20:00| Practical 5: visualizing model prediction             | <!-- marginal effects? -->
+|         |19:15 - 20:00| Practical 5: visualizing model prediction             | 
 |---------|-------------|-------------------------------------------------------|
 |Wednesday|14:00 - 14:45| Binomial regression                                   |
-|         |14:45 - 15:30| Practical 6: Binomial GLM                             |
+|         |14:45 - 15:30| Practical 6: Binomial GLM                             |<!-- marginal effects? -->
 |         |15:30 - 16:15| Model comparison                                      |
 |         |16:15 - 16:30| Break                                                 |
 |         |16:30 - 17:15| Practical 7: Model comparison: exploratory            |  
