@@ -16,3 +16,5 @@
 **R6data**: via Douma and Weedon (2019), but originally Poorter et al. (1995). <br>
 **lime**: data from Schepaschenko et al. (2017) who got it from various other sources.<br> 
 **brachy**: Jongman et al. (1995). <br>
+**nickel.expand**: via the ISwR R-package, but originally Breslow and Day (1987). <br>
+**dmn**: via https://github.com/mccoy-lab/hgv_modules, but originally Halldorsson et al. (2019) <br>
