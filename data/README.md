@@ -18,3 +18,4 @@
 **brachy**: Jongman et al. (1995). <br>
 **nickel.expand**: via the ISwR R-package, but originally Breslow and Day (1987). <br>
 **dmn**: via https://github.com/mccoy-lab/hgv_modules, but originally Halldorsson et al. (2019) <br>
+**OME**: via the MASS package, but originally from Sara Hogan, University of Oxfrod<br>
