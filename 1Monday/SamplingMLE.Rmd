@@ -65,6 +65,11 @@ knitr::opts_chunk$set(echo = TRUE)
 - Normal distribution
 - Linear models
 
+## R code on slides
+
+The R-code on the slides is meant to introduce you to simulation \newline
+You do not have to run it on your own computer \tiny but you can \normalsize \newline 
+
 # Sampling data
 
 ## Sampling data
@@ -138,7 +143,7 @@ For such (binary) data: $y_i \sim Binom(p, n_{picks})$, with $p(orchid) = p$
 ## The binomial distribution
 
 \begin{equation}
-f(y_i;n_{picks},p) = y_i\log\{p\}+(n_{picks}-y_i)\log\{1-p\} +constant
+f(y_i;n_{picks},p) = constant \times p^{y_i}(1-p)^{n_{picks}-y_i}
 \end{equation}
 
 ### R-functions 
@@ -152,7 +157,7 @@ f(y_i;n_{picks},p) = y_i\log\{p\}+(n_{picks}-y_i)\log\{1-p\} +constant
 set.seed(12345) # For reproducibility
 p.orchid = 0.4 # The true proportion of orchids
 n.picks = 10 # The number of picks in the field
-n.times = 1
+n.times = 1 # number of fields
 # Collect data
 y <- rbinom(n.times, size = n.picks, prob = p.orchid) 
 y/n.picks # Proportion of orchids
@@ -165,7 +170,7 @@ What if we sample the whole field once?
 ```{r, cache=TRUE}
 set.seed(12345) # For reproducibility
 n.times = 1e5 # The number of picks in the field
-n.picks <- 1
+n.picks <- 1 # number of fields
  # Collect data
 y <- rbinom(n.times, size = n.picks, prob = p.orchid)
 mean(y/n.picks) # Proportion of orchids
@@ -175,8 +180,8 @@ mean(y/n.picks) # Proportion of orchids
 
 ```{r, fig.height = 2.8, cache=TRUE}
 set.seed(12345) # For reproducibility
-n.times <- 50
-n.picks = 10 # The number of picks in the field
+n.times <- 50 # The number of picks in the field
+n.picks = 10 # number of fields
 # Collect data
 y <- rbinom(n.times, size = n.picks, prob = p.orchid) 
 hist(y, xlab = "Proportion of orchids", 
@@ -230,7 +235,7 @@ quantile(y/n.picks,c(0.025,.975))
 ```
 
 50 times 100 picks reduces the variability in the proportion of observed orchids. 
-Most of the time we will find fewer orchids than other flowers.
+Most of the time we will not find orchids on all our picks.
 
 ## On average, we will get it right.
 
