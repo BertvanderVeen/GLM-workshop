@@ -5,9 +5,93 @@ author: "Bert van der Veen"
 output: html_document
 ---
 
-# R functions
+# Background
 
-The fourth presentation of the workshop covered model assumptions of linear regressions in more detail. In this practical, we will use the same real datasets from this morning to again fit multiple regressions, but this time we will focus on inspecting residual plots. Each of the datasets is covered in Zuur et al (2009). For this you will need the following functions:
+All methods make assumptions, especially linear regression. Those assumptions help us in small samples, because they can ensure behavior of the estimators, and generally the statistics that underlays our analysis.
+
+For linear regression, these assumptions focus on the error term, and they include:
+
+1. a linear relationship of $\textbf{y}$ and $\textbf{x}$ ("linearity")
+2. normally distributed errors $\boldsymbol{\epsilon}$ ("normality")
+3. uncorrelated errors ("independence of errors")
+4. equal variance for all errors $\boldsymbol{\epsilon}$ ("homoscedasticity")
+
+When any of these assumptions is violated that may have consequences for the analysis. It does not mean that we cannot trust the analysis, but that either a) we cannot rely on a certain test or result or 2) we need large samples to be able to say anything about performance of the estimators or tests.
+
+In this practical, we will focus on checking the assumptions graphically. There are tests for checking assumptions, but we do not explore those here. Once we have determined if an assumption is violated we can consider what the consequences are for our analysis.
+
+Let's continue with the example from practical 3:
+
+```{r}
+x <- runif(20, 3, 5)
+z <- rnorm(20)
+(y <- rnorm(20, mean = 1 + x*2))
+reg <- lm(y~x+z)
+```
+
+the exact details may differ because the data is re-simulated here.
+
+Each of the above assumptions can be checked with particular plots of the residuals $\hat{\boldsymbol{\epsilon}}$ and fitted values $\hat{\boldsymbol{\mu}}$ (these are the prediction of the model for the observed data). The residuals can be extracted from the model using the `residuals` function, and the fitted values using `fitted`:
+
+```{r, fig.width = 10}
+plot(residuals(reg)~fitted(reg))
+```
+
+the residuals versus fitted plot is one of the most useful residual plots for linear regression. Roughly, if we see any kind of pattern, we should think a bit more deeply about our model. If we see no patterns we can proceed, and the linearity, homoscedasticity, and independence of errors assumptions are most likely met. 
+
+If the linearity assumption is not met, we may see curvature in the plot.
+If the unequal variance assumption is not met, we would see different amounts of vertical scatter in different parts of the plot.
+If we independence of errors assumption is not met, we might see residuals cluster in particular parts of the plot. In practice, this would then be further explored by plotting the residuals versus whatever variable we expect to invalidate the assumption (such as time, space, phylogeny, or otherwise).
+
+The normality assumption is checked using a QQ-plot:
+
+```{r, fig.width=10}
+plot(sort(residuals(reg)) ~qnorm(ppoints(length(y))))
+qqline(residuals(reg))
+```
+
+which is slightly more involved in its construction. It requires using the following functions:
+
+- `sort`: sorts a vector
+- `residuals`
+- `qnorm`: the quantile function for the normal distribution
+- `ppoints`: calculates theoretical quantiles
+- `qqline`: draws the diagonal line
+
+In essence, in a QQ-plot we are visualising our residuals versus what the residuals would look like if they perfectly followed a normal distribution. Some scatter is always expected, but as such we want the residuals to lay on a diagonal line. There is a function that does all this for us, which is `qqplot`, so we do not actually have to draw it manually.
+
+In fact, we can draw all plots that we may need from the linear regression directly by using the `plot` function:
+
+```{r, fig.width=10}
+plot(reg)
+```
+
+which gives us two more plots: one called "scale-location" and another called "leverage". 
+The scale-location plot can also aid in checking the homoscedasticity assumption. 
+
+"Leverage" is explained in the fifth presentation of the workshop called "model validation"; it flags outlying observations that may be erroneous or just fit the model poorly. Do not be fooled by the three labeled points; the plot by default labels the three observations with most leverag, which do not need to be erroneous at all. By default, `plot` omits one plot, namely Cook's distance plot, which flags the three most influential observations (again, these do not at all need to be influential). We can construct this plot ourselves:
+
+```{r, fig.width = 10}
+plot(reg, which = 4)
+```
+
+Besides the plots base R can provide us with, there are many R-packages that create their own diagnostic plots. The `car` and `arm` packages are among these, and have various functions for plotting residuals, such as `car::residualPlots` or `car::qqPlot` and `arm::residual.plot`. Whether or not you prefer base R plots or a set of plots from another R-package is largely personal preference. The ones from the `car` package might look a little nicer, and it performs some basic tests to check if there is curvature in the residuals that is unaccounted for:
+
+```{r, fig.width = 10, fig.height = 15}
+car::residualPlots(reg, layout = c(3, 1))
+```
+
+Finally, we can also plot our model against our data, to see if it is a good fit:
+
+```{r, fig.width = 10}
+plot(y ~ predict(reg), xlim = range(predict(reg)), ylim = range(y))
+abline(0, 1, col = "red", lwd = 2)
+segments(x0 = predict(reg), x1 = predict(reg), y0 = predict(reg), y1 = y, col = "blue")
+```
+
+any systematic deviations should be examined.
+
+A few of the functions you may need for this practical:
 
 - `plot`: draws all kinds of plots (controlled by `type`), but usually a scatterplot
 - `abline`: draws a straight line through a plot. Accepts a model as input (only for simple linear regression)
@@ -16,51 +100,60 @@ The fourth presentation of the workshop covered model assumptions of linear regr
 - `confint`: calculates (estimated) confidence intervals for the parameters of a model
 - `predict`: calculates the predicted values from a regression, potentially for new $X$
 - `pairs`: construct a panel of plots for a dataset
-- `relevel`: changes the reference category for a factor
 - `residuals`: retrieves the residuals of a model (see also `rstandard` and `rstudent`)
 - `cooks.distance`: calculates cook's distance for each observation in the model
 - `qqnorm` and `qqline`: function to construct your own QQ-plot
 - `fitted`: returns the predicted/fitted values from your regression
 - `glmtoolbox::leverage`: calculate leverage for a regression
-. `hatvalues`: returns the influence for each observation in the regression  
+- `hatvalues`: returns the influence for each observation in the regression  
 
-If you do not remember what these functions do, or what arguments they take, you can look it up by typing `?functionName` in the console. That will show you the help page of the function, which hopefully clarifies things. If it does not, try a search engine to find online resources, or ask someone. Almost always your question has been asked (and answered) by someone else before. Some hints are given with questions **in bold**.
+# Datasets
 
-# R-packages
+We will use the same datasets as in the last practical. You can find the datasets in the "data" folder of the github repository.
 
-The `car` and `arm` packages have various functions for plotting residuals, such as `car::residualPlots` or `car::qqPlot` and `arm::residual.plot`. 
+1. [nickel.expand](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/nickel.expand.csv): Lung cancer due to nickel exposure in South Wales [Breslow and Day (1987)](https://pubmed.ncbi.nlm.nih.gov/3329634/)
+2. [dmn](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/dmn.csv): de novo mutations in children [Halldorsson et al. (2019)](https://www.science.org/doi/10.1126/science.aau1043), see also [this page](https://mccoy-lab.github.io/hgv_modules/setup.html)
+2. [ISIT](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/ISIT.csv): Pelagic bioluminescence ("Sources") along a depth gradient in different seasons ([Gillibrand et al. 2007](https://www.int-res.com/abstracts/meps/v341/p37-44/))
+4. [TeethNitrogen](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/TeethNitrogen.csv): Nitrogen isotope ratios in teeth of stranded whales ([Mendes et al. 2007](https://link.springer.com/article/10.1007/s00442-006-0612-z))
 
-# Description
+# Part 1
 
-In the previous practical we focused on learning to fit different types of multiple linear regression, and the outputs that the models provide such as confidence intervals, coefficient estimates, statistics, p-values, and perhaps $R^2$.
+Here is what I want you to do:
 
-During an analysis we try to use every tool at our disposal to understand a dataset, or rather the process that generated the dataset, as much as possible. However, we should *actually* wait with looking at the results until we have determined if the model is valid! We do this by checking if the assumptions of the model are violated.
+1. Fit a multiple linear regression, you can continue where you left off during the last practical.
+2. Use `plot` to visualize the residuals of the model.
+3. Determine which assumptions are violated:
+  - linearity
+  - normality
+  - independence of errors
+  - homoscedasticity
+4. Which plot(s) did you use to conclude an assumption was violated in 3.?
+  
+# Part 2
 
-In this practical we will reiterate the assumptions of multiple linear regression, and consider what consequences follow when we violate some of those assumptions. We first need to check *if* an assumption is violated, which we do by constructing residual plots. Real data are often messy, so make sure to carefully examine the data for its properties before fitting a model to it, as this can contribute to solving issues in assumption violations later. There are four datasets that you can choose to fit models to in this practical. They are all covered in the book Zuur et al (2008) on mixed-effects models, but originally come from different sources:
+<details><summary>Open after discussion on zoom</summary>
 
-1. Clams: Wedge clam data: biomass (AFD) of 398 wedge clams, length of wedge clams in six months. The log-transformed version of length and biomass (AFD) have also been included (Ieno unpublished)
-2. ISIT: Pelagic bioluminescence ("Sources") along a depth gradient in different seasons (Gillibrand et al. 2007)
-3. Nereis: Nutrient concentration of three nutrient types in the marine benthos ($\text{NH}_4$ $\text{PO}_4$, $\text{NO}_3$), with density (biomass) of *Hediste diversicolor* by Ieno et al (2006)
-4. TeethNitrogen: Nitrogen isotope ratios in teeth of stranded whales (Mendes et al. 2007)
-5. Alternatively, you can simulate normally distributed responses from a multiple linear regressionMa
+Assumption violations can generally be addressed by adjusting to model to accommodate the issue. Some of the assumption violations are more difficult to accommodate than others. Violation of:
 
-Don't forget to use `set.seed` for reproducibility if you do simulations. You can answer the questions below for guidance. Here, simulating responses might be very useful, as it can help you understand what a certain assumption violations looks like when we inspect residual plots. You can construct the plots from the presentation yourself with the aforementioned functions, or use the `plot` function on your model.
+- linearity: can be addressed by specifying functions of covariates; quadratic or more non-linear terms
+- normality: can be addressed by normalizing the data (`log(y)` for example) before regression
+- independence of errors: this one is tricky, we might come back to it on friday, but occasionally it can be accounted for by including a missing covariate
+- homoscedasticity: can be addressed by applying a variance-stabilizing transformation (`sqrt(y)`for example) before regression, or by incorporating a missing covariate
 
-# Tasks
+Especially normality and homoscedasticity are issues that arise when fitting a linear model when you should be fitting a generalised linear model to your data instead.
 
-1. What are the assumptions of multiple linear regression?
+Here is what I want you to do:
 
-2. With what plot do we check if the various assumptions are violated? Note, that these might be different plots for different assumptions. *Hint: plot(model) shows various residual plots*
+1. Try to improve your model. The basis for this is an assumption violation.
+  - if you did not find any, pick another dataset and try again.
+2. How did you address the assumption violation?
+3. Compare the model estimates, and standard errors or confidence intervals, with those of the uncorrected model. Did anything change?
 
-3. Are there violated assumptions in any of the models that you fitted during the last practical? If so, which?
+</details>
 
-4. What might (biologically) be the cause of violating this particular assumption?
+[If you finish early you can pick a different dataset, or there is also the practical from last year.](https://htmlpreview.github.io/?https://github.com/BertvanderVeen/GLM-workshop/blob/main/Practicals/2024/4Practical.html) \newline
 
-5. What might be the consequences of violating this particular assumption? (this is a rather techical question that might warrant some discussion)
+You can also try simulating data from a (multiple) linear regression where the assumptions are violated!
 
-6. Are there assumptions that we can safely violate?
 
-7. Have a look at the `car`, `glmtoolbox`, `arm` or other \texttt{R}-packages that might help you assess assumptions of a linear model. *Hint: e.g., influenceIndexPlot, leveragePlot, mmps, qqPlot, residualPlot, residual.plot*
-
-8. Can you write code for simulating a normally distributed dataset that violates linear regression assumptions?
-
+  

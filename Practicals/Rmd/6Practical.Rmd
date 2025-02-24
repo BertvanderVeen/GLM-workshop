@@ -5,9 +5,69 @@ author: "Bert van der Veen"
 output: html_document
 ---
 
-# R functions
+# Background
 
-The first practical on GLMs has arrived! So far, we have This practical goes over binomial regression with different link functions. We will use real datasets regressions, collected from different sources. For this you will need the following functions:
+Now that we have a solid background in frequentist statistics, and linear regression in particular, we can move on to Generalised Linear Models. GLMs come to the rescue when the assumptions of linear regression are invalid, in particular the linearity, normality, and homoscedasticity assumptions. 
+
+In GLMs, the variance depends on the mean, and variance functions are usually non-linear. The mean is also non-linearly related to the data, and there is no explicit error term $\epsilon$. So, things work a little different in GLMs, but the specification in R is surprisingly similar to a linear regression!
+
+In this practical, we will use binomial regression. Binomial regression is usually referred to as logistic, or probit, regression; the exact terminology depends on the link function that is used. By default, R assumed a logit link function. For starters, let's simulate an example again, this time using the `rbinom` function and the `plogis` functions. We are familiar with `rbinom` from the first presentation of the workshop. The `plogis` function helps us translate from the link scale (which is where we simulate the model) $boldsymbol{\eta}$ to the response scale:
+
+```{r, fig.width = 10}
+x1 <- rnorm(35)
+x2 <- rnorm(35)
+(eta <- -2+2*x1+3.4*x2)
+(p <- plogis(eta))
+hist(p, breaks = 20)
+(y <- rbinom(35, 1, p))
+```
+
+In the first lecture, $p$ was the same for all observations. Now, as in a GLM, $p$ is observation-specific. Because $p$ was different per observation, a-priori guessing the number of 1s and 0s in the data is much more challenging. Because the `size` argument was set to 1, we only simulates 1s and 0s. 
+
+We can plot the simulated data $\textbf{y}$ with the `hist` function, but a combination of `plot` and `table` makes for a nicer plot:
+
+```{r, fig.width = 10}
+plot(table(y))
+```
+
+For pedagogical purposes, we will analyse this data with a linear regression and have a look at the residuals:
+
+```{r, fig.width = 10}
+(reg1 <- glm(y ~ x1 + x2, family = "gaussian"))
+plot(reg1)
+```
+"Gaussian" is synonymous to "normal" in terms of response distribution; this is how a linear model is fitted using the `glm` function.
+The true parameters we simulated for were $\alpha = -2$, $\beta_1 = 2$ and $\beta_2 = 3.4$. Clearly, none of these estimates comes close. We cannot transform our way out of this issue. The residual plots look terrible, because our data is discrete and only takes 0 or 1. We need to fit a GLM!
+
+```{r}
+(reg2 <- glm(y ~ x1 + x2, family = "binomial"))
+```
+
+The parameter estimate are much closer to the ones we simulated from. They are still a little different, but this is due to the "small" sample. They cannot be directly interpreted in terms of the response scale, i.e., the scale the data is on, but they can be interpreted in terms of changes in the log-odds. Generally speaking, a negative coefficient means a negative relationship between $p_i$ and the predictor, and positive the opposite.
+
+The `marginaleffects` can help us to interpret effects on the response scale; in particular the `plot_slopes` function is help to assess how the probability of success $p_i$ changes with a covariate, which provides similar interpretation to that in a linear model:
+
+```{r, warning=FALSE, message=FALSE, fig.width = 10}
+library(marginaleffects)
+plot_slopes(reg2, variables = "x1", condition = "x2")
+```
+
+However, because we now have a non-linear model, this change is not the same everywhere. We can still try to summarize it with a single value:
+
+```{r}
+avg_slopes(reg2)
+```
+
+but this is not particularly helpful. The `slopes` function provides the same information but per observation. The `marginaleffects` package can also help make pairwise comparisons when there is a categorical predictor in the model with the `comparisons` function.
+
+Finally, solely for the purpose of demonstration, we can change the link function as follows:
+
+```{r}
+(reg3 <- glm(y ~ x1 + x2, family = binomial(link=probit)))
+```
+The estimates are considerably different, which shows that the logit and probit link functions do not sufficiently overlap (at least for this example). That shows that the assumptions in GLMs matter, just as in linear models.
+
+Just as in linear models, we use very similar functions to extract coefficients, calculate confidence intervals, and so on:
 
 - `plot`: draws all kinds of plots (controlled by `type`), but usually a scatterplot
 - `glm`: fits a generalized linear regression to data
@@ -17,46 +77,31 @@ The first practical on GLMs has arrived! So far, we have This practical goes ove
 - `pairs`: construct a panel of plots for a dataset
 - `relevel`: changes the reference category for a factor
 
-and perhaps some of the functions or R packages used in the previous practicals.
-
 If you do not remember what these functions do, or what arguments they take, you can look it up by typing `?functionName` in the console. That will show you the help page of the function, which hopefully clarifies things. If it does not, try a search engine to find online resources, or ask someone. Almost always your question has been asked (and answered) by someone else before. Some hints are given with questions **in bold**.
 
-# R-packages
+# Datasets
 
-There are no extra R-packages necessary for this practical, but feel free to use any from the previous practicals.
+We will use the same datasets as in the last practical. You can find the datasets in the "data" folder of the github repository.
 
-# Description
+1. [nickel.expand](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/nickel.expand.csv): Lung cancer due to nickel exposure in South Wales [Breslow and Day (1987)](https://pubmed.ncbi.nlm.nih.gov/3329634/). You can use lung cancer and nasal cancer rates as response variable
+2. [dmn](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/dmn.csv): de novo mutations in children [Halldorsson et al. (2019)](https://www.science.org/doi/10.1126/science.aau1043), see also [this page](https://mccoy-lab.github.io/hgv_modules/setup.html). You can use de novo mutations of father and mother as a response variable
+3. [Baseball](): attendance to baseball games [Cochran 2002](https://jse.amstat.org/v10n2/datasets.cochran.html)
+4. [OME]: Counts of correct identifications, used in the presentation ([MASS package](https://rdrr.io/cran/MASS/man/OME.html))
+5. Lizards: Lizard counts, used in the presentation, includes a count of two lizard species and multiple categorical covariates [(Schoener 1970)](https://esajournals.onlinelibrary.wiley.com/doi/10.2307/1935376)
+6. wells: Water quality of contaminated wells (y vs n) in New York with variables of surrounding land use, sewer usage, and nitrate and chloride concentration [(Eckhard et al. 1989)](https://pubs.usgs.gov/publication/wri864142)
+ 
+# Part 1 (we only have one part)
 
-So far, we have been focusing on models that assume normality, constant variance, linearity, independence, and a few other assumptions. When those assumptions are violated (particularly normality, constant variance, and linearity) we move to models that accommodate that. Here, that is a binomial generalised linear model.
+Here is what I want you to do:
 
-Binomial generalised linear models really cover a bunch of models, which we can specify using the link function. This includes logistic regression, probit regression, cloglog regression, and loglog regression. Each of those link functions is a little different (and some a lot different) as covered in the presentation this morning.
+1. Choose your dataset and fit a binomial regression.
 
-In this practical we will fit these models to real datasets. You can choose:
+2. Study the parameter estimates and their uncertainty. What conclusion can you draw?
 
-1. Lizards: Lizard counts, used in the presentation this morning, includes a count of two lizard species and multiple categorical covariates [(Schoener 1970)](https://esajournals.onlinelibrary.wiley.com/doi/10.2307/1935376)
-2. Moose: Data on the detection of GPS collared moose by helicopter. This includes thee covariates: year of the survey, amount of visual obstruction in a 10m radius of the moose, number of moose in the sighted group [(Giudice et al. 2012)](https://wildlife.onlinelibrary.wiley.com/doi/full/10.1002/jwmg.213)
-3. deposit: Number of insects killed and exposed as a function of insecticide types with different doses [(Hewlet and Plackett 1950)](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1744-7348.1950.tb00973.x)
-4. wells: Water quality of contaminated wells (y vs n) in New York with variables of surrounding land use, sewer usage, and nitrate and chloride concentration [(Eckhard et al. 1989)](https://pubs.usgs.gov/publication/wri864142)
-5. Alternatively, you can simulate binomial distributed responses
+3. How much do the parameter estimates and their uncertainty change, using a probit link function, compared to the default logit?
 
-Don't forget to use `set.seed` for reproducibility if you do simulations. You can answer the questions below for guidance. You can construct the plots from the presentation yourself with the aforementioned functions, or use the `plot` function on your model.
+4. Can you predict the probability of success for a particular subset of conditions (e.g., wells with used sewers, high nitrate, low chloride)? *Hint: use the predict function and its 'newdata' and 'type' arguments*
 
-# Tasks
+5. Plot the binomial regression against one of the predictor variables.
 
-1. What are the assumptions of binomial regression?
-
-2. What is the parameter that you are modeling in a binomial regression?
-
-3. Which link function might be most suitable for your dataset?
-
-4. Fit binomial regression to one of the aforementioned datasets. Which covariate has the largest, and which the smallest, effect?
-
-5. Do these effects have a large statistical uncertainty? *Hint: use the confint function to extract confidence intervals*
-
-6. Can you predict the probability of success for a particular subset of conditions (e.g., wells with used sewers, high nitrate, low chloride)? *Hint: use the predict function and its 'newdata' and 'type' arguments*
-
-7. Can you draw any conclusions from the predicted probability? *Hint: if you are unsure, also predict for a quite different set of conditions to see a contrasting prediction*
-
-8. Plot the binomial regression against one of the predictor variables.
-
-9. Plot the residuals of the model, how do they look? Can you discern any assumption violations?
+6. Plot the residuals of the model, how do they look? Can you discern any assumption violations?

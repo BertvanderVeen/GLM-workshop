@@ -5,89 +5,145 @@ author: "Bert van der Veen"
 output: html_document
 ---
 
-# R functions
+# Background
 
-At this point in the workshop we have covered 1) Sampling variation and maximum likelihood estimation, 2) Simple linear regression, 3) Multiple linear regression, and 4) Checking model assumptions. With this practical, we will end the second day of the workshop with something fun: making nice plots of our data and model results. 
+At this point in the workshop we have covered 1) Sampling variation and maximum likelihood estimation, 2) Simple linear regression, 3) Multiple linear regression, and 4) Checking model assumptions. With this practical, we will end the second day of the workshop with something fun: making nice plots of our data and model results. Let's start by simulating an example again:
 
-The base R function you can use include:
+```{r}
+x <- runif(20, 3, 5)
+z <- factor(rbinom(20, 1, 0.5), labels = c("group 1", "group 2"))
+(y <- rnorm(20, mean = as.integer(z)*2 + x*(as.integer(z)-1)*4 + x*-1))
+```
 
-- `plot`: draws all kinds of plots (controlled by `type`), but usually a scatterplot
-- `abline`: draws a straight line through a plot. Accepts a model as input (only for simple linear regression)
-- `lm`: fits a linear regression to data
-- `summary`: provides a summary table for a (linear) model
-- `confint`: calculates (estimated) confidence intervals for the parameters of a model
-- `predict`: calculates the predicted values from a regression, potentially for new $X$
-- `pairs`: construct a panel of plots for a dataset
-- `relevel`: changes the reference category for a factor
-- `residuals`: retrieves the residuals of a model (see also `rstandard` and `rstudent`)
-- `cooks.distance`: calculates cook's distance for each observation in the model
-- `qqnorm` and `qqline`: function to construct your own QQ-plot
-- `fitted`: returns the predicted/fitted values from your regression
-- `glmtoolbox::leverage`: calculate leverage for a regression
-. `hatvalues`: returns the influence for each observation in the regression  
+Here, $\textbf{z}$ is a categorical predictor and $\textbf{x}$ a continuous predictor. The simulated linear regression includes an interaction of a categorical and a continuous predictor. We should plot the data before we analyse it, so we have a better understanding what is going on:
 
-If you do not remember what these functions do, or what arguments they take, you can look it up by typing `?functionName` in the console. That will show you the help page of the function, which hopefully clarifies things. If it does not, try a search engine to find online resources, or ask someone. Almost always your question has been asked (and answered) by someone else before. Some hints are given with questions **in bold**.
+```{r, fig.width = 10}
+plot(y~x, pch = as.integer(z), col = as.integer(z))
+```
 
-# R-packages
+Factor variables can be treated as numeric using `as.integer`, which gives each factor the number associated to its level (in alphabetical order). In the plot, the $\textbf{x}$ covariate is shown on the horizontal axis, and the $\textbf{z}$ variable is used to show the groups. Now, we can fit linear models to the data. We will fit three: 1) `y ~ x`, 2) `y ~ x + z`, 3) `y ~ x*z`. Of course we know that the "true" model is 3), but trying different options can help to train your intuition in goodness of fit.
 
-Some useful R-packages for plotting are:
+Visualizing data, and model results, are a key component in analysing data; with GLMs or otherwise. Before model fitting, visualizing data can help to inform us of any issues that may arise: non-linearity, outliers or otherwise. After model fitting, we can visualize the prediction to check the model's fit, or just to present the results for publication. Ideally, such plots include a measure of uncertainty. The `predict` function helps us with this; it has an argument called `newdata` that we can use to create a line for the predictions by passing it many values between the minimum and maximum of $\textbf{x}$, as well as a `se.fit` argument that helps us to construct confidence intervals for the prediction. You can read more about these options in the help page for predicting with linear model objects `?predict.lm`.
 
-- `car`: avPlots
-- `lattice`: xyplot, dotplot, barchart, stripplot, bwplot, more
-- `emmeans`: function for comparing levels of a categorical predictor. Main function emmeans, of which the results  can be plotted
+First, we use the functions `seq`; "sequence" and `expand.grid` to interpolate between our data. We need this to construct our plot:
+
+```{r}
+xnew <- seq(from = min(x), to = max(x), length.out = 100)
+znew <- factor(c("group 1", "group 2"))
+newdata <- expand.grid(x = xnew, z = znew)
+```
+
+`seq` constructs a sequence of values between the lowest value of $\textbf{x}$ `min(x)` and its highest value `max(x)`. We could use the model to extrapolate, but we do not do that here. Next, we fit the regressions:
+
+```{r}
+reg1 <- lm(y~x)
+reg2 <- lm(y~x+z)
+reg3 <- lm(y~x*z)
+```
+
+The `predict` function always requires all variables in the model to be present in `newdata`. We can choose to fix some of these to a single value, for example, we could predict only for $z = 0$, or we could fix $x$ to its mean (or some other value). Here, we combine the two, which is what `expand.grid` helps us do. It repeats `xnew` for every value of `znew` so we can create a smooth looking plot:
+
+```{r, fig.width = 10}
+predictions1 <- predict(reg1, newdata = newdata)
+plot(y ~ x, ylim = range(c(y, predictions1)), pch = as.integer(z))
+lines(predictions1 ~ newdata$x, col = "red")
+```
+
+The argument `ylim` helps to ensure that both the predictions and the response variable are in the range of the vertical axis. The predictions are then plotted with the `lines` function, we could alternatively use `points` here, but it makes more sense to visualize a regression using `lines`. The plot looks a bit odd: the regression is not a good fit, it misses vital structure in the data, namely due to $\textbf{z}$. We can make the same plot for the other two models, but we need to plot one line per category $\textbf{z}$:
+
+```{r, fig.width = 10}
+par(mfrow=c(1,2))
+predictions2 <- predict(reg2, newdata = newdata)
+plot(y ~ x, ylim = range(c(y, predictions2)), pch = as.integer(z))
+lines(predictions2[newdata$z=="group 1"] ~ xnew, col = "red")
+lines(predictions2[newdata$z=="group 2"] ~ xnew, col = "red")
+
+predictions3 <- predict(reg3, newdata = newdata)
+plot(y ~ x, ylim = range(c(y, predictions3)), pch = as.integer(z))
+lines(predictions3[newdata$z=="group 1"] ~ xnew, col = "red")
+lines(predictions3[newdata$z=="group 2"] ~ xnew, col = "red")
+```
+The second regression assumes that the two groups have the same $\beta$ for $\textbf{x}$, which means that the regression fits neither group particularly well. It is a considerable improvement from the first model though. The third and final model, which follows the real structure in the data, clearly fits best.
+
+Now, we have not yet added uncertainty to the predictions. For this, we need the `se.fit` argument in the `predict` function. Let's do this for the third regression:
+
+```{r, fig.width = 10}
+predictions3 <- predict(reg3, newdata = newdata, se.fit = TRUE)
+plot(y ~ x, ylim = range(c(y, predictions3)), type = "n")
+predictions3$LI <- predictions3$fit - predictions3$se.fit*1.96
+predictions3$UI <- predictions3$fit + predictions3$se.fit*1.96
+
+polygon(c(newdata$x[newdata$z=="group 1"], rev(newdata$x[newdata$z=="group 1"])), 
+        c(predictions3$LI[newdata$z=="group 1"], rev(predictions3$UI[newdata$z=="group 1"])),
+        , col = adjustcolor("grey", 0.4))
+lines(predictions3$fit[newdata$z=="group 1"] ~ xnew, col = "red")
+
+lines(predictions3$fit[newdata$z=="group 2"] ~ xnew, col = "red")
+polygon(c(newdata$x[newdata$z=="group 2"], rev(newdata$x[newdata$z=="group 2"])), 
+        c(predictions3$LI[newdata$z=="group 2"], rev(predictions3$UI[newdata$z=="group 2"])),
+        , col = adjustcolor("grey", 0.4))
+
+points(y~x, pch = as.integer(z))
+```
+
+
+That is a lot of code! The confidence intervals are drawn assuming the estimator for $\hat{\boldsymbol{\mu}}$ is normally distributed, which we know is the case if the right assumptions for our model hold true. In `plot` the `type` argument is used to prevent plotting; vector graphics are layered and we do not want to draw on top of our points, but to have our points on top, so they need to be drawn last. The `polygon` function is used to draw the confidence interval bands, and `adjustcolor` to introduce some transparency to its fill color. Finally, `points` is used to draw the observations, and the `pch` argument adjusts the point shape using $\textbf{z}$
+
+Now that we have visualized the model, we can still visualize the coefficients of the model. This is most straightforwardly done with a caterpillar plot via `stripchart`. We use the `coef` function to extract the parameter estimates, and the `confint` function for the confidence intervals:
+
+```{r, fig.width = 10}
+par(mar = c(5, 6, 4, 2))
+CI <- confint(reg3)
+stripchart(coef(reg3)~factor(names(coef(reg3)), levels = names(coef(reg3))), las = 1, xlim = c(min(CI), max(CI)))
+arrows(x0 = CI[,1], x1 = CI[,2], y0 = 1:nrow(CI), y1 = 1:nrow(CI), angle = 90, code = 3, length = 0.05)
+```
+
+`par` makes sure we have enough space on the left side of the plot for the labels, `las` turns the labels to be horizontal, and `xlim` adjusts the range of the horizontal axis to ensure that all confidence intervals are fully shown. We use the `arrows` function to draw the confidence intervals, although we could have used the `segments` function instead.
+
+This is a lot of work, and there are plenty of packages that can make your life easier by taking this work out of your hands. Here are a few that you might like to explore during this practical:
+
+- `car`: `avPlots`
+- `lattice`: `xyplot`, `dotplot`, `barchart`, `stripplot`, `bwplot`, more
+- `emmeans`: function for comparing levels of a categorical predictor. Main function `emmeans`, of which the results can be plotted via `plot(emmeans(...))`
 - `visreg`: package dedicated to visualizing regression (see main function `visreg`)
-- `effects`: generic function for automatic plotting model results. See function allEffects
-- `arm`: package with loads of tools for regression. Coefplot creates a caterpillar plot of model coefficients
-- `MuMIn`: package for model selection and averaging. Coefplot creates a caterpillar plot of model coefficients
-- `ggplot2`: generic package for flexible plotting, main function ggplot
+- `effects`: generic function for automatic plotting model results. See function `allEffects` which is plotted via `plot(allEffects(model))`
+- `ggeffects`: similar to the effects package, but with ggplot2. Maybe function `ggeffect`
+- `arm`: package with loads of tools for regression. `Coefplot` creates a caterpillar plot of model coefficients
+- `MuMIn`: package for model selection and averaging. `Coefplot` creates a caterpillar plot of model coefficients
+- `ggplot2`: generic package for flexible plotting, main function `ggplot`
 - `patchwork`: facilitates combining multiple ggplots
-- probably many, many more
-- `ggeffects`: similar to the effects package, but with ggplot2
 
-# Description
+# Datasets
 
-In the previous practical we focused on learning about the assumptions of multiple linear regression, and how to check them using plots of residuals. In this practical, we explore how we can present model results visually with different types of plots. After all, plots usually convey much more information in a more intuitive way than tables. Generally, only use tables for presenting model results in the main text of a report of article if the actual numbers matter to the narrative of the article.
+We will use the same datasets as in the last practical. You can find the datasets in the "data" folder of the github repository.
 
-There are all kinds of plots that we can construct for our analysis. First of all, every analysis should start out with exploratory analysis to get familiar with the properties of our dataset. Second, our model: diagnostics plots with the residuals as in the last practical, but also plots of coefficients (hopefully with statistical uncertainties!), or plots of the data together with the regression line.
+1. [nickel.expand](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/nickel.expand.csv): Lung cancer due to nickel exposure in South Wales [Breslow and Day (1987)](https://pubmed.ncbi.nlm.nih.gov/3329634/)
+2. [dmn](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/dmn.csv): de novo mutations in children [Halldorsson et al. (2019)](https://www.science.org/doi/10.1126/science.aau1043), see also [this page](https://mccoy-lab.github.io/hgv_modules/setup.html)
+2. [ISIT](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/ISIT.csv): Pelagic bioluminescence ("Sources") along a depth gradient in different seasons ([Gillibrand et al. 2007](https://www.int-res.com/abstracts/meps/v341/p37-44/))
+4. [TeethNitrogen](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/TeethNitrogen.csv): Nitrogen isotope ratios in teeth of stranded whales ([Mendes et al. 2007](https://link.springer.com/article/10.1007/s00442-006-0612-z))
 
-We will distinguish between "base R" plots and "ggplot2" plots. Base R plots are fine, and in many cases sufficient for publication, or for our purposes here. However, the ggplot2 R-package provides many plotting possibilities that are more difficult to achieve in base R, and has more options for finetuning visualizations.
+# Part 1
 
-Don't forget to use `set.seed` for reproducibility if you do simulations. You can answer the questions below for guidance, or just do your own thing!
+The goal is to have a little fun, while making visualizations that effectively communicate the results of your regression. 
 
-# Tasks
+Here is what I want you to do:
 
-1. How would you visualize an ANOVA?
+1. Make a plot of your data and the prediction. For a multiple linear regression, you may want to try for various predictor variables. $\textbf{x}$.
 
-2. What plots could you make for a model with a categorical covariate and a continuous covariate?
+2. Change the point shape, size, and color of the observations.
 
-3. What difficulties arise with visualizing a regression that has both a categorical and a continuous covariate?
+3. Change the line width and color for the regression.
 
-4. What plots can you use to visualize an ANCOVA?
+4. How could you make a plot of the prediction if you have two continuous covariates in the model?
 
-## base R plotting
-
-5. Plot a multiple regression together with the data. *Hint: plot your data first, and add the model after*
+5. Construct a caterpillar plot.
 
 6. Use `par(mfrow=c(..,..))` to plot multiple base R plots together.
 
-7. Use the `predict` function to (also) plot your regression line beyond the range of your data.
+7. Use `effects::allEffects` or `ggeffects::ggeffect` to visualize your regression.
 
-8. Change the point shape, size, and color of the observations.
+# Part 2
 
-9. Change the line width and color for the regression.
+Try reconstructing your plots from part 1 using the `ggplot2` package. You need the `ggplot` function in combination with `geom_line` and `geom_ribbon`, `geom_point` and `geom_errorbar`
 
-10. Create a caterpillar plot of the coefficients, with confidence intervals. *Hint: see `coefplot` in the arm or MuMIn packages*
-
-## ggplot2 plotting
-
-11. Recreate your plots from 1. and 3. using the `ggplot2` package.
-
-12. Change some graphical parameters, such as the line width, color, or point shape.
-
-13. Create a caterpillar plot of the coefficients, with confidence intervals. *Hint: google for a solution if you cannot manage*
-
-14. Combine two of your plots using the `ggplot2` and `patchwork` packages.
-
-15. Use the `theme_bw`, `theme_classic` or other themes from ggplot2 with your plots.
-
-16. Are there other visualization that you can think of, that you have not yet made?
+[If you finish early you can pick a different dataset, or there is also the practical from last year.](https://htmlpreview.github.io/?https://github.com/BertvanderVeen/GLM-workshop/blob/main/Practicals/2024/5Practical.html) \newline
