@@ -69,7 +69,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Sampling data
 
-![www.ugent.be](grassland.jpeg){width=80%}
+![www.ugent.be](grassland.jpeg){width=60%}
 
 A nice field with orchids.  \newline
 
@@ -133,12 +133,12 @@ He tells us that the true proportion of orchids is 0.4.
 
 ## The data
 
-For such (binary) data: $y_i \sim Binom(\pi_i, n_{picks})$, with $p(orchid) = \pi_i$
+For such (binary) data: $y_i \sim Binom(p, n_{picks})$, with $p(orchid) = p$
 
 ## The binomial distribution
 
 \begin{equation}
-f(y_i;n_{picks},\pi) = y_i\log\{\pi\}+(n_{picks}-y_i)\log\{1-\pi\} +constant
+f(y_i;n_{picks},p) = y_i\log\{p\}+(n_{picks}-y_i)\log\{1-p\} +constant
 \end{equation}
 
 ### R-functions 
@@ -289,6 +289,8 @@ We just multiply! (assumes independence)
 plot(dnorm, from = -1, to = 1, xlab = "Some parameter", ylab = "Likelihood")
 ```
 
+\vspace*{-\baselineskip}
+
 Likelihood tells us about:
 
 - The (set of) parameter estimates that most likely generated the data
@@ -315,17 +317,17 @@ Usually, we work with the log-likelihood. The maximum is the same and it is easi
 - Which follows a binomial likelihood (only as example, for now)
 
 \begin{equation}
-f(y_i;n_{picks},\pi) = y_i\log\{\pi\}+(n_{picks}-y_i)\log\{1-\pi\} +constant
+f(y_i;n_{picks},p) = y_i\log\{p\}+(n_{picks}-y_i)\log\{1-p\} +constant
 \end{equation}
 
 - $N = n_{picks}$ trials
 - $r = y_i$ successes (orchids)
-- $\pi$ the probability of success (proportion of orchids)
+- $p$ the probability of success (proportion of orchids)
 
 Assumptions
 
 - Each pick is independent from the next
-- $\pi$ is the same for all observations 
+- $p$ is the same for all observations 
 
 ## Finding the proportion of orchids
 ```{r, cache=TRUE, echo = FALSE}
@@ -339,7 +341,7 @@ y <- rbinom(n.times, size = n.picks, prob = p.orchid) # Collecting data
 ll <- function(p, n.picks, y)prod(dbinom(y, n.picks,p))
 phat <- seq(0.35,0.45,length.out=3)
 plot(sapply(phat, ll, n.picks = n.picks, y = y), 
-     x = phat, type = "l", xlab=expression(hat(pi)), ylab="Likelihood")
+     x = phat, type = "l", xlab=expression(hat(p)), ylab="Likelihood")
 ```
 
 ## Finding the proportion of orchids (2)
@@ -354,7 +356,7 @@ y <- rbinom(n.times, size = n.picks, prob = p.orchid) # Collecting data
 ll <- function(p, n.picks, y)prod(dbinom(y, n.picks,p))
 phat <- seq(0.35,0.45,length.out=1000)
 plot(sapply(phat, ll, n.picks = n.picks, y = y),
-     x = phat, type = "l", xlab=expression(hat(pi)), ylab="Likelihood")
+     x = phat, type = "l", xlab=expression(hat(p)), ylab="Likelihood")
 ```
 
 ## Maximising the likelhood
@@ -383,7 +385,7 @@ for(i in p){
 b<-grad.dbinom(y,n.picks,i)
 a<--b*i+ll(i,n.picks,y)
 pphat <- phat[order(abs(phat-i),decreasing=FALSE)[1:200]]
-plot(lls, x = phat, type = "l", xlab=expression(hat(pi)), ylab="log-Likelihood", lty = "dashed",main = i)
+plot(lls, x = phat, type = "l", xlab=expression(hat(p)), ylab="log-Likelihood", lty = "dashed",main = i)
 segments(x0=i,x1 = i, y0=ll(0.1,n.picks,y), y1= ll(i,n.picks,y), col="red", lty = "dotted")
 lines(x=pphat,y=a+b*pphat, col = "red")
 }
@@ -391,32 +393,75 @@ lines(x=pphat,y=a+b*pphat, col = "red")
 
 ## Finding the maximum: gradient
 
+\vspace*{-\baselineskip}
+
 ```{r, fig.height = 4}
 phat =  seq(0.05,0.95,length.out=1000)
 plot(sapply(phat, grad.dbinom, y=y, n.picks = n.picks),
-     x = phat, type = "l", xlab=expression(hat(pi)), 
+     x = phat, type = "l", xlab=expression(hat(p)), 
      ylab="Gradient", lty = "dashed")
 abline(h=0, col = "red")
 ```
+
+# Estimator for $p$
 
 ## Finding the maximum: mathy bits
 
 Our function:
 \begin{equation}
-\log\{\mathcal{L}(\textbf{y};n_{picks})\} = \sum \limits^{n_{times}}_{i=1} y_i\log\{\pi\}+(n_{picks}-y_i)\log\{1-\pi\} +constant
+\log\{\mathcal{L}(\textbf{y};n_{picks})\} = \pause \sum \limits^{n_{times}}_{i=1} y_i\log\{p\}+(n_{picks}-y_i)\log\{1-p\} +constant
 \end{equation}
+
+\pause
 
 Slope of the likelihood:
 \begin{equation}
-\frac{\partial\log\{\mathcal{L}(\textbf{y};n_{picks})\}}{\partial\pi} = \sum \limits^{n_{times}}_{i=1} \frac{y_i}{\pi} - \frac{n_{picks}-y_i}{1-\pi}
+\frac{\partial\log\{\mathcal{L}(\textbf{y};n_{picks})\}}{\partial p} \pause = \sum \limits^{n_{times}}_{i=1} \frac{y_i}{p} - \frac{n_{picks}-y_i}{1-p}
 \end{equation}
 
-Estimator:
+## Estimator for $p$
+
+\only<1>{
 \begin{equation}
-0 = \sum \limits^{n_{times}}_{i=1} \frac{y_i}{\pi} - \frac{n_{picks}-y_i}{1-\pi}
+0 = \sum \limits^{n_{times}}_{i=1} \frac{y_i}{p} - \frac{n_{picks}-y_i}{1-p}
+\end{equation}
+}
+
+\only<2>{
+\begin{equation}
+\sum \limits^{n_{times}}_{i=1} \frac{n_{picks}-y_i}{1-p} = \sum \limits^{n_{times}}_{i=1} \frac{y_i}{p}
+\end{equation}
+}
+\only<3>{
+\begin{equation}
+\sum \limits^{n_{times}}_{i=1} (n_{picks}-y_i)p = \sum \limits^{n_{times}}_{i=1}  y_i(1-p)
+\end{equation}
+}
+\only<4>{
+\begin{equation}
+ n_{times}n_{picks}p - \sum \limits^{n_{times}}_{i=1}y_ip = \sum \limits^{n_{times}}_{i=1} y_i- \sum \limits^{n_{times}}_{i=1}y_ip 
+\end{equation}
+}
+\only<5>{
+\begin{equation}
+\sum \limits^{n_{times}}_{i=1} y_i = n_{times}n_{picks}p
+\end{equation}
+}
+\only<6>{
+\begin{equation}
+\hat{p} =  \frac{\sum \limits^{n_{times}}_{i=1}y_i}{n_{times}n_{picks}}
+\end{equation}
+}
+
+\only<7>{
+And if we only pick once every time:
+
+\begin{equation}
+\hat{p} =  \frac{\sum \limits^{n_{times}}_{i=1}y_i}{n_{times}}
 \end{equation}
 
-(i.e., the proportion of successes!)
+which is the proportion of $1$s in the data!
+}
 
 ## Maximum likelihood estimation: summary
 
@@ -440,13 +485,15 @@ optimize(ll, n.picks = n.picks, y=y,
 
 (an estimate of) Width of the likelihood:
 \begin{equation}
-\frac{\partial^2\log\{\mathcal{L}(\textbf{y};n_{picks})\}}{\partial\pi^2} = \sum \limits^{n_{times}}_{i=1} -\frac{y_i}{\pi^2}-\frac{n_{picks}-y_i}{(1-\pi)^2} 
+\frac{\partial^2\log\{\mathcal{L}(\textbf{y};n_{picks})\}}{\partial p^2} = -\sum \limits^{n_{times}}_{i=1} \frac{y_i}{p^2}+\frac{n_{picks}-y_i}{(1-p)^2} 
 \end{equation}
+
+\vspace*{-\baselineskip}
 
 ```{r, cache = TRUE, echo = FALSE, fig.height = 5}
 ll <- function(p, n.picks, y)prod(dbinom(y, n.picks,p))
 phat <- seq(0.35,0.45,length.out=1000)
-plot(sapply(phat, ll, n.picks = n.picks, y = y), x = phat, type = "l", xlab=expression(hat(pi)), ylab="Likelihood", lty = "dashed")
+plot(sapply(phat, ll, n.picks = n.picks, y = y), x = phat, type = "l", xlab=expression(hat(p)), ylab="Likelihood", lty = "dashed")
 p = optimize(ll, n.picks = n.picks, y=y,
          lower = 0, upper = 1, maximum = TRUE)
 se = sqrt(1/(sum(y/p$maximum^2+(n.picks-y)/(1-p$maximum)^2)))
@@ -497,7 +544,7 @@ y <- rbinom(n.times, size = n.picks, prob = p.orchid)
 ```{r, cache = TRUE, echo = FALSE, fig.height = 6}
 ll <- function(p, n.picks, y)prod(dbinom(y, n.picks,p))
 phat <- seq(1e-10,0.2,length.out=1000)
-plot(sapply(phat, ll, n.picks = n.picks, y = y), x = phat, type = "l", xlab=expression(hat(pi)), ylab="Likelihood", lty = "dashed", xlim = c(-0.1,0.1))
+plot(sapply(phat, ll, n.picks = n.picks, y = y), x = phat, type = "l", xlab=expression(hat(p)), ylab="Likelihood", lty = "dashed", xlim = c(-0.1,0.1))
 p = optimize(ll, n.picks = n.picks, y=y,
          lower = 0, upper = 1, maximum = TRUE)
 se = sqrt(1/(sum(y/p$maximum^2+(n.picks-y)/(1-p$maximum)^2)))
@@ -520,7 +567,7 @@ y <- rbinom(n.times, size = n.picks, prob = p.orchid)
 ```{r, cache = TRUE, echo = FALSE, fig.height = 6}
 ll <- function(p, n.picks, y)prod(dbinom(y, n.picks,p))
 phat <- seq(0.95,1-1e-12,length.out=1000)
-plot(sapply(phat, ll, n.picks = n.picks, y = y), x = phat, type = "l", xlab=expression(hat(pi)), ylab="Likelihood", lty = "dashed", xlim = c(0.95,1.02))
+plot(sapply(phat, ll, n.picks = n.picks, y = y), x = phat, type = "l", xlab=expression(hat(p)), ylab="Likelihood", lty = "dashed", xlim = c(0.95,1.02))
 p = optimize(ll, n.picks = n.picks, y=y,
          lower = 0, upper = 1, maximum = TRUE)
 se = sqrt(1/(sum(y/p$maximum^2+(n.picks-y)/(1-p$maximum)^2)))
@@ -528,6 +575,83 @@ se = sqrt(1/(sum(y/p$maximum^2+(n.picks-y)/(1-p$maximum)^2)))
 points(x=p$maximum, y=p$objective,col="red")
 abline(v=p$maximum+1.96*se, col="red")
 abline(v=p$maximum-1.96*se, col="red")
+```
+
+## Sampling distribution of $\hat{p}$
+
+\center
+
+But, we have more information about $\hat{p}$ \newline
+
+What do we know?
+
+
+## Sampling distribution of $\hat{p}$
+
+We simulated $y_i \sim Binom(1, p)$. \pause In real data, this is an assumption. As long as it holds:
+
+\begin{equation}
+\hat{p} =  \frac{\sum \limits^{n_{times}}_{i=1}y_i}{n_{times}}
+\end{equation}
+
+is a linear combination of $y_i \sim Binom(1,p)$, from which we know $\biggl(\sum \limits^{n_{times}}_{i=1} y_i \biggr)\sim Binom(n_{times}, p)$\newline
+
+\pause
+
+From this we also know $\text{var}(\hat{p}) = \frac{p(1-p)}{n_{times}}$, which gives us a better standard error!
+
+## Improved CI for $\hat{p}$ (1)
+
+```{r, echo =FALSE}
+set.seed(12345)
+p.orchid = 0.01
+n.times <- 10
+n.picks =10
+y <- rbinom(n.times, size = n.picks, prob = p.orchid) 
+```
+
+```{r, cache = TRUE, echo = FALSE, fig.height = 6}
+ll <- function(p, n.picks, y)prod(dbinom(y, n.picks,p))
+phat <- seq(1e-10,0.2,length.out=1000)
+plot(sapply(phat, ll, n.picks = n.picks, y = y), x = phat, type = "l", xlab=expression(hat(p)), ylab="Likelihood", lty = "dashed", xlim = c(-0.1,0.1))
+p = optimize(ll, n.picks = n.picks, y=y,
+         lower = 0, upper = 1, maximum = TRUE)
+se = sqrt(1/(sum(y/p$maximum^2+(n.picks-y)/(1-p$maximum)^2)))
+
+points(x=p$maximum, y=p$objective,col="red")
+abline(v=p$maximum+1.96*se, col="red")
+abline(v=p$maximum-1.96*se, col="red")
+
+points(x=p$maximum, y=p$objective,col="blue")
+abline(v=qbinom(0.025,n.picks*n.times,p$maximum)/(n.picks*n.times), col="blue")
+abline(v=qbinom(0.975,n.picks*n.times,p$maximum)/(n.picks*n.times), col="blue")
+```
+
+## Improved CI for $\hat{p}$ (2)
+
+```{r, echo =FALSE}
+set.seed(12345)
+p.orchid = 0.99
+n.times <- 10
+n.picks =10
+y <- rbinom(n.times, size = n.picks, prob = p.orchid) 
+```
+
+```{r, cache = TRUE, echo = FALSE, fig.height = 6}
+ll <- function(p, n.picks, y)prod(dbinom(y, n.picks,p))
+phat <- seq(0.95,1-1e-12,length.out=1000)
+plot(sapply(phat, ll, n.picks = n.picks, y = y), x = phat, type = "l", xlab=expression(hat(p)), ylab="Likelihood", lty = "dashed", xlim = c(0.95,1.02))
+p = optimize(ll, n.picks = n.picks, y=y,
+         lower = 0, upper = 1, maximum = TRUE)
+se = sqrt(1/(sum(y/p$maximum^2+(n.picks-y)/(1-p$maximum)^2)))
+
+points(x=p$maximum, y=p$objective,col="red")
+abline(v=p$maximum+1.96*se, col="red")
+abline(v=p$maximum-1.96*se, col="red")
+
+points(x=p$maximum, y=p$objective,col="blue")
+abline(v=qbinom(0.025,n.picks*n.times,p$maximum)/(n.picks*n.times), col="blue")
+abline(v=qbinom(0.975,n.picks*n.times,p$maximum)/(n.picks*n.times), col="blue")
 ```
 
 ## Why is uncertainty so important
@@ -582,7 +706,7 @@ y <- rbinom(n.times, size = n.picks, prob = p.orchid)
 CI <- rbind(CI,quantile(y/n.picks,c(0.025,.975)))
 }
 
-plot(1,1, type="n", xlim=range(CI), ylim=range(1:20), xlab=expression(hat(pi)), ylab="Replicate")
+plot(1,1, type="n", xlim=range(CI), ylim=range(1:20), xlab=expression(hat(p)), ylab="Replicate")
 arrows(x0=CI[,1], y0=1:20, x1=CI[,2], y1=1:20, lwd=1.2, angle = 90, code=3, length=0.05)
 abline(v=0.4, col="red")
 ```
