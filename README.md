@@ -109,7 +109,7 @@ On the first day we will go through R basics and background theory of frequentis
 |         |      - 17:45| $R^2$                                                 |
 |         |17:45 - 18:30| Break                                                 |
 |         |18:30 - 19:15| Practical 8: Model comparison: confirmatory           |
-|         |19:15 - 20:00| Q & A / Practical 9: Repeat practical 5 with GLM      |
+|         |19:15 - 20:00| Q & A / Practical 9: Pairwise comparisons             |
 |---------|-------------|-------------------------------------------------------|
 |Thursday |14:00 - 14:45| Models for unbounded count data                       |
 |         |15:00 - 16:00| Practical 10: log-linear regression                   | <!--get people to interpret/discuss the results with CIs, try a genomics  dataset for the exercise -->
@@ -142,4 +142,12 @@ use marginal effects package throughout exercises? or maybe for "predictionn" pa
 make slides with many equations incremental, such a s the re-arranging slides to glm in binomial.
 beyond glms should repeat poisson bits, and maybe a poisson example
 consider adding equation and equation in words for the examples?!
+-->
+
+
+<!--
+notes:
+1) les time needed for r coding / recap and introduction
+2) redistributing the data requires a lot of time; I should put the "save" command directly in the exercise 1
+3) "curve" function is a bit unclear, needs further explanation what the exercise uses it for.
 -->

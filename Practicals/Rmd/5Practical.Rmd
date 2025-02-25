@@ -122,6 +122,8 @@ We will use the same datasets as in the last practical. You can find the dataset
 2. [ISIT](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/ISIT.csv): Pelagic bioluminescence ("Sources") along a depth gradient in different seasons ([Gillibrand et al. 2007](https://www.int-res.com/abstracts/meps/v341/p37-44/))
 4. [TeethNitrogen](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/TeethNitrogen.csv): Nitrogen isotope ratios in teeth of stranded whales ([Mendes et al. 2007](https://link.springer.com/article/10.1007/s00442-006-0612-z))
 
+The datasets are all stored in as ".csv" files, which means that you can load them into R by using the `read.csv("...")` function. You need to replace "..." by the link of the dataset, which you can copy by right-clicking the dataset name and choosing "copy link address".
+ 
 # Part 1
 
 The goal is to have a little fun, while making visualizations that effectively communicate the results of your regression. 
