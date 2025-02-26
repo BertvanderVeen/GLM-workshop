@@ -1,0 +1,108 @@
+---
+title: "Practical: Confirmatory model comparison"
+subtitle: "Physalia workshop on GLMs"
+author: "Bert van der Veen"
+output: html_document
+---
+
+# Background
+
+In the previous practical we performed model comparisons using information criteria. Information criteria can be used to **explore** which model is best. In contrast, confirmatory model comparison aims to find an answer to a hypothesis; providing a yes-or-no binary answer. It can also be used for model comparison, to decide whether or not the improvement of a model over another by adding terms is *statistically significant*.
+
+There are various ways of doing this, we will use the `anova` function. The `anova` function calculates the log-ratio of two likelihoods, also known as the likelihood ratio statistic. For models with normally distributed response variable(s), we know that this test statistic is $\chi^2$-distributed, and can calculate a p-value. For Generalised Linear Models, the likelihood at the maximum is only approximately quadratic function, so that under large samples the same result holds. As such, the result of a likelihood ratio test for GLMs is only approximate (and we should interpret it cautiously).
+
+Thanks to the connection of likelihoods and deviance, the likelihood ratio test-statistic can be written in terms of the deviance of two models $M_0$ and $M_1$:
+
+\begin{equation}
+\begin{aligned}
+\text{LRT} &= -2\log \left( \frac{\mathcal{L}_{M_0}}{\mathcal{L}_{M_1}} \right) \\
+&= -2\log \mathcal{L}_{M_0} + 2\log \mathcal{L}_{M_1} \\
+&= D_{M_0} - D_{M_1}
+\end{aligned}
+\end{equation}
+
+
+Using the same example from the previous practical:
+
+```{r, fig.width = 10}
+x1 <- rnorm(35)
+x2 <- rnorm(35)
+eta <- -2+2*x1+3.4*x2
+p <- plogis(eta)
+y <- rbinom(35, 1, p)
+reg1 <- glm(y ~ x1 + x2, family = "binomial")
+reg2 <- glm(y ~ x1 + x2 + x1:x2, family = "binomial")
+```
+
+We can see that the second model is nested in the first. "Nested" here means that the terms in the first model ($\textbf{x}_1$ and $\textbf{x}_2$) are also present in the second model, in addition to a term that is not included in the first model. This is different than with information criteria, where we do not need models to be nested. Applying the `anova` function is straightforward:
+
+```{r}
+anova(reg1, reg2)
+```
+
+from which we conclude, because the reported p-value is smaller than 0.05, that the second model is improvement over the first. For GLMs, the likelihood ratio test is performed on the basis of the deviance, hence that is reported by the `anova` function. As pedagogical example, we can manually implement what the `anova` function does:
+
+```{r}
+resid.dev <- deviance(reg1)-deviance(reg2)
+1-pchisq(resid.dev, reg1$df.residual-reg2$df.residual)
+# Which is the same as 
+-2*logLik(reg1)+2*logLik(reg2)
+```
+
+Since the `anova` function only provides us with an approximate result, we may want to use a different approach that can also be relied on in small samples: likelihood ratio test by simulation. This is implemented in the `DHARMa` package with the following code:
+
+```{r, fig.width = 10}
+DHARMa::simulateLRT(reg1,reg2)
+```
+
+The result is the same as what we found with `anova`: the more complex model is not an improvement over the first. Such an approach by simulation is very accurate, but it can be burdensome to implement for many models, and for large datasets. Doing such simulations requires refitting the models a large number of times, and calculating the likelihood ratio every time, for the result to be accurate. GLMs generally fit pretty quickly even for moderately large datasets, but we might still want to avoid extensive comparisons by simulation.
+
+For a single model, the `anova` function builds an analysis of deviance table; it cycles through the terms and builds an increasingly complex model. For every model it reports whether or not the improvement is statistically significant:
+
+```{r}
+anova(reg2)
+```
+
+We could reconstruct such a table with the simulation function from the `DHARMa` package, but we would have to do it manually: it requires going through the pairwise comparisons ourselves.
+
+To compare how much a model is (or isn't) an improvement over another model, we can use an $R^2$ measure of variation. There are many potential $R^2$ statistics that we can calculate, using  (for example) the functions `DescTools::PseudoR2`, `glmtoolbox::adjR2`, or `MuMIn::r.squaredLR`. We here make no recommendations on which to use, but simply choose the first for demonstration:
+
+```{r}
+DescTools::PseudoR2(reg1)
+DescTools::PseudoR2(reg2)
+```
+
+# Datasets
+
+We will use the same datasets as in the last practicals. You can find the datasets in the "data" folder of the github repository.
+
+1. [nickel.expand](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/nickel.expand.csv): Lung cancer due to nickel exposure in South Wales [Breslow and Day (1987)](https://pubmed.ncbi.nlm.nih.gov/3329634/). You can use lung cancer and nasal cancer rates as response variable
+2. [dmn](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/dmn.csv): de novo mutations in children [Halldorsson et al. (2019)](https://www.science.org/doi/10.1126/science.aau1043), see also [this page](https://mccoy-lab.github.io/hgv_modules/setup.html). You can use de novo mutations of father and mother as a response variable
+3. [Baseball](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/Baseball.csv): attendance to baseball games [Cochran 2002](https://jse.amstat.org/v10n2/datasets.cochran.html)
+4. [OME]: Counts of correct identifications, used in the presentation ([MASS package](https://rdrr.io/cran/MASS/man/OME.html))
+5. [Lizards](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/lizards.csv): Lizard counts, used in the presentation, includes a count of two lizard species and multiple categorical covariates [(Schoener 1970)](https://esajournals.onlinelibrary.wiley.com/doi/10.2307/1935376)
+6. [wells](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/wells.csv): Water quality of contaminated wells (y vs n) in New York with variables of surrounding land use, sewer usage, and nitrate and chloride concentration [(Eckhard et al. 1989)](https://pubs.usgs.gov/publication/wri864142)
+ 
+The datasets are all stored in as ".csv" files, which means that you can load them into R by using the `read.csv("...")` function. You need to replace "..." by the link of the dataset, which you can copy by right-clicking the dataset name and choosing "copy link address".
+ 
+# Part 1
+
+The goal of this practical is to go over the models that you fitted during the last practicals (or for the multiple linear regression practical) and perform a confirmatory analysis. You can also use $R^2$ measures for supporting your conclusions. 
+
+1. To begin, can you shortly summarize (in your own words) what the difference is between confirmatory and exploratory analysis?
+
+2. Can you calculate deviance by hand for the binomial distribution? *Hint: it is included in the slides from yesterday*
+
+3. Formulate a hypothesis, fit two models, and use `anova` to compare them. Do you accept or reject the alternative hypothesis?
+
+4. Use `anova` with the most complex of the two models in 3 (or ane ven more complex model). Compare the results of `anova(model)` to `car::Anova(model, type = "II")` and `car::Anova(model, type = "III")` how do the results of the two functions differ?
+
+<details><summary>Open after discussion on zoom</summary>
+
+# Part 2
+
+5. Your analysis of deviance table to a model comparison with AIC/AICc/BIC. Do the two approaches give you the same or similar results?
+
+6. To build intuition for the procedures of confirmatory hypothesis testing, choose another dataset and repeat all steps.
+
+</details>

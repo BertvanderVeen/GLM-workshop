@@ -85,11 +85,13 @@ We will use the same datasets as in the last practical. You can find the dataset
 
 1. [nickel.expand](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/nickel.expand.csv): Lung cancer due to nickel exposure in South Wales [Breslow and Day (1987)](https://pubmed.ncbi.nlm.nih.gov/3329634/). You can use lung cancer and nasal cancer rates as response variable
 2. [dmn](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/dmn.csv): de novo mutations in children [Halldorsson et al. (2019)](https://www.science.org/doi/10.1126/science.aau1043), see also [this page](https://mccoy-lab.github.io/hgv_modules/setup.html). You can use de novo mutations of father and mother as a response variable
-3. [Baseball](): attendance to baseball games [Cochran 2002](https://jse.amstat.org/v10n2/datasets.cochran.html)
+3. [Baseball](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/Baseball.csv): attendance to baseball games [Cochran 2002](https://jse.amstat.org/v10n2/datasets.cochran.html)
 4. [OME]: Counts of correct identifications, used in the presentation ([MASS package](https://rdrr.io/cran/MASS/man/OME.html))
-5. Lizards: Lizard counts, used in the presentation, includes a count of two lizard species and multiple categorical covariates [(Schoener 1970)](https://esajournals.onlinelibrary.wiley.com/doi/10.2307/1935376)
-6. wells: Water quality of contaminated wells (y vs n) in New York with variables of surrounding land use, sewer usage, and nitrate and chloride concentration [(Eckhard et al. 1989)](https://pubs.usgs.gov/publication/wri864142)
+5. [Lizards](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/lizards.csv): Lizard counts, used in the presentation, includes a count of two lizard species and multiple categorical covariates [(Schoener 1970)](https://esajournals.onlinelibrary.wiley.com/doi/10.2307/1935376)
+6. [wells](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/wells.csv): Water quality of contaminated wells (y vs n) in New York with variables of surrounding land use, sewer usage, and nitrate and chloride concentration [(Eckhard et al. 1989)](https://pubs.usgs.gov/publication/wri864142)
  
+The datasets are all stored in as ".csv" files, which means that you can load them into R by using the `read.csv("...")` function. You need to replace "..." by the link of the dataset, which you can copy by right-clicking the dataset name and choosing "copy link address".
+
 # Part 1 (we only have one part)
 
 Here is what I want you to do:
@@ -105,3 +107,5 @@ Here is what I want you to do:
 5. Plot the binomial regression against one of the predictor variables.
 
 6. Plot the residuals of the model, how do they look? Can you discern any assumption violations?
+
+If you finish early with your dataset, you can choose another and repeat the same process.

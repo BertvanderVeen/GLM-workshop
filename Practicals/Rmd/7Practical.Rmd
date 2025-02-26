@@ -1,62 +1,133 @@
 ---
-title: "Practical: model selection"
+title: "Practical: Exploratory model comparison"
 subtitle: "Physalia workshop on GLMs"
 author: "Bert van der Veen"
 output: html_document
 ---
 
-# R functions
+# Background
 
-In the last practical we fitted binomial glms. In this practical we return to those models and try to figure out which model fits "best" to the data. For this you will might the following functions:
+We have spent a good amount of time fitting models, and exploring how models work. We have checked model assumptions, and have tried to improve a model when the assumptions were violated. What we have not yet done, is trying to rank models to see which one is better. This is actually quite a challenging endeavor, as we need to agree on a single measure that represents how well the model explains our data. Unfortunately, not one single measure can do such a thing; it depends on your philosophy and how you define "better". 
 
-- `AIC`: extracts Akaike's Information Criteria from a model
-- `BIC`: extracts Schwarz's Bayesian Information Criteria from a model
+In this practical we focus on *information criterion*. An information criterion is a tool that forms one of the foundations of contemporary statistical modeling. It aims to quantify the information in the data that is explained by a model, and particularly how much more information another model might explain. There are many information criteria, and all do slightly different things. In this exercise, we limit ourselves to Akaike's information criterion (AIC) and its sample-size corrected counterpart `AICc` and the Bayesian information criterion (BIC).
 
-and perhaps some of the functions or R packages used in the previous practicals.
+For these information criteria, "better" means either 1) in a predictive manner in the case of AIC, or 2) the model that is closest to the truth in terms of BIC.
 
-If you do not remember what these functions do, or what arguments they take, you can look it up by typing `?functionName` in the console. That will show you the help page of the function, which hopefully clarifies things. If it does not, try a search engine to find online resources, or ask someone. Almost always your question has been asked (and answered) by someone else before. Some hints are given with questions **in bold**.
+To AIC and BIC, first we need to have a model. Let's take the simulation from the previous practical:
 
-# R-packages
+```{r, fig.width = 10}
+x1 <- rnorm(35)
+x2 <- rnorm(35)
+eta <- -2+2*x1+3.4*x2
+p <- plogis(eta)
+y <- rbinom(35, 1, p)
+(reg1 <- glm(y ~ x1 + x2, family = "binomial"))
+```
 
-Model-selection can be a tedious task, so there are some R-packages that can make things easier. In particular:
+Information criteria are calculated from the likelihood of a model, which we can retrieve by using the `logLik` function on our model object:
 
-- `AICcmodavg::AICc`: extract corrected AIC from a model. Alternatively `MuMIN::AICc`
-- `AICcmodavg::aictab`: creates a model selection table 
-- `AICcmodavg::bictab`: creates a model selection table
-- `MuMIn::dredge`: automatic model selection
+```{r}
+logLik(reg1)
+```
 
-# Description
+This returns two pieces of information: 1) the binomial log-likelihood as a function of the parameter estimates, and 2) the number of parameters (3). By themselves, this information is not particularly useful, but they are exactly what we need to calculate AIC and BIC. The formulae for AIC and BIC are:
 
-Fitting model is fun, but how do you know it is a good model? In practical we went over how to determine if your model is valid, but that does not make it a good model, or the best in a set.
+\begin{equation}
+\begin{aligned}
+AIC = 2k - 2\log(\mathcal{L})\\
+BIC = k\log(n) - 2\log(\mathcal{L})
+\end{aligned}
+\nonumber
+\end{equation}
 
-The goal of this practical is to go over the models that you fitted during the last practical (or for the multiple linear regression practical) and determine for your dataset of choice, which is the model that is "best". "Best" being either 1) in a predictive manner, or 2) for inference. Again you can choose one of the following datasets from the binomial regression practical:
+where $k$ is the number of parameters, $\log{\mathcal{L}}$ is the log-likelihood, and $n$ is the sample size. We have all those things, so we can go ahead and calculate AIC and BIC:
 
-1. Lizards: Lizard counts, used in the presentation this morning, includes a count of two lizard species and multiple categorical covariates [(Schoener 1970)](https://esajournals.onlinelibrary.wiley.com/doi/10.2307/1935376)
-2. Moose: Data on the detection of GPS collared moose by helicopter. This includes thee covariates: year of the survey, amount of visual obstruction in a 10m radius of the moose, number of moose in the sighted group [(Giudice et al. 2012)](https://wildlife.onlinelibrary.wiley.com/doi/full/10.1002/jwmg.213)
-3. deposit: Number of insects killed and exposed as a function of insecticide types with different doses [(Hewlet and Plackett 1950)](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1744-7348.1950.tb00973.x)
-4. wells: Water quality of contaminated wells (y vs n) in New York with variables of surrounding land use, sewer usage, and nitrate and chloride concentration [(Eckhard et al. 1989)](https://pubs.usgs.gov/publication/wri864142)
-5. Alternatively, you can simulate binomial distributed responses
+```{r}
+k1 = attr(logLik(reg1), "df")
+logL1 = logLik(reg1)
+n = length(y)
+(aic1 = 2*k1 - 2*logL1)
+(bic1 = k1*log(n) - 2*logL1)
+```
 
-Or any of the dataset for the multiple linear regression example. Don't forget to use `set.seed` for reproducibility if you do simulations. You can answer the questions below for guidance. You can construct the plots from the presentation yourself with the aforementioned functions, or use the `plot` function on your model.
+we cannot compare AIC and BIC; they are meant for comparison between two models, not within a single model. Let's fit another model so we can make the comparison:
 
-# Tasks
+```{r}
+(reg2 <- glm(y ~ x1*x2, family = "binomial"))
+k2 = attr(logLik(reg2), "df")
+logL2 = logLik(reg2)
+(aic2 = 2*k2 - 2*logL2)
+(bic2 = k2*log(n) - 2*logL2)
+```
 
-1. What makes a good model?
+we received a warning, indicating that the model is overfitting, but for the moment we will ignore that. AIC and BIC are used for comparison between models by examining their difference, which we is generally denoted $\Delta AIC$ and $\Delta BIC$. There exist rules of thumb when we should consider one model better than another; generally the rule that is maintained is if the alternative model's AIC or BIC is at least a 2 points lower than that of the first, per added parameter, we can consider it to be better. If the difference is less than that, we will stick to the simpler model per the principle of parsimony. Here, we addded one parameter (for the interaction of the two predictors), so we need the the AIC or BIC to be 2 points lower than for the first model:
 
-2. What are the differences between AIC, BIC, and AICc for model comparison?
+```{r}
+(daic = aic1-aic2)
+(dbic = bic1-bic2)
+```
 
-3. How do you use AIC/BIC for model comparison?
+In both cases, the second model's information criteria are larger than the first; we immediately know the model is not an improvement. The difference in AIC is less than 2 points, so we consider the two models to fit the data equally well, and thus to the simpler model. From this we conclude that the interaction term does not improve our model, i.e., it does not help in better explaining the response variable.
 
-4. How do you use LRT for model comparison?
+Here, we calculated AIC and BIC ourselves, but R actually has functions to do that for us: `AIC` and `BIC`, which we can use from this point forward. There is no standard `AICc` function, the AIC corrected for small sample sizes, but it is available in the `AICcmodavg` or `MuMIn` packages. `AICcmodavg` can even make tables for us that include the difference in AIC(c) or BIC for the models, making things even easier:
 
-5. Define a question for your dataset of choice, fit models, and compare models with your choice of information criteria. Write a brief summary of how you found "the best" model.
+```{r}
+AICcmodavg::aictab(list(reg1 = reg1, reg2 = reg2))
+```
 
-6. Use AIC/AICc/BIC (the one you did not use in 5.) and compare the same models. Do you find a different model?
+This function requires that we provide the models in a list, and spits out a bunch of metrics for us to use. By default, `aictab` actually implements the AICc, which we can turn off using the `second.ord` argument if we want it to return the AIC instead. In the table, $K$ is the number of parameters, `Delta_AICc` is the difference in AICc to the "best" model of the ones provided, "AICcWt" is a weight (between zero and one) calculated from the difference in AICc. The weights can be used to infer which model is likely to be best; in a manner it is a reflection of relative support for a model. The "Cum.Wt" column is simply a sum of those weights, and gives a straightforward overview of the cut-off after which we do not need to consider models.
 
-7. How would you explain the model selection procedure in a report or scientific article?
+Such tables should be used cautiously for model comparison. Years ago, groups of researchers got so caught up in model comparison that studies would report entire tables of all potential submodels of the most complex model that was possible to fit for a given dataset. Such tables (and the submodels) can automatically be fitted using an approached called "dredging", which is the automatic fitting of models, and ranking following some information criteria. As a demonstration, we can here use the `dredge` function from the `MuMIn` package. We apply this to the second model, as it is more complelx than the first, and the first is nested in the more complex model:
 
-8. How might you determine if your model is a good model?
+```{r}
+reg2 <- update(reg2, na.action = na.fail)
+(res <- MuMIn::dredge(reg2))
+```
+This function returns us another table, with the first columns being the coefficients for a particular covariate or term in a model. If a term is left blank it was not included in the model. We can now use this `dredge` table to select all models within 2 difference AICc of the top model:
 
-9. What do you do if two models fit the data equally well?
+```{r}
+MuMIn::get.models(res, subset = delta < 2)
 
-10. Can you think of any issues that might arise when comparing all possible submodels?
+```
+
+which returns our original (true) model. There is an issue that can arise here: models can automatically be fitted where the interaction term is included, but the main model terms are not. Such models are not (nearly) always sensible, and the general recommendation is to only consider models that include lower order (i.e., main terms) when there are higher order terms in the model. The `dredge` function has all kinds of possibilities for customising, you can also rank models with BIC, $R^2$ or otherwise, but we do not explore this further here.
+
+What is vital to remember, is that information criteria are used for **comparison**, they are not a tool for assessing goodness-of-fit for any particular model, because they only compare models within the considered set of models. In that set, the "best" model may still be a very poor model! 
+
+# Datasets
+
+We will use the same datasets as in the last practicals. You can find the datasets in the "data" folder of the github repository.
+
+1. [nickel.expand](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/nickel.expand.csv): Lung cancer due to nickel exposure in South Wales [Breslow and Day (1987)](https://pubmed.ncbi.nlm.nih.gov/3329634/). You can use lung cancer and nasal cancer rates as response variable
+2. [dmn](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/dmn.csv): de novo mutations in children [Halldorsson et al. (2019)](https://www.science.org/doi/10.1126/science.aau1043), see also [this page](https://mccoy-lab.github.io/hgv_modules/setup.html). You can use de novo mutations of father and mother as a response variable
+3. [Baseball](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/Baseball.csv): attendance to baseball games [Cochran 2002](https://jse.amstat.org/v10n2/datasets.cochran.html)
+4. [OME]: Counts of correct identifications, used in the presentation ([MASS package](https://rdrr.io/cran/MASS/man/OME.html))
+5. [Lizards](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/lizards.csv): Lizard counts, used in the presentation, includes a count of two lizard species and multiple categorical covariates [(Schoener 1970)](https://esajournals.onlinelibrary.wiley.com/doi/10.2307/1935376)
+6. [wells](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/wells.csv): Water quality of contaminated wells (y vs n) in New York with variables of surrounding land use, sewer usage, and nitrate and chloride concentration [(Eckhard et al. 1989)](https://pubs.usgs.gov/publication/wri864142)
+ 
+The datasets are all stored in as ".csv" files, which means that you can load them into R by using the `read.csv("...")` function. You need to replace "..." by the link of the dataset, which you can copy by right-clicking the dataset name and choosing "copy link address".
+ 
+# Part 1
+
+The goal of this practical is to go over the models that you fitted during the last practical (or for the multiple linear regression practical) and determine for your dataset of choice, which is the model that is "best". 
+
+Here is what I want you to do:
+
+
+1. Fit two models to your dataset of choice. One model should be more complex than the other. Compare them with AIC.
+
+2. Try finding "the best model" using AIC.
+
+3. Deciding on a "full model" (i.e., the most complex or realistic model that you can define for a dataset), try going through a model selection procedure by comparing potential submodels. You can use `AICcmodavg::aictab` in combination with `second.ord  = FALSE`. Try not to use `MuMIn::dredge`.
+
+4. Now use `MuMin::dredge` and see if it finds the best model to be the same. If not, consider why that might be.
+
+<details><summary>Open after discussion on zoom</summary>
+
+# Part 2
+
+5. Repeat steps 1-3 with `AICc` and/or with `BIC`. Are there differences in the comparisons when you use a different information criteria?.
+
+6. Compare the confidence intervals of the parameter estimates that are present in both your original model and in the final model from one of the selection procedures. How have they changed?
+
+</details>

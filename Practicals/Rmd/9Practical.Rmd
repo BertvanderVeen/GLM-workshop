@@ -1,0 +1,165 @@
+---
+title: "Practical: Post-hoc pairwise comparisons"
+subtitle: "Physalia workshop on GLMs"
+author: "Bert van der Veen"
+output: html_document
+---
+
+# Background
+
+In the previous exercise, we focused on hypothesis testing of models. However, there are other tests we can do that can provide valuable information about the model. It is the tests that are reported in the summary of a model:
+
+```{r}
+x1 <- rnorm(100)
+x2 <- factor(rbinom(100,2,0.5), labels = c("group1", "group2", "group3"))
+X2 <- model.matrix(~. , data.frame(x2))[,-1]
+eta <- -2+2*x1+X2%*%c(3.4,-5)
+p <- plogis(eta)
+y <- rbinom(100, 1, p)
+(reg1 <- glm(y ~ x1 + x2, family = "binomial"))
+```
+
+this is an example of a model with a continuous, and with a categorical predictor variable. The categorical predictor variable has three groups. The `model.matrix` function creates the design matrix for the variable, which makes the simulation a little easier. When we fit the model, the coefficients that are returned are relative to the reference category (the category that comes first alphabetically, group 1), so that the results from the `summary` function indicate whether or not the effects of the groups in the regression are different from the first group. We can change the reference category using the `relevel` function on our factor, if for example we want to compare to the second group:
+
+```{r}
+x2 <- relevel(x2, ref = "group2")
+(reg2 <- glm(y ~ x1 + x2, family = "binomial"))
+```
+
+The most classical scenario in which we want to compare to a single reference are case-control studies. The reference category is the control, so that the difference with the control presents a meaningful effect of a type of treatment. However, if our study is not of the case-control type, such a comparison with the reference category can be meaningless. What we are instead after, is pairwise comparisons of all the groups.
+
+For any two groups, we can calculate the group effect by summing the effect of the reference category and the group we are interested in. However, for a comparison we also need the uncertainty for the sum of the two effects, which requires the variance and the **covariance** of the two estimators.
+
+The next part is a little technical, but necessary to explain how we can get to a pairwise comparison. If you recall from earlier lectures, the maximum likelihood estimator is normally distribution in large samples. However, we have not yet discussed what the sampling distribution is when there is more than one estimator. When there is more than one estimator, the sampling distribution is **multivariate normal**, i.e., normal in more than one dimension. Formally, we write:
+
+\begin{equation}
+\hat{\boldsymbol{\beta}} \sim \mathcal{N}(\boldsymbol{\beta}, \boldsymbol{\Sigma})
+\end{equation}
+
+$\Sigma = \begin{bmatrix}\sigma^2_{\beta_1} \sigma_ {{\beta_1},{\beta_2}}\\\sigma_ {{\beta_2},{\beta_1}} \sigma_{\beta_2}\end{bmatrix}$ is the covariance matrix of all the parameter estimates in the model. It holds the uncertainty for each estimate, but also information about how the estimators covary. The uncertainty of the sum of two coefficients, for example to get the effect from the regression for group 1, is calculated using both those pieces of information, the variance and the covariance:
+
+\begin{equation}
+\text{var}(\hat{\beta}_1 + \hat{\beta}_3) = \sigma^2_{\beta_1} + \sigma^2_{\beta_3} + 2\sigma_{\beta_1, \beta_3}
+\end{equation}
+
+if we write the summation over the coefficients as matrix; $\textbf{S} = \textbf{C}\boldsymbol{\beta}$, that means the variance of the summation is:
+
+\begin{equation}
+\text{var}(\beta_1 + \beta_3) = \textbf{S}
+\end{equation}
+
+The only thing we need to do is work out what $\textbf{C}$ should look like. The rows of $\textbf{C}$ represent the new parameter estimate that we want, as a function of the parameters that we already have (the columns), here that is $\beta_1$ and $\beta_3$. For the parameters that we need to sum, we place a 1 in the correct row and column. For the example above, where there are three groups and group 2 is the reference category, is we want the effect for group 1, $\textbf{C}$ is:
+
+\begin{equation}
+\textbf{C} = \begin{bmatrix}1 0 1 0 \end{bmatrix}
+\end{equation}
+
+If we also want the effect for group 2, the matrix becomes:
+
+
+\begin{equation}
+\textbf{C} = \begin{bmatrix}
+1 0 1 0 \\
+1 0 0 0
+\end{bmatrix}
+\end{equation}
+ 
+and finally, including the result for the third group:
+
+
+\begin{equation}
+\textbf{C} = \begin{bmatrix}
+1 0 1 0 \\
+1 0 0 0 \\
+1 0 0 1
+\end{bmatrix}
+\end{equation}
+
+In R, this is how we can create the matrix:
+
+```{r}
+C = matrix(c(1, 0, 1, 0,
+             1, 0, 0, 0,
+             1, 0, 0, 1), nrow = 3, ncol = 4, byrow = TRUE)
+C
+```
+
+So that the group effects and their covariance matrix are:
+
+```{r}
+(coefs <- C%*%coef(reg2))
+(Sigma <- C%*%vcov(reg2)%*%t(C))
+```
+ the `vcov` function extracts the covariance matrix from the model, which we needed to calculate the uncertainties from the "new" parameter estimates. Now, these are the only two pieces of information that we need to construct pairwise tests of the coefficients; we just need to decide on the test. Usually, we want to test whether or not a parameter is zero. For two parameter estimates, $\hat{\beta_1}$ and $\hat{\beta_2}$, we can calculate a wald-test statistic to test if they are the same:
+ 
+ \begin{equation}
+ W = \frac{(\hat{\beta}_1 - \hat{\beta_2})}{\text{var}(\hat{\beta_1}-\hat{\beta_2)}}
+ \end{equation}
+ 
+Under the null hypothesis, this test-statistic follows a $\chi^2$-distribution with $k$ degrees of freedom, where $k$ is the number of unique parameters involved. The only thing we need to do is calculate out test statistics and their associated p-values. $\text{var}(\hat{\beta_1}-\hat{\beta_2}) = \sigma^2_{\beta_1} + \sigma^2_{\beta_3} - 2\sigma_{\beta_1, \beta_3}$ is given by a summation over variances but now minus the covariance of the involved parameter estimates, so it is calculated similarly as before, but entering a -1 in the correct location:
+ 
+```{r}
+ Cnew <- matrix(c(1,-1, 0), ncol = 3)
+ W = (coefs[1] - coefs[2])^2/Cnew%*%Sigma%*%t(Cnew)
+ 1- dchisq(W, 3)
+```
+ 
+ That is a lot of information! Fortunately, there are R-packages to help us with such calculations: `emmeans::emmeans` and `marginaleffects::comparisons` for example. For the example above, we can reproduce the results with the `emmeans` package like this:
+ 
+```{r, fig.width  = 10, message=FALSE}
+library(emmeans)
+emmeans(reg2, ~x2, at=list(x1=0))
+plot(emmeans(reg2, ~x2, at=list(x1=0)))
+```
+ 
+Because there is a continuous variable in the model, we need to "condition" on a value for that predictor. Here, we do that at 0, but we could also choose the mean of $x_1$, for example. We can compare the groups pairwise as:
+
+```{r, fig.width = 10}
+pairs(emmeans(reg2, ~x2, at = list(x1 = 0)))
+plot(pairs(emmeans(reg2, ~x2, at = list(x1 = 0))))
+```
+
+With `marginaleffects` we can retrieve the group effects by:
+
+```{r, message=FALSE}
+library(marginaleffects)
+predictions(reg2, newdata = datagrid(x1 = 0, x2 = c("group1", "group2",  "group3")), type = "link")
+```
+ 
+and their pairwise comparisons via:
+
+```{r}
+comparisons(reg2, variables = "x2", newdata = datagrid(x1 = 0), type = "link")
+```
+ 
+`marginaleffects` makes it a bit easier for us to get the results on the response scale, by switching to `type = "response"`, similar as in the `predict` function. It also include (separate) functions for plotting the comparisons; `plot_comparisons` and `plot_predictions`.
+ 
+# Datasets
+
+We will use the same datasets as in the last practicals. You can find the datasets in the "data" folder of the github repository.
+
+1. [nickel.expand](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/nickel.expand.csv): Lung cancer due to nickel exposure in South Wales [Breslow and Day (1987)](https://pubmed.ncbi.nlm.nih.gov/3329634/). You can use lung cancer and nasal cancer rates as response variable
+2. [dmn](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/dmn.csv): de novo mutations in children [Halldorsson et al. (2019)](https://www.science.org/doi/10.1126/science.aau1043), see also [this page](https://mccoy-lab.github.io/hgv_modules/setup.html). You can use de novo mutations of father and mother as a response variable
+3. [Baseball](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/Baseball.csv): attendance to baseball games [Cochran 2002](https://jse.amstat.org/v10n2/datasets.cochran.html)
+4. [OME](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/OME.csv): Counts of correct identifications, used in the presentation ([MASS package](https://rdrr.io/cran/MASS/man/OME.html))
+5. Lizards: Lizard counts, used in the presentation, includes a count of two lizard species and multiple categorical covariates [(Schoener 1970)](https://esajournals.onlinelibrary.wiley.com/doi/10.2307/1935376)
+6. wells: Water quality of contaminated wells (y vs n) in New York with variables of surrounding land use, sewer usage, and nitrate and chloride concentration [(Eckhard et al. 1989)](https://pubs.usgs.gov/publication/wri864142)
+ 
+The datasets are all stored in as ".csv" files, which means that you can load them into R by using the `read.csv("...")` function. You need to replace "..." by the link of the dataset, which you can copy by right-clicking the dataset name and choosing "copy link address".
+
+# Part I
+
+Exploring and presenting results is a vital component to effectively using statistical models. Here is what I want you to do:
+
+1. Fit a model to one of the dataset, that includes a categorical predictor variable
+2. Calculate the group effects yourself, using the `coef` and adding the right coefficients together
+3. What comparisons can you make using the information from the model, and with the `relevel` function?
+
+# Part II
+
+4. Either manually by manipulating the code above, or by using the `emmeans` or `marginaleffects` packages, retrieve results for pairwise comparisons of the groups
+
+ 
+ 
+ 
+ 
