@@ -328,7 +328,7 @@ Data via Legler and Roback (2021)
 \tiny
 
 ```{r, echo  =FALSE, message=FALSE, warning=FALSE}
-campus <- read.csv("../data/c_data2.csv")[,c("num_viol","total_crime","num_prop","Enrollment","type","region")]
+campus <- read.csv("../data/Campus.csv")[,c("num_viol","total_crime","num_prop","Enrollment","type","region")]
 campus$region <- as.factor(campus$region)
 campus$type <- as.factor(campus$type)
 library(tidyr)## Campus crime: the data
@@ -343,7 +343,7 @@ knitr::kable(head(campus, 7), format="latex", booktabs = T)%>%kableExtra::kable_
 \tiny
 
 ```{r, echo  =FALSE, message=FALSE, warning=FALSE}
-campus <- read.csv("../data/c_data2.csv")[,c("num_viol","total_crime","num_prop","Enrollment","type","region")]
+campus <- read.csv("../data/Campus.csv")[,c("num_viol","total_crime","num_prop","Enrollment","type","region")]
 campus$region <- as.factor(campus$region)
 campus$type <- as.factor(campus$type)
 library(tidyr)

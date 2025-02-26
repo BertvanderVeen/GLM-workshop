@@ -19,4 +19,6 @@
 **nickel.expand**: via the ISwR R-package, but originally Breslow and Day (1987). <br>
 **dmn**: via https://github.com/mccoy-lab/hgv_modules, but originally Halldorsson et al. (2019). <br>
 **OME**: via the MASS package, but originally from Sara Hogan, University of Oxfrod. <br>
-**Baseball**: via the UsingR package, but originall from Cochran (2002). <br>
+**Baseball**: via the UsingR package, but originally from Cochran (2002). <br>
+**Hurricanes**: via the DHARMa package, but originally from Jung et al. (2014) <br>
+**Campus**: Legler and Roback (2021) <br>
