@@ -7,7 +7,7 @@ output: html_document
 
 # R functions
 
-Regression of count data requries a change of response distribution. Instead of doing regression based on the normal distribution or binomial distribution, we here perform regression with the Poisson and negative-binomial distributions. We will use real datasets, collected from different sources. For this you will need the following functions:
+Regression of count data requires a change of response distribution. Instead of doing regression based on the normal distribution or binomial distribution, we here perform regression with the Poisson and negative-binomial distributions. We will use real datasets, collected from different sources. For this you will need the following functions:
 
 - `plot`: draws all kinds of plots (controlled by `type`), but usually a scatterplot
 - `glm`: fits a generalized linear regression to data
