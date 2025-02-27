@@ -363,16 +363,6 @@ The model we assume is:
   - $y_{i2} \vert N_i-y_{i1} \sim \mathcal{Bin}(\pi_{ij};N_i-y_{i1})$
 - Equivalent to using a Poisson regression with fixed total
 
-
-## Cumulative link models, such as:
-
-For ordered data
-
--
--
--
-
-
 ## Ordinal: proportional odds
 
 More commonly, the categories are ordered.
