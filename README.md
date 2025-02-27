@@ -114,7 +114,7 @@ On the first day we will go through R basics and background theory of frequentis
 |Thursday |14:00 - 14:45| Models for unbounded count data                       |
 |         |15:00 - 16:00| Practical 10: log-linear regression                   | <!--get people to interpret/discuss the results with CIs, try a genomics  dataset for the exercise -->
 |         |16:00 - 16:15| Break                                                 |
-|         |16:15 - 17:00| Residuals diagnostics in GLMs                         |
+|         |16:15 - 17:00| Model validation                                      |
 |         |17:00 - 17:45| Practical 11: Residuals diagnostics in GLMs           |
 |         |17:45 - 18:30| Break                                                 |
 |         |18:30 - 19:15| Other useful models                                   |
