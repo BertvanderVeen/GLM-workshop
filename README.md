@@ -109,7 +109,7 @@ On the first day we will go through R basics and background theory of frequentis
 |         |      - 17:45| $R^2$                                                 |
 |         |17:45 - 18:30| Break                                                 |
 |         |18:30 - 19:15| Practical 8: Model comparison: confirmatory           |
-|         |19:15 - 20:00| Q & A / Practical 9: Pairwise comparisons             |
+|         |19:15 - 20:00| Practical 9: Pairwise comparisons (extra)             |
 |---------|-------------|-------------------------------------------------------|
 |Thursday |14:00 - 14:45| Models for unbounded count data                       |
 |         |15:00 - 16:00| Practical 10: log-linear regression                   | <!--get people to interpret/discuss the results with CIs, try a genomics  dataset for the exercise -->
@@ -121,7 +121,7 @@ On the first day we will go through R basics and background theory of frequentis
 |         |19:15 - 20:00| Practical 12: other useful models                     |
 |---------|-------------|-------------------------------------------------------|
 |Friday   |14:00 - 16:00| Generalised Linear Mixed-effects Models               |
-|         |16:00 - 18:00| Practical 13: Real data exercise                      | <!-- first a demonstration, then discussion and correction after -->
+|         |16:00 - 18:00| Demonstration, real data analysis, time for questions | <!-- first a demonstration, then discussion and correction after -->
 
 <!-- from survey
 more real data less simulations
@@ -147,7 +147,9 @@ consider adding equation and equation in words for the examples?!
 
 <!--
 notes:
-1) les time needed for r coding / recap and introduction
+1) les time needed for r coding / recap and introduction. The first exerise needs more time for the redistribution of data and a slow start
 2) redistributing the data requires a lot of time; I should put the "save" command directly in the exercise 1
 3) "curve" function is a bit unclear, needs further explanation what the exercise uses it for.
+4) "subset" needs to be mentioned in the exercise 1 for knowing how to compare the groups with a t test
+5) 2 10 minute breaks better than 1 15 minute break
 -->

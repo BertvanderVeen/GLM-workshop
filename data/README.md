@@ -22,3 +22,6 @@
 **Baseball**: via the UsingR package, but originally from Cochran (2002). <br>
 **Hurricanes**: via the DHARMa package, but originally from Jung et al. (2014) <br>
 **Campus**: Legler and Roback (2021) <br>
+**fish**: https://stats.idre.ucla.edu/stat/data/fish.dat <br>
+**cheddar**: via the faraway R-package, but originally from Moore and McCabe (1993)<br>
+**wafer**:via the faraway R-package, but originally from Myers and Montgomery (1997)<br>
