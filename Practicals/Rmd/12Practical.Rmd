@@ -1,0 +1,153 @@
+---
+title: "Practical: Other useful models"
+subtitle: "Physalia workshop on GLMs"
+author: "Bert van der Veen"
+output: html_document
+---
+
+This is the final practical of the workshop. So far, we have learned about linear regression, binomial regression, Poisson and negative-binomial regression. Generalised Linear Models include more model types, but these are some of the most important cases. There are also a few model types that are not technically GLMs, which might be useful to know about.
+
+In particular, we have not in detail covered regression of positive-continuous outcomes, outcomes with excess zeros, and (actual) proportions. Exploring methods for those data types is the main aim of this practical.
+
+## Positive-continuous outcomes
+
+When the response variable is positive, without zeros, there are four model types that you can consider:
+
+- Gamma regression (default link is the inverse link-function)
+- Log-normal regression (linear regression with log-transformed response variable)
+- Inverse Gaussian regression (default link is the inverse square link function: $\frac{1}{\mu^2}$)
+- Tweedie regression (default link is the log-link function)
+
+We simulate data from a Gamma distribution to try it out:
+
+```{r, fig.width = 10}
+x1 <- rnorm(30, sd = 0.5)
+x2 <- runif(30, -1, 1)
+eta <- 1-2*x1-0.5*x2
+# I parameterize it in terms of the mean with log-link
+# and variance shape*scale^2
+# This might look a little funky
+# because we need to calculate the shape and scale parameters
+mu = exp(eta)
+var = 2
+scale = var/mu
+shape = var/scale^2
+(y <- rgamma(30, scale = scale, shape = shape))
+hist(y)
+```
+
+If we fit out gamma regression, we see that the parameters are well estimated:
+
+```{r}
+(model1 <- glm(y ~ x1 + x2, family = Gamma(link = log), start = c(mean(log(y)), coef(lm(log(y)~x1+x2))[2:3])))
+```
+
+Let's fit the remaining models:
+
+```{r, warning=FALSE}
+(model2 <- lm(log(y) ~ x1 + x2))
+(model3 <- glm(y ~ x1 + x2, family = inverse.gaussian, start = c(mean(1/y^2), coef(lm(I(1/y)~x1+x2))[2:3])))
+model4 <- NULL
+model4$logLik <- -Inf
+xi <- seq(1.01, 2, length.out=1000)
+for(i in xi){
+  modelnew <- glm(y ~ x1 + x2, family = statmod::tweedie(var.power = i, link.power = 0))
+  modelnew$xi <- i
+  modelnew$logLik <- tweedie::logLiktweedie(modelnew)
+  if(model4$logLik<modelnew$logLik)model4 <- modelnew
+}
+model4
+model4$xi # Power parameter
+```
+
+The last part of code is used to find the power parameter in the tweedie regression (which is what determines the distribution in the Tweedie class of distributions). Funny enough, the power parameter is not estimated to be 2, which is when the Tweedie corresponds to a gamma distribution. Note that to use AIC with the tweedie model, you need to use the `tweedieAIC` function from the `tweedie` R-package.
+
+The inverse-gaussian model returns poor estimates, perhaps because we used the incorrect link function. We used the default, but we simulated using a log-link function. We can change this to see if we get something more accurate:
+
+```{r}
+model3 <- glm(y ~ x1 + x2, family = inverse.gaussian(link=log), start = c(mean(log(y)), coef(lm(log(y)~x1+x2))[2:3]))
+```
+
+The last argument "start" provides starting values for the IRWLS fitting algorithm; this is sometimes necessary when it fails to find good starting values. That almost never happens, but if it does it tends to happen for the inverse gaussian and gamma regressions.
+
+## Categories
+
+For regression with more than 2 categories (i.e., binomial) we use multinomial regression. If the categories are ordered, ordinal regression. We implement these using the VGAM R-package (`vglm` function for multinomial regression) and the MASS package (`polr` function for ordinal regression).
+
+```{r, fig.width = 10}
+# Multinomial
+cutoff = rnorm(5)
+p = plogis(replicate(5, eta)+matrix(cutoff,nrow=30,ncol=5,byrow=TRUE))
+ps <- t(apply(p, 1, function(x) x / sum(x))) # needs to sum to 1
+y2 <- t(sapply(1:30, function(i)rmultinom(1, 1, ps[i,])))
+(model5 <- VGAM::vglm(y2 ~ x1 + x2, family = VGAM::multinomial()))
+
+# Ordinal
+cutoff <- sort(rnorm(5), decreasing = FALSE)
+p2 = plogis(replicate(5, eta)+matrix(cutoff,nrow=30,ncol=5,byrow=TRUE))
+ps2 <- t(apply(p2, 1, function(x) x / sum(x))) # needs to sum to 1
+y3 <- t(sapply(1:30, function(i)rmultinom(1, 1, p[i,])))
+(y3v <- factor(apply(y3, 1, function(row) which(row == 1))))
+hist(as.numeric(y3v))
+(model6 <- MASS::polr(y3v ~ x1 + x2))
+```
+
+# Proportions
+
+Proportion data might be a result of standardised binomially-distributed response, but where you forgot to write down the actual counts. There are also other cases where data might be between zero and one. Beta regression deals in such data:
+
+```{r, fig.width = 10, message=FALSE}
+mu2 = plogis(eta)
+var2 = 0.5
+beta = (1-mu2)*mu2/(var*mu2 - mu2^2 + mu2)
+alpha = mu2/(1-mu2)*beta
+(y4 <- rbeta(30, shape1 = alpha, shape2 = beta))
+hist(y4)
+library(betareg)#or glmmTMB
+(model7 <- betareg(y4 ~ x1 + x2))
+```
+
+## Excess zeros
+
+Sometimes, datasets have more zeros than a Poisson distribution can accommodate. Although such data can be modelled with a negative-binomial distribution, a more explicit choice (in terms of the zeros) is a zero-inflated model. There are various R-packages that can help you with this, such as `pscl`, `countreg`, `glmmTMB`, or `VGAM`.
+Formally, we can think of such data as being generated by two processes: a Bernoulli process and a Poisson process. The Bernoulli process then determines whether there is a count (which can be  zero), or not. The Poisson (or another) distribution (e.g., the negative-binomial) then determined how large the count is.
+
+If you fit a Poisson regression, excess zeros will show as lack of fit. The `DHARMa` package has a special function called `testZeroInflation` that can help you determine if the model that you fitted can generate a similar amount of zeros to the data that you observed.
+
+```{r, fig.width = 10, message=FALSE}
+z <- rbinom(30, size = 1, 0.5)
+ystar <- rpois(30, exp(eta))
+(y5 = z*ystar)
+hist(y5)
+
+model8 <- glm(y5 ~ x1 + x2, family = "poisson")
+DHARMa::testZeroInflation(model8)
+
+model9 <- glmmTMB::glmmTMB(y5 ~ x1 + x2, family = "poisson", ziformula = ~1)
+DHARMa::testZeroInflation(model9)
+```
+
+## Datasets
+
+You can choose from the following datasets:
+
+1. [lime](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/lime.csv): foliage measurements of small-leaved lime trees.
+2. [brachy](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/brachy.csv): cover class data for Brachythecium rutabulum with multiple covariates
+3. [r6data](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/R6data.csv): data of two plant species under low and high nitrate supply. Response is the proportion of biomass in roots ("LMF"), stems ("SMF"), and leaves ("LMF").
+5. [fish](https://stats.idre.ucla.edu/stat/data/fish.csv): fish caught by campers (with children or van).
+6. [mistletoe](https://github.com/BertvanderVeen/GLM-workshop/blob/main/data/MistletoeV2.csv): mistletoe infections in trees.
+7. [OralHealth](https://github.com/BertvanderVeen/GLM-workshop/blob/main/data/OralHealth.csv): decayed teeth in children.
+8. [wafer](https://github.com/BertvanderVeen/GLM-workshop/blob/main/data/wafer.csv) in faraway: wafer resitivity. 
+9. [chedder](https://github.com/BertvanderVeen/GLM-workshop/blob/main/data/cheddar.csv) taste of cheddar based on composition.
+10. Try one of the binomial datasets for a beta regression, or any of the count datasets for a zero-inflated regression.
+
+# Part 1
+
+Here, you can combine everything you have learned so far into the analysis of a single dataset. Pick a dataset, and analyse it from a-z:
+
+1) data exploration
+2) decide on a research question or hypothesis 
+3) choose a response distribution
+4) fit a model
+5) perform a model comparison
+6) find a valid model

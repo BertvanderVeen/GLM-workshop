@@ -97,9 +97,9 @@ The goal of this practical is to go over the models that you fitted during the l
 
 4. Use `anova` with the most complex of the two models in 3 (or ane ven more complex model). Compare the results of `anova(model)` to `car::Anova(model, type = "II")` and `car::Anova(model, type = "III")` how do the results of the two functions differ?
 
-<details><summary>Open after discussion on zoom</summary>
-
 # Part 2
+
+<details><summary>Open after discussion on zoom</summary>
 
 5. Your analysis of deviance table to a model comparison with AIC/AICc/BIC. Do the two approaches give you the same or similar results?
 

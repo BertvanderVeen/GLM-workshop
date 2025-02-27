@@ -1,0 +1,105 @@
+---
+title: "Practical: Poisson and NB regression"
+subtitle: "Physalia workshop on GLMs"
+author: "Bert van der Veen"
+output: html_document
+---
+
+# Background
+
+Yesterday, we focused on binomial regression with either 1) a probit link or 2) a logit link. Binomial regression is suitable for counts of successes of failures, or more generally when we are modeling counts as part of a total. However, there are plenty of cases when there is no real total. When such a critical  property of a distribution or model does not align with the data we observe, we switch the model we use to better accommodate our data.
+
+When the counts have no upperbound, such as with stars in the night sky, or grains of sand on a beach, we use Poisson regression. In Poisson regression, we allow the counts to be unbounded, but still require the prediction to be larger than zero. To make sure of that, Poisson regression uses the log link function. Let's simulate an example with two continuous predictor variables to demonstrate this:
+
+```{r, fig.width = 10}
+x1 <- rnorm(100, sd = 0.5)
+x2 <- runif(100, -1, 1)
+eta <- 1-2*x1-0.5*x2
+lambda <- exp(eta)
+(y <- rpois(100, lambda))
+hist(y)
+```
+
+And we fit a Poisson GLM:
+
+```{r}
+(reg <- glm(y ~ x1 + x2, family = poisson))
+```
+
+Besides the fact that we changed `family` to "poisson" in this practical, everything else still works pretty much the same as when we were fitting binomial regression.
+
+Poisson regression assumes that the mean and the variance of the distribution are the same. In real data, this is not always the case. When this assumption is violated, we can see that in the residual plots. The variance can be lower, or higher than what is assumed in the Poisson regression, which we call underdispersion and overdispersion, respectively. In real data, overdispersion is more common than underdispersion. It is also easier to account for.
+
+When we have overdispersion, we switch to a negative-binomial regression. Negative-binomial regression relaxes the Poisson assumption of equal mean and variance, for which it includes an additional dispersion parameter, so that the variance can be greater than the mean. We can simulate from a negative-binomial distribution to demonstrate this:
+
+```{r, fig.width = 10}
+(y2 <- rnbinom(100, mu = lambda, size = .1))
+hist(y2)
+```
+
+If we fit a Poisson regression to this negative-binomially distributed simulation $\textbf{y}_2$:
+
+```{r}
+(reg2 <- glm(y2 ~ x1 + x2, family = "poisson"))
+```
+
+and plot the residuals:
+
+```{r, fig.width = 10}
+plot(reg2, which = 1)
+```
+
+we see that they look poor. Typically, when there is overdispersion present in the model, residuals will "fan out", i.e., the spread increases, with the mean (the horizontal axis). This pattern is typical when there is an issue of overdispersion. Instead of looking at the residuals, an identifying overdispersion visually, we can also quantify the overdispersion with an overdispersion factor:
+
+```{r}
+deviance(reg2)/df.residual(reg2)
+```
+
+When this overdispersion factor is larger than 1, it is indicative of overdispersion, and provides another motivation for adjusting the model structure. Overdispersion biases the parameter estimates, and makes for too narrow confidence intervals. The `DHARMa` package, or the `performance` package have functions for testing overdispersion that can help you;  the `testDispersion` and `check_overdispersion` functions, respectively. 
+
+```{r}
+DHARMa::testDispersion(reg2)
+
+performance::check_overdispersion(reg2)
+```
+
+We can fit a negative-binomial regression, but we cannot do this with the `glm` function in R; we need the `glm.nb` function from the `MASS` package instead.
+
+```{r}
+(reg3 <- MASS::glm.nb(y2 ~ x1 + x2))
+```
+
+ 
+Overdispersion is always relative to the Poisson assumption, so it is not possible to have overdispersion in the negative-binomial model.
+
+# Datasets
+
+We will use different datasets than in the last practicals (except the Baseball example, that has both Poisson and Binomial variables!). You can find the datasets in the "data" folder of the github repository.
+
+1. [Horseshoecrabs](https://github.com/BertvanderVeen/GLM-workshop/blob/main/data/Horseshoecrabs.csv): Data on the number of male sattelites attracted by female horseshoecrabs, data used in the presentation today.
+2. [Roadkills](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/RoadKills.csv): Count of amphibian road kills (TOT.n) as a function of distance to a park (D.PARK), and other variables of the parks such as the amount of olive grooves, montado with and without shrubs, shrubs, urban area, water reservoirs, dirt road length, paved road length, distance to water reservoirs, water courses, and more.
+3. [Baseball](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/Baseball.csv)
+4. [Campus](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/Campus.csv)
+5. [Hurricanes](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/hurricanes.csv)
+
+# Part I
+
+Here is what I want you to do:
+
+1. Pick a dataset and fit a Poisson regression. You can also do model selection as we did yesterday.
+
+2. Examine the parameter estimates, standard errors, and confidence intervals from the model. Try to draw a conclusion of the effects.
+
+3. Check the residuals, and test with the `DHARMa` or `performance` packages if there is overdispersion.
+
+# Part II
+
+<details><summary>Open after discussion on zoom</summary>
+
+4. Fit a negative-binomial regression, check the residuals for improvement.
+
+5. Compare the parameter estimates and the confidence intervals from the negative-binomial regression with your previous Poisson regression. 
+
+6. Has your conclusion about the effects changed?
+
+</details>

@@ -157,9 +157,11 @@ Exploring and presenting results is a vital component to effectively using stati
 
 # Part II
 
+<details><summary>Open after discussion on zoom</summary>
+
 4. Either manually by manipulating the code above, or by using the `emmeans` or `marginaleffects` packages, retrieve results for pairwise comparisons of the groups
 
- 
+ </details>
  
  
  

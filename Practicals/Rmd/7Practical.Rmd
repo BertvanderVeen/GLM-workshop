@@ -122,9 +122,9 @@ Here is what I want you to do:
 
 4. Now use `MuMin::dredge` and see if it finds the best model to be the same. If not, consider why that might be.
 
-<details><summary>Open after discussion on zoom</summary>
-
 # Part 2
+
+<details><summary>Open after discussion on zoom</summary>
 
 5. Repeat steps 1-3 with `AICc` and/or with `BIC`. Are there differences in the comparisons when you use a different information criteria?.
 

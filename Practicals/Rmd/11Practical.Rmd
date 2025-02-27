@@ -1,0 +1,92 @@
+---
+title: "Practical: residual diagnostics in GLMs"
+subtitle: "Physalia workshop on GLMs"
+author: "Bert van der Veen"
+output: html_document
+---
+
+# Background
+
+On the second day of the workshop we learned how to check if the assumptions of a linear regression model are met. We did this via residual diagnostics; plots that visualize the random component of the model. Generally, if we saw a pattern in those plots it means an assumptions was violated. Whether or not that posed a problem to our results depended on the particular assumption that was violated.
+
+The assumptions we make in a GLM are:
+
+- Independence of observations
+- The correct distribution is specified
+- The correct link function is used
+- The model is linear on the link-scale
+- The correct variance function is applied
+- No outliers
+- Lack of (perfect) multicollinearity
+
+Residual diagnostics in GLMs is harder than linear models. Because the residual term is not present in GLMs, the concept of "error" works a bit different. Further, because of the sometimes discrete nature of the data in a GLM, the residual usually looks a bit odd. We can demonstrate this with the simulation from the last practical.
+
+```{r, fig.width = 10}
+x1 <- rnorm(100, sd = 0.5)
+x2 <- runif(100, -1, 1)
+eta <- 1-2*x1-0.5*x2
+lambda <- exp(eta)
+y <- rpois(100, lambda)
+```
+
+First, we need to fit a model to our data:
+
+```{r}
+model <- glm(y ~ x1 + x2, family = "poisson")
+```
+
+As in a multiple linear regression, we could use the `plot` function to look at the residuals. By default, the `plot` function will create plots with Pearson residuals for GLMs. For pedagogical purposes, I here choose to manually create a residuals versus fitted plot, so we can compare a few types residuals alongside each other. The `residuals.glm` function has a `type` argument that specifies the type of residual used, with options "deviance", "pearson", "working", "response", and "partial". Partial residuals are defined per covariate to help spot issues with particular covariates, or the relationship between the response variable and particular covariates, so I choose not to look at those here. Working residuals are the difference between the data and the prediction, as in a linear model. More residual types exist, such as the Anscbome residual, but we will limit ourselves to the four aforementioned types.
+
+```{r, fig.width = 10}
+par(mfrow = c(1, 4))
+plot(residuals(model, type = "deviance")~predict(model))
+plot(residuals(model, type = "pearson")~predict(model))
+plot(residuals(model, type = "working")~predict(model))
+plot(residuals(model, type = "response")~predict(model))
+```
+
+
+
+From the plots  we can see that the deviance and pearson residuals show similar patterns, while the working and response residuals look a bit different, but overall all of the residuals show similar patterns. We do see some patterns; this is due to the discrete nature of the data and low sample size, which often makes checking residuals in GLMs difficult. 
+
+To mitigate this issue somewhat, a better idea is to use randomized quantile residuals (also called Dunn-Smyth residuals), as implemented in (amongst others) the `DHARMa` package:
+
+```{r, fig.width = 10}
+DHARMa::plotResiduals(model)
+```
+
+These residuals look much better, have better properties in small samples, and overall make checking GLM(M) assumptions much easier. More information about this `DHARMa` function can be found in `?DHARMa::plotResiduals`. Amongst other things, clarification of the black lines that are added for easier interpretation: the lines should be (somewhat) straight if the model is good, and significant deviations indicate lack of fit (in which case the lines will be shown in red).
+
+We can demonstrate this following the last practical, purposefully introducing overdispersion to our Poisson example:
+
+```{r, fig.width = 10}
+y2 <- rnbinom(100, mu = lambda, size = .1)
+model2 <- glm(y2 ~ x1 + x2, family = "poisson")
+DHARMa::plotResiduals(model2)
+```
+
+# Datasets
+
+We will use different datasets than in the last practicals (except the Baseball example, that has both Poisson and Binomial variables!). You can find the datasets in the "data" folder of the github repository.
+
+1. [Horseshoecrabs](https://github.com/BertvanderVeen/GLM-workshop/blob/main/data/Horseshoecrabs.csv): Data on the number of male sattelites attracted by female horseshoecrabs, data used in the presentation today.
+2. [Roadkills](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/RoadKills.csv): Count of amphibian road kills (TOT.n) as a function of distance to a park (D.PARK), and other variables of the parks such as the amount of olive grooves, montado with and without shrubs, shrubs, urban area, water reservoirs, dirt road length, paved road length, distance to water reservoirs, water courses, and more.
+3. [Baseball](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/Baseball.csv)
+4. [Campus](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/Campus.csv)
+5. [Hurricanes](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/hurricanes.csv)
+
+# Part I
+
+1. Fit a Poisson regression to one of the datasets.
+
+2. Plot the residuals using `plot` or a combination of `residuals` and `fitted`.
+
+3. Plot Dunn-Smyth residuals with the `DHARMa` package.
+
+# Part 2
+
+4. Fit a negative-binomial regression to the same dataset.
+
+5. Plot the residuals using `plot`.
+
+6. PLot the Dunn-Smyth residuals with the `DHARMa` package, hopefully things have improved!
