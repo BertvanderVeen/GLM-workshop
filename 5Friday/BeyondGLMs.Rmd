@@ -1,5 +1,5 @@
 ---
-title: "Beyond GLMs: Mixed-effects models"
+title: "Beyond GLMs: Mixed effects models"
 institute: "Department of Mathematical Sciences, NTNU"
 author: "Bert van der Veen"
 output: 
@@ -81,20 +81,9 @@ knitr::opts_chunk$set(echo = TRUE)
 4) \alt<2>{\textcolor{blue}{Perform inference}}{Perform inference}
 5) Write article
 
-## Outline
+## Recap
 
 - GLMs assume independence
-- Mixed-effects models for clustered observations
-
-# "Technicalities"
-
-```{r echo=F,out.width="50%", fig.align="center"}
-knitr::include_graphics("technical.jpg")
-```
-
-- We can formulate the same models
-- But now, effects are from a distribution
-- This allows us to incorporate correlation
 
 ## Recap Likelihood: independence
 
@@ -105,10 +94,49 @@ knitr::include_graphics("technical.jpg")
 
 We just multiply! (assumes independence)
 
+## What are random effects used for?
+
+- An effect is "unobserved" or "latent"
+- We do not want our model to "depend" on the effect
+- To account for pseudoreplication
+- Something that is nuisance (e.g., library depth when not measured)
+- To incorporate correlation between observations (space, time, individuals, genes, ...)
+- To estimate variation of an effect
+- To incorporate overdispersion
+- To estimate fixed effects at the "population level"
+
+There is more.
+
+# "Technicalities"
+
+## Why is it called a random effect?
+
+"Random" is in contract to "fixed"
+
+- Fixed effects we maximize
+- Random effects we marginalize
+
+Random effects are *random* or *stochastic*; like our data they come from a distribution
+
+\pause
+
+\textcolor{red}{Mixed effects means a model that incorporates both fixed and random effects}
+
+
+## "Technicalities"
+
+```{r echo=F,out.width="50%", fig.align="center"}
+knitr::include_graphics("technical.jpg")
+```
+
+- We can formulate the same models
+- But now, random effects are from a distribution
+- This allows us to incorporate correlation
+
 ## Our new likelihood
 
 \begin{equation}
-\mathcal{L}(\textbf{y};\symbf{\Sigma}) = \displaystyle \int \prod \limits^n_i f(y_i \vert \textbf{u}) f(\textbf{u};\symbf{\Sigma}) d\textbf{u}
+\mathcal{L}(\textbf{y};\symbf{\Sigma}, \Theta) = \displaystyle \int \prod \limits^n_i f(y_i ;\Theta\vert \textbf{u}) f(\textbf{u};\symbf{\Sigma}) d\textbf{u}
 \end{equation}
 
 - Fixed effects: what we had so far
@@ -119,7 +147,7 @@ We just multiply! (assumes independence)
 
 \textbf{Also notice that we cannot work with the log-likelihood here :(}
 
-## The mixed-effects model
+## The mixed effects model
 
 \begin{equation}
               \tikz[baseline,remember picture]{
@@ -200,15 +228,7 @@ We just multiply! (assumes independence)
 
 - it's the kind of thing as the fixed effects design matrix!
 
-## When to include a random effect
-
-- Unobserved effect vs. observed effect
-- To account for pseudo replication
-- Nuisance vs. of interest
-- If parameter comes from a population
-- To incorporate correlation
-
-## A linear mixed-effects model
+## A linear mixed effects model
 
 \begin{columns}
 \column{0.6\textwidth}
@@ -276,7 +296,7 @@ knitr::include_graphics("lmer_lemur_tim_doherty.jpg")
 
 
 
-## A linear mixed-effects model
+## A linear mixed effects model
 
 We can rewrite the model in terms of the complete error term.
 
@@ -315,8 +335,6 @@ knitr::include_graphics("lmer_lemur_tim_doherty.jpg")
   \only<2>{
   \textbf{So, we are including covariance between our errors in the model.}
   }
-
-# Fitting
 
 ## The objective function
 
@@ -361,6 +379,19 @@ we have the marginal distribution $\textbf{y} \sim \mathcal{N}(\textbf{X}\symbf{
 -->
 
 # Estimation
+
+We assume that the random effects follow a normal distribution:
+
+$$
+\textbf{u} \sim \mathcal{N}(\textbf{0}, \boldsymbol{\Sigma})
+$$
+However, we are really interested in $\boldsymbol{u}\vert\textbf{y}$ instead; this holds information from our data!
+
+- We want $f(\textbf{u}\vert\textbf{y})$ to be as flexible as possible
+- So we can capture the patterns in the data as accurately as possible
+
+## Estimation methods
+
 - Penalized quasi-likelihood methods
 - Adaptive GH quadrature
 - Laplace approximation
@@ -403,7 +434,7 @@ At the maximum of the likelihood:
 - Asymptotic covariance matrix is given by the inverse of the negative Hessian
 
 \begin{center}
-\textcolor{red}{These are important concepts to understand error messages and convergence in mixed-models.}
+\textcolor{red}{These are important concepts to understand error messages and convergence in mixed effects models.}
 \end{center}
 
 ## There are many \texttt{R}-packages
@@ -499,7 +530,7 @@ Now some examples of how it works in \texttt{R}. Generally:
 
 \center
 
-\textcolor{A few examples next}
+\textcolor{red}{A few examples next}
 
 ## Random intercepts
 
@@ -597,7 +628,7 @@ y ~ fixed effects + (random slope|random intercept)
 ```
 
 
-```{r, echo = FALSE, fig.height = 5, cache = TRUE}
+```{r, echo = FALSE, fig.height = 4.5, cache = TRUE}
 x <- rnorm(50)
 b <- sort(rnorm(5*2))
 
@@ -623,7 +654,7 @@ Originally by Roulin and Bersier (2007)
 
 \footnotesize
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
 library(glmmTMB)
 data(Owls)
 knitr::kable(Owls, format="latex", booktabs = T)
@@ -793,7 +824,7 @@ knitr::include_graphics("tangent.png")
 3. \textcolor{red}{Different starting values}
 4. Rethink your model
 
-## Mixed-effects model troubleshooting
+## Mixed effects model troubleshooting
 
 see \href{https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html}{Ben Bolker's GLMM FAQ}
 
@@ -1155,7 +1186,7 @@ plot(y=quant.resid, x=(1:4)[fac], main="Conditional residual vs. group", cex.lab
 
 \columnsend
 
-## Residual checking for mixed-models
+## Residual checking for mixed effects models
 
 - Check assumptions
   - Use both conditional and marginal residuals
@@ -1255,6 +1286,7 @@ t = \frac{
 
 ## Information criteria 
 
+- Information criteria do not work "on the boundary"
 - Not clear which measure of AIC works best (it depends)
 - As usual beware model selection bias (Freedman's paradox)
 - Generally proceed with caution
