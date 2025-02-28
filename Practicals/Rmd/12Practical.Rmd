@@ -92,7 +92,7 @@ hist(as.numeric(y3v))
 (model6 <- MASS::polr(y3v ~ x1 + x2))
 ```
 
-# Proportions
+## Proportions
 
 Proportion data might be a result of standardised binomially-distributed response, but where you forgot to write down the actual counts. There are also other cases where data might be between zero and one. Beta regression deals in such data:
 
@@ -134,12 +134,12 @@ You can choose from the following datasets:
 1. [lime](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/lime.csv): foliage measurements of small-leaved lime trees.
 2. [brachy](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/brachy.csv): cover class data for Brachythecium rutabulum with multiple covariates
 3. [r6data](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/R6data.csv): data of two plant species under low and high nitrate supply. Response is the proportion of biomass in roots ("LMF"), stems ("SMF"), and leaves ("LMF").
-5. [fish](https://stats.idre.ucla.edu/stat/data/fish.csv): fish caught by campers (with children or van).
-6. [mistletoe](https://github.com/BertvanderVeen/GLM-workshop/blob/main/data/MistletoeV2.csv): mistletoe infections in trees.
-7. [OralHealth](https://github.com/BertvanderVeen/GLM-workshop/blob/main/data/OralHealth.csv): decayed teeth in children.
-8. [wafer](https://github.com/BertvanderVeen/GLM-workshop/blob/main/data/wafer.csv) in faraway: wafer resitivity. 
-9. [chedder](https://github.com/BertvanderVeen/GLM-workshop/blob/main/data/cheddar.csv) taste of cheddar based on composition.
-10. Try one of the binomial datasets for a beta regression, or any of the count datasets for a zero-inflated regression.
+4. [fish](https://stats.idre.ucla.edu/stat/data/fish.csv): fish caught by campers (with children or van).
+5. [mistletoe](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/MistletoeV2.csv): mistletoe infections in trees.
+6. [OralHealth](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/OralHealth.csv): decayed teeth in children.
+7. [wafer](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/wafer.csv) in faraway: wafer resitivity. 
+8. [chedder](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/cheddar.csv) taste of cheddar based on composition.
+9. Try one of the binomial datasets for a beta regression, or any of the count datasets for a zero-inflated regression.
 
 # Part 1
 
@@ -151,3 +151,17 @@ Here, you can combine everything you have learned so far into the analysis of a 
 4) fit a model
 5) perform a model comparison
 6) find a valid model
+
+<details><summary>Open this for model suggestion per dataset</summary>
+
+1. Positive continuous data - Gamma, Inverse Gaussian, or Tweedie regression.
+2. Ordered categories - Ordinal regression .
+3. Continuous proportion data - Beta regression.
+4. Count data with excess zeros - Zero-inflated Poisson regression.
+5. Count data with excess zeros - Zero-inflated Poisson regression.
+6. Count data with excess zeros - Zero-inflated Poisson regression.
+7. Positive continuous data - Gamma, Inverse Gaussian, or Tweedie regression.
+8. Positive continuous data - Gamma, Inverse Gaussian, or Tweedie regression.
+9. The binomial data can be used to calculate a proportion and fit beta regression, the count data can be used for zero-inflated regression.
+
+</details>
