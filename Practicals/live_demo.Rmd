@@ -1,0 +1,233 @@
+---
+title: "Live demonstration"
+subtitle: "Physalia workshop on GLMs"
+author: "Bert van der Veen"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+- attempt at clean workflow
+- interpretation of coefficients
+- going through a complete analysis
+- prediction y vs. covariates to explore relationships
+- Generalized Aditive Models / Generalised Mixed effects Models / regularisation
+
+
+# Example 1
+
+```{r data}
+lime <- read.csv("https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/lime.csv")
+colnames(lime)
+head(lime) # First 5 rows
+tail(lime) # Last 5 rows
+lime$Origin <- as.factor(lime$Origin)
+View(lime) # Look at all of the data
+anyNA(lime) # NAs in DATA?
+apply(lime, 2, anyNA) # If so, which columns have NAs?
+```
+
+
+```{r visual_exploration, fig.width = 10}
+hist(lime$Foliage, breaks = 100)
+min(lime$Foliage) # check if there are hard zeros; no
+
+par(mfrow = c(1, 3))
+plot(log(Foliage) ~ DBH, data = lime)
+plot(log(Foliage) ~ Age, data = lime)
+plot(log(Foliage) ~ Origin, data = lime)
+
+par(mfrow=c(1,1))
+plot(log(Foliage) ~ DBH, data = lime, col = Origin, pch = as.numeric(Origin))
+
+cor(lime$DBH, lime$Age) # woops, collinearity
+```
+
+```{r fitting}
+model1 <- glm(Foliage ~ DBH + Origin, family = Gamma(link=log), data = lime)
+model2 <- glm(Foliage ~ DBH*Origin, family = Gamma(link=log), data = lime)
+model3 <- glm(Foliage ~ DBH:Origin, family = Gamma(link=log), data = lime)
+model4 <- glm(Foliage ~ DBH + DBH:Origin, family = Gamma(link=log), data = lime)
+model5 <- glm(Foliage ~ DBH + DBH:Origin + I(DBH^2) + I(DBH^2):Origin, family = Gamma(link=log), data = lime)
+model6 <- glm(Foliage ~ log(DBH) + log(DBH):Origin, family = Gamma(link=log), data = lime)
+model7 <- glm(Foliage ~ log(DBH)*Origin, family = Gamma(link=log), data = lime)
+model8 <- glm(Foliage ~ log(DBH) + I(log(DBH)^2) + log(DBH):Origin + I(log(DBH)^2):Origin, family = Gamma(link=log), data = lime)
+
+model9 <- glm(Foliage ~ log(DBH)*Origin, data = lime, family = gaussian(link = log))
+
+model10 <- list()
+model10$logLik <- -Inf
+xi <- seq(1.01, 2, length.out=1000)
+for(i in xi){
+modelnew <- glm(Foliage ~ log(DBH)*Origin, data = lime, family = statmod::tweedie(var.power = i, link.power = 0))
+modelnew$xi <- i
+modelnew$logLik <- tweedie::logLiktweedie(modelnew)
+if(model10$logLik<modelnew$logLik)model10 <- modelnew
+}
+model10$xi
+
+model11 <- list()
+model11$logLik <- -Inf
+xi <- seq(1.01, 2, length.out=1000)
+for(i in xi){
+modelnew <- glm(Foliage ~ log(DBH) + I(log(DBH)^2) + log(DBH):Origin + I(log(DBH)^2):Origin, data = lime, family = statmod::tweedie(var.power = i, link.power = 0))
+modelnew$xi <- i
+modelnew$logLik <- tweedie::logLiktweedie(modelnew)
+if(model11$logLik<modelnew$logLik)model11 <- modelnew
+}
+model11$xi
+
+summary(model11)
+
+AICs <- AIC(model1, model2, model3, model4, model5, model6, model7, model8, model9)
+
+tweedie::AICtweedie(model10)
+tweedie::AICtweedie(model11)
+```
+
+```{r visualization_prediction_interpolate}
+DBHnew = seq(min(lime$DBH), max(lime$DBH), length.out = 1000)
+OriginNew = factor(c("Coppice", "Natural", "Planted"))
+dataPredict <- expand.grid(DBH = DBHnew, Origin = OriginNew)
+predictions <- predict(model10, newdata = dataPredict, se.fit = TRUE)
+fit <- exp(predictions$fit)
+UI <- exp(predictions$fit + 1.96*predictions$se.fit)
+LI <- exp(predictions$fit - 1.96*predictions$se.fit)
+
+plot(Foliage ~ DBH, data = lime, col = Origin, pch = as.numeric(Origin))
+lines(fit[dataPredict$Origin == "Coppice"]~DBHnew, col = 1, lwd = 2)
+
+lines(UI[dataPredict$Origin == "Coppice"]~DBHnew, col = 1, lty = "dashed")
+lines(LI[dataPredict$Origin == "Coppice"]~DBHnew, col = 1, lty = "dotted")
+
+lines(fit[dataPredict$Origin == "Natural"]~DBHnew, col = 2, lwd = 2)
+
+lines(UI[dataPredict$Origin == "Natural"]~DBHnew, col = 2, lty = "dashed")
+lines(LI[dataPredict$Origin == "Natural"]~DBHnew, col = 2, lty = "dotted")
+
+lines(fit[dataPredict$Origin == "Planted"]~DBHnew, col = 3, lwd = 2)
+
+lines(UI[dataPredict$Origin == "Planted"]~DBHnew, col = 3, lty = "dashed")
+lines(LI[dataPredict$Origin == "Planted"]~DBHnew, col = 3, lty = "dotted")
+# Black = Coppice
+# Red = Natural
+# Green = Planted
+
+# log-scale plot
+predictions <- predict(model10, newdata = dataPredict, se.fit = TRUE)
+fit <- predictions$fit
+UI <- predictions$fit + 1.96*predictions$se.fit
+LI <- predictions$fit - 1.96*predictions$se.fit
+
+plot(log(Foliage) ~ DBH, data = lime, col = Origin, pch = as.numeric(Origin))
+lines(fit[dataPredict$Origin == "Coppice"]~DBHnew, col = 1, lwd = 2)
+
+lines(UI[dataPredict$Origin == "Coppice"]~DBHnew, col = 1, lty = "dashed")
+lines(LI[dataPredict$Origin == "Coppice"]~DBHnew, col = 1, lty = "dotted")
+
+lines(fit[dataPredict$Origin == "Natural"]~DBHnew, col = 2, lwd = 2)
+
+lines(UI[dataPredict$Origin == "Natural"]~DBHnew, col = 2, lty = "dashed")
+lines(LI[dataPredict$Origin == "Natural"]~DBHnew, col = 2, lty = "dotted")
+
+lines(fit[dataPredict$Origin == "Planted"]~DBHnew, col = 3, lwd = 2)
+
+lines(UI[dataPredict$Origin == "Planted"]~DBHnew, col = 3, lty = "dashed")
+lines(LI[dataPredict$Origin == "Planted"]~DBHnew, col = 3, lty = "dotted")
+```
+
+```{r residual_check}
+b <- tweedie::ptweedie(lime$Foliage, mu = predict(model10, type = "response"), phi = summary(model10)$dispersion, xi = model10$xi)
+a <- pmin(b, tweedie::ptweedie(lime$Foliage - 1, mu = predict(model10, type = "response"), phi = summary(model10)$dispersion, xi = model10$xi))
+
+anew =  ifelse((lime$Foliage - 1)<0, 0, a)
+u = anew+(b-anew)*runif(nrow(lime))
+
+if(any(u==1, na.rm = TRUE))u[u==1] <- 1-1e-16
+if(any(u==0, na.rm = TRUE))u[u==0] <- 1e-16
+ds.res <- qnorm(u)
+
+plot(predict(model10), u, ylab = "DS residuals")
+
+# Explore outlier
+lime[order(ds.res,decreasing=TRUE)[1],]
+
+qqnorm(ds.res)
+qqline(ds.res)
+
+plot(DHARMa::simulateResiduals(model7))
+```
+
+```{r posthoc}
+emmeans::emtrends(model10, ~Origin | DBH, var = "log(DBH)")
+```
+
+```{r gam}
+library(mgcv)
+model11 <- gam(Foliage ~ s(DBH, by = Origin), family = Gamma(link=log), data = lime)
+plot(model11)
+```
+
+# Example 2
+
+```{r}
+fish <- read.csv("https://stats.idre.ucla.edu/stat/data/fish.csv")
+colnames(fish)
+head(fish) # First 5 rows
+tail(fish) # Last 5 rows
+View(fish) # Look at all of the data
+anyNA(fish) # NAs in DATA?
+apply(fish, 2, anyNA) # If so, which columns have NAs?
+```
+
+```{r visualization_exploratory}
+hist(fish$count, breaks = 100)
+fish[fish$count>100,] # outlier
+plot(log1p(count) ~ livebait, data = fish)
+plot(log1p(count) ~ child, data = fish)
+plot(log1p(count) ~ nofish, data = fish)
+plot(log1p(count) ~ camper, data = fish)
+plot(log1p(count) ~ persons, data = fish)
+plot(log1p(count) ~ xb, data = fish)
+plot(log1p(count) ~ zg, data = fish)
+plot(livebait ~ camper, data = fish)
+```
+
+```{r fitting, fig.width = 10}
+zimodel1 <- glm(count ~ camper + persons, family = poisson, data = fish)
+deviance(zimodel1)/df.residual(zimodel1)
+DHARMa::testZeroInflation(zimodel1)
+
+library(glmmTMB)
+zimodel2 <- glmmTMB(count ~ camper + persons, data = fish, family = nbinom2)
+zimodel3 <- glmmTMB(count ~ camper + persons, data = fish, family = poisson, ziformula = ~1)
+AIC(zimodel2, zimodel3)
+DHARMa::testOverdispersion(zimodel3)
+
+zimodel4 <- glmmTMB(count ~ camper + persons + child + xb, data = fish, family = nbinom2)
+zimodel5 <- glmmTMB(count ~ camper + persons + child + xb, data = fish, family = poisson, ziformula = ~1)
+AIC(zimodel4, zimodel5)
+
+DHARMa::plotResiduals(zimodel4)
+DHARMa::plotResiduals(zimodel5)
+
+zimodel6 <- glmmTMB(count ~ camper + persons + child + xb, data = fish, family = nbinom2, ziformula = ~1)
+DHARMa::plotResiduals(zimodel6)
+
+zimodel7 <- glmmTMB(count ~ camper + persons + child + offset(xb), data = fish, family = nbinom2)
+AIC(zimodel4, zimodel5, zimodel6, zimodel7)
+
+plot(DHARMa::simulateResiduals(zimodel4))
+DHARMa::plotResiduals(zimodel4, rank = FALSE)
+
+plot(residuals(zimodel4)~predict(zimodel4))
+plot(residuals(zimodel4)~fish$count)
+
+zimodel8 <- glmmTMB(count ~ camper + persons + child + offset(xb) + zg, data = fish[-89,], family = nbinom2, ziformula = ~1)
+plot(residuals(zimodel8)~fish$count[-89])
+DHARMa::plotResiduals(zimodel8, quantreg = FALSE)
+
+hist(fish[-89,][which(residuals(zimodel8)<=(-5)|residuals(zimodel8)>5),"count"])
+zimodel8b <- glmmTMB(count ~ camper + persons + child + offset(xb) + zg, data = fish[-89,][-which(residuals(zimodel8)<=(-5)|residuals(zimodel8)>5), ], family = nbinom2, ziformula = ~1)
+```
+
