@@ -1,6 +1,6 @@
 ---
 title: "Introduction to Linear Models"
-institute: "Department of Mathematical Sciences, NTNU"
+institute: "University of Bayreuth"
 author: "Bert van der Veen"
 output: 
   beamer_presentation:
@@ -146,7 +146,7 @@ f(y_i;\mu, \sigma) = \frac{1}{\sigma\sqrt{2\pi}}\exp\biggl\{\frac{(y_i-\mu)^2}{2
 
 log-Likelihood:
 \begin{equation}
-\log\{f(y_i;\mu, \sigma)\} = -\frac{1}{2}\log(\sigma^22\pi) -\frac{(y_i-\mu)^2}{2\sigma^2}
+\log\{f(y_i;\mu, \sigma)\} = -\frac{1}{2}\log(2\pi\sigma^2) -\frac{(y_i-\mu)^2}{2\sigma^2}
 \end{equation}
 Two parameters: $\mu$ and $\sigma$
 
@@ -179,7 +179,7 @@ Same process as before. MLE is biased so gets a small correction.
 \hat{\sigma}^2 = \frac{1}{n-1}\sum \limits^n_{i=1}(y_i-\hat{\mu})^2
 \end{equation}
 
-Is it a quadratic function of $y_i$ so is $\chi^2$-distributed.
+It is a quadratic function of $y_i$ so is $\chi^2$-distributed.
 
 ## Uncertainty of $\hat{\mu}$
 
@@ -250,15 +250,15 @@ knitr::kable(head(alaska.pipeline, 7), format="latex", booktabs = T)%>%kableExtr
 
 \normalsize
 
-## Alaska pipline: t-test
+## Alaska pipeline: t-test
 
 
 ```{r, echo = TRUE, eval = FALSE}
-t.test(alaska.pipeline$field.defect, 
+t.test(alaska.pipeline$field.defect,
        alaska.pipeline$lab.defect, paired=TRUE)
 ```
 
-## Alaska pipline: t-test output
+## Alaska pipeline: t-test output
 
 \small
 
@@ -315,7 +315,7 @@ They all refer to $x_i$.
 
 ## What is the goal of regression?
 
-We measure data $y_i$ and want to infer its with $x_i$
+We measure data $y_i$ and want to infer its relationship with $x_i$
 
 Steps:
 
@@ -401,7 +401,7 @@ Sounds familiar to the t-test?
 - t-test is a type of linear regression
 - Namely where we have a categorical covariate with two categories
 
-## Alaska pipline: t-test as linear regression
+## Alaska pipeline: t-test as linear regression
 
 $$
 depth_i =
@@ -414,7 +414,7 @@ $$
 
 So, $\beta$ is how much deeper (-) or less deep (+) the defect is detected when measured in the lab
 
-## Alaska pipline: t-test with `lm()`
+## Alaska pipeline: t-test with `lm()`
 
 \tiny
 
@@ -543,7 +543,7 @@ We make some critical assumptions here
 \end{equation}
 
 - are normally distributed
-- have constant variance ("Homoscedastcity")
+- have constant variance ("Homoscedasticity")
 - are independent
 - no outliers
 

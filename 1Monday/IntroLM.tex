@@ -2,18 +2,16 @@
 \PassOptionsToPackage{unicode}{hyperref}
 \PassOptionsToPackage{hyphens}{url}
 \PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
-%
 \documentclass[
   ignorenonframetext,
 ]{beamer}
+\newif\ifbibliography
 \usepackage{pgfpages}
 \setbeamertemplate{caption}[numbered]
 \setbeamertemplate{caption label separator}{: }
 \setbeamercolor{caption name}{fg=normal text.fg}
 \beamertemplatenavigationsymbolsempty
-% Prevent slide breaks in the middle of a paragraph
-\widowpenalties 1 10000
-\raggedbottom
+% remove section numbering
 \setbeamertemplate{part page}{
   \centering
   \begin{beamercolorbox}[sep=16pt,center]{part title}
@@ -22,16 +20,19 @@
 }
 \setbeamertemplate{section page}{
   \centering
-  \begin{beamercolorbox}[sep=12pt,center]{part title}
+  \begin{beamercolorbox}[sep=12pt,center]{section title}
     \usebeamerfont{section title}\insertsection\par
   \end{beamercolorbox}
 }
 \setbeamertemplate{subsection page}{
   \centering
-  \begin{beamercolorbox}[sep=8pt,center]{part title}
+  \begin{beamercolorbox}[sep=8pt,center]{subsection title}
     \usebeamerfont{subsection title}\insertsubsection\par
   \end{beamercolorbox}
 }
+% Prevent slide breaks in the middle of a paragraph
+\widowpenalties 1 10000
+\raggedbottom
 \AtBeginPart{
   \frame{\partpage}
 }
@@ -44,7 +45,6 @@
 \AtBeginSubsection{
   \frame{\subsectionpage}
 }
-\usepackage{amsmath,amssymb}
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[T1]{fontenc}
@@ -75,8 +75,6 @@
 }{% if KOMA class
   \KOMAoptions{parskip=half}}
 \makeatother
-\usepackage{xcolor}
-\newif\ifbibliography
 \usepackage{color}
 \usepackage{fancyvrb}
 \newcommand{\VerbBar}{|}
@@ -119,21 +117,22 @@
 \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 \usepackage{graphicx}
 \makeatletter
-\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
-\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
-\makeatother
-% Scale images if necessary, so that they will not overflow the page
-% margins by default, and it is still possible to overwrite the defaults
-% using explicit options in \includegraphics[width, height, ...]{}
-\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
 % Set default figure placement to htbp
-\makeatletter
 \def\fps@figure{htbp}
 \makeatother
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
 \newcommand{\columnsbegin}{\begin{columns}}
 \newcommand{\columnsend}{\end{columns}}
 \makeatletter
@@ -186,9 +185,6 @@
 \usepackage[normalem]{ulem}
 \usepackage{makecell}
 \usepackage{xcolor}
-\ifLuaTeX
-  \usepackage{selnolig}  % disable illegal ligatures
-\fi
 \usepackage{bookmark}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
@@ -205,7 +201,7 @@
 \title{Introduction to Linear Models}
 \author{Bert van der Veen}
 \date{}
-\institute{Department of Mathematical Sciences, NTNU}
+\institute{University of Bayreuth}
 
 \begin{document}
 \frame{\titlepage}
@@ -229,8 +225,10 @@
 \columnsbegin
 \column{0.5\textwidth}
 
-\includegraphics{IntroLM_files/figure-beamer/unnamed-chunk-2-1.pdf}
-\column{0.5\textwidth} \includegraphics{grassland.jpeg} \columnsend
+\pandocbounded{\includegraphics[keepaspectratio]{IntroLM_files/IntroLM_files/figure-beamer/unnamed-chunk-2-1.pdf}}
+\column{0.5\textwidth}
+\pandocbounded{\includegraphics[keepaspectratio]{IntroLM_files/grassland.jpeg}}
+\columnsend
 \end{frame}
 
 \begin{frame}[fragile]{The orchids example}
@@ -250,8 +248,10 @@
 \columnsbegin
 \column{0.5\textwidth}
 
-\includegraphics{IntroLM_files/figure-beamer/unnamed-chunk-4-1.pdf}
-\column{0.5\textwidth} \includegraphics{grassland.jpeg} \columnsend
+\pandocbounded{\includegraphics[keepaspectratio]{IntroLM_files/IntroLM_files/figure-beamer/unnamed-chunk-4-1.pdf}}
+\column{0.5\textwidth}
+\pandocbounded{\includegraphics[keepaspectratio]{IntroLM_files/grassland.jpeg}}
+\columnsend
 \end{frame}
 
 \begin{frame}{The orchids example}
@@ -265,7 +265,7 @@ conditions
 
 \begin{frame}{Normal approximation}
 \phantomsection\label{normal-approximation}
-\includegraphics{IntroLM_files/figure-beamer/unnamed-chunk-5-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{IntroLM_files/IntroLM_files/figure-beamer/unnamed-chunk-5-1.pdf}}
 \end{frame}
 
 \begin{frame}{Normality}
@@ -276,7 +276,8 @@ conditions
 \textbf{Real data is rarely normally distributed.}\newline But it is a
 nice starting point when learning GLMs.\newline We can use it (e.g.,)
 when the mean is far enough from zero. \column{0.5\textwidth} \centering
-\includegraphics{normal.jpeg} \columnsend
+\pandocbounded{\includegraphics[keepaspectratio]{IntroLM_files/normal.jpeg}}
+\columnsend
 \end{frame}
 
 \section{\texorpdfstring{\(\mathcal{N}(\mu,\sigma^2)\)}{\textbackslash mathcal\{N\}(\textbackslash mu,\textbackslash sigma\^{}2)}}\label{mathcalnmusigma2}
@@ -295,7 +296,7 @@ f(y_i;\mu, \sigma) = \frac{1}{\sigma\sqrt{2\pi}}\exp\biggl\{\frac{(y_i-\mu)^2}{2
 \end{equation}
 
 log-Likelihood: \begin{equation}
-\log\{f(y_i;\mu, \sigma)\} = -\frac{1}{2}\log(\sigma^22\pi) -\frac{(y_i-\mu)^2}{2\sigma^2}
+\log\{f(y_i;\mu, \sigma)\} = -\frac{1}{2}\log(2\pi\sigma^2) -\frac{(y_i-\mu)^2}{2\sigma^2}
 \end{equation} Two parameters: \(\mu\) and \(\sigma\)
 
 \begin{itemize}
@@ -335,7 +336,7 @@ Same process as before. MLE is biased so gets a small correction.
 \hat{\sigma}^2 = \frac{1}{n-1}\sum \limits^n_{i=1}(y_i-\hat{\mu})^2
 \end{equation}
 
-Is it a quadratic function of \(y_i\) so is \(\chi^2\)-distributed.
+It is a quadratic function of \(y_i\) so is \(\chi^2\)-distributed.
 \end{frame}
 
 \begin{frame}{Uncertainty of \(\hat{\mu}\)}
@@ -366,7 +367,7 @@ uncertainty.
 
 \begin{frame}{The t-distribution}
 \phantomsection\label{the-t-distribution}
-\includegraphics{IntroLM_files/figure-beamer/unnamed-chunk-6-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{IntroLM_files/IntroLM_files/figure-beamer/unnamed-chunk-6-1.pdf}}
 \end{frame}
 
 \begin{frame}[fragile]{The t-test}
@@ -417,7 +418,7 @@ Depth of pipeline defects
 
 \begin{figure}
 \centering
-\includegraphics{alaskapipeline.jpg}
+\pandocbounded{\includegraphics[keepaspectratio]{IntroLM_files/alaskapipeline.jpg}}
 \caption{insideclimatenews.org}
 \end{figure}
 \end{frame}
@@ -463,13 +464,13 @@ field.defect & lab.defect & batch\\
 \normalsize
 \end{frame}
 
-\begin{frame}[fragile]{Alaska pipline: t-test}
-\phantomsection\label{alaska-pipline-t-test}
+\begin{frame}[fragile]{Alaska pipeline: t-test}
+\phantomsection\label{alaska-pipeline-t-test}
 \begin{codebox}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{t.test}\NormalTok{(alaska.pipeline}\SpecialCharTok{$}\NormalTok{field.defect, }
+\FunctionTok{t.test}\NormalTok{(alaska.pipeline}\SpecialCharTok{$}\NormalTok{field.defect,}
 \NormalTok{       alaska.pipeline}\SpecialCharTok{$}\NormalTok{lab.defect, }\AttributeTok{paired=}\ConstantTok{TRUE}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -477,8 +478,8 @@ field.defect & lab.defect & batch\\
 \end{codebox}
 \end{frame}
 
-\begin{frame}[fragile]{Alaska pipline: t-test output}
-\phantomsection\label{alaska-pipline-t-test-output}
+\begin{frame}[fragile]{Alaska pipeline: t-test output}
+\phantomsection\label{alaska-pipeline-t-test-output}
 \small
 
 \begin{codebox}
@@ -502,7 +503,7 @@ field.defect & lab.defect & batch\\
 
 \begin{frame}{Alaska pipeline: t-test visually}
 \phantomsection\label{alaska-pipeline-t-test-visually}
-\includegraphics{IntroLM_files/figure-beamer/unnamed-chunk-11-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{IntroLM_files/IntroLM_files/figure-beamer/unnamed-chunk-11-1.pdf}}
 \end{frame}
 
 \section{Simple linear regression}\label{simple-linear-regression}
@@ -527,7 +528,7 @@ equations.
 
 \column{0.4\textwidth}
 
-\includegraphics{xy.png}
+\pandocbounded{\includegraphics[keepaspectratio]{IntroLM_files/xy.png}}
 
 \columnsend
 
@@ -555,7 +556,7 @@ They all refer to \(x_i\).
 
 \begin{frame}{What is the goal of regression?}
 \phantomsection\label{what-is-the-goal-of-regression}
-We measure data \(y_i\) and want to infer its with \(x_i\)
+We measure data \(y_i\) and want to infer its relationship with \(x_i\)
 
 Steps:
 
@@ -603,7 +604,7 @@ Steps:
 
 \begin{frame}{Examples of linear models: categorical \(x_i\)}
 \phantomsection\label{examples-of-linear-models-categorical-x_i-1}
-\includegraphics{IntroLM_files/figure-beamer/unnamed-chunk-12-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{IntroLM_files/IntroLM_files/figure-beamer/unnamed-chunk-12-1.pdf}}
 
 \begin{itemize}
 \tightlist
@@ -616,7 +617,7 @@ Steps:
 
 \begin{frame}{Examples of linear models: categorical \(x_i\)}
 \phantomsection\label{examples-of-linear-models-categorical-x_i-2}
-\includegraphics{IntroLM_files/figure-beamer/unnamed-chunk-13-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{IntroLM_files/IntroLM_files/figure-beamer/unnamed-chunk-13-1.pdf}}
 
 \begin{itemize}
 \tightlist
@@ -642,8 +643,8 @@ Sounds familiar to the t-test?
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Alaska pipline: t-test as linear regression}
-\phantomsection\label{alaska-pipline-t-test-as-linear-regression}
+\begin{frame}{Alaska pipeline: t-test as linear regression}
+\phantomsection\label{alaska-pipeline-t-test-as-linear-regression}
 \[
 depth_i =
   \begin{cases}
@@ -657,8 +658,8 @@ So, \(\beta\) is how much deeper (-) or less deep (+) the defect is
 detected when measured in the lab
 \end{frame}
 
-\begin{frame}[fragile]{Alaska pipline: t-test with \texttt{lm()}}
-\phantomsection\label{alaska-pipline-t-test-with-lm}
+\begin{frame}[fragile]{Alaska pipeline: t-test with \texttt{lm()}}
+\phantomsection\label{alaska-pipeline-t-test-with-lm}
 \tiny
 
 \begin{codebox}
@@ -693,7 +694,7 @@ detected when measured in the lab
 
 \begin{frame}{Examples of linear models: continuous \(x_i\)}
 \phantomsection\label{examples-of-linear-models-continuous-x_i}
-\includegraphics{IntroLM_files/figure-beamer/reg-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{IntroLM_files/IntroLM_files/figure-beamer/reg-1.pdf}}
 
 \(y_i = \textcolor{darkorange}{\alpha} + x_i\beta + \textcolor{blue}{\epsilon_i\sim \mathcal{N}(0,\sigma^2)}\)
 
@@ -707,7 +708,7 @@ detected when measured in the lab
 
 \begin{frame}{Examples of linear models: continuous \(x_i\)}
 \phantomsection\label{examples-of-linear-models-continuous-x_i-1}
-\includegraphics{IntroLM_files/figure-beamer/reg2-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{IntroLM_files/IntroLM_files/figure-beamer/reg2-1.pdf}}
 
 \(y_i = \alpha + x_i\textcolor{darkorange}{\beta} + \textcolor{blue}{\epsilon_i\sim \mathcal{N}(0,\sigma^2)}\)
 
@@ -760,12 +761,12 @@ lab.defect_i &= \textcolor{red}{\alpha + field.defect_i *\beta} + \textcolor{blu
 
 \begin{frame}{What is the best line?}
 \phantomsection\label{what-is-the-best-line}
-\includegraphics{IntroLM_files/figure-beamer/norm2-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{IntroLM_files/IntroLM_files/figure-beamer/norm2-1.pdf}}
 \end{frame}
 
 \begin{frame}{How good is the line?}
 \phantomsection\label{how-good-is-the-line}
-\includegraphics{IntroLM_files/figure-beamer/norm-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{IntroLM_files/IntroLM_files/figure-beamer/norm-1.pdf}}
 
 Distance from model (line) to data: ``error''
 \(\textcolor{blue}{\epsilon_i}\)
@@ -832,7 +833,7 @@ We make some critical assumptions here
 \item
   are normally distributed
 \item
-  have constant variance (``Homoscedastcity'')
+  have constant variance (``Homoscedasticity'')
 \item
   are independent
 \item
