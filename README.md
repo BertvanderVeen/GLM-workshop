@@ -18,7 +18,7 @@ Please make sure to update your R installation prior to the workshop. Most of th
 ## PROGRAM
 Sessions from 14:00 to 20:00 (Monday to Thursday), 14:00 to 18:00 on Friday (Berlin time). Sessions will consist of a mix of lectures, in-class discussion, and practical exercises / case studies over Slack and Zoom.
 
-### Monday
+## Monday
 On the first day we will go through R basics and background theory of frequentist statistics to build a foundation for the rest of the workshop.
 * Brief reminder of R programming
 * Reminder of foundational statistical concepts
@@ -34,7 +34,7 @@ On the first day we will go through R basics and background theory of frequentis
 * Multiple linear regression
 * Model validation
 * Introduction to GLMs
-* Visualizing outputs
+* Visualising predictions
 
 [First presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/2Tuesday/MultipleRegression.pdf)
 
@@ -82,11 +82,11 @@ On the first day we will go through R basics and background theory of frequentis
 # Detailed schedule
 |   Day   |Time         |Subject                                                |
 |---------|-------------|-------------------------------------------------------|
-|Monday   |14:00 - 15:00| Introduction, getting started                         |
-|         |15:00 - 15:45| Recap R (coding)                                      |
-|         |15:45 - 16:00| Break                                                 |
-|         |16:00 - 16:45| Sampling theory and Maximum likelihood estimation     |
-|         |16:45 - 17:45| Practical 1: Sampling and variance                    |
+|Monday   |14:00 - 14:30| Introduction, getting started                         |
+|         |14:30 - 15:15| Recap R (coding)                                      |
+|         |15:15 - 16:00| Sampling theory and Maximum likelihood estimation     |
+|         |16:00 - 16:15| Break                                                 |
+|         |16:15 - 17:45| Practical 1: Sampling and variance                    |
 |         |17:45 - 18:30| Break                                                 |
 |         |18:30 - 19:15| Introduction to Linear models                         |
 |         |19:15 - 20:00| Practical 2: Simple linear regression                 |
@@ -105,14 +105,14 @@ On the first day we will go through R basics and background theory of frequentis
 |         |15:30 - 16:15| Model comparison                                      |
 |         |16:15 - 16:30| Break                                                 |
 |         |16:30 - 17:15| Practical 7: Model comparison: exploratory            |  
-|         |17:15 -      | P-values                                              |
-|         |      - 17:45| $R^2$                                                 |
+|         |17:15 - 17:45| P-values                                              |
 |         |17:45 - 18:30| Break                                                 |
-|         |18:30 - 19:15| Practical 8: Model comparison: confirmatory           |
-|         |19:15 - 20:00| Practical 9: Pairwise comparisons (extra)             |
+|         |18:30 - 19:00| $R^2$                                                 |
+|         |19:00 - 20:00| Practical 8: Model comparison: confirmatory           |
+|         |             | Practical 9: Pairwise comparisons (extra)             |
 |---------|-------------|-------------------------------------------------------|
 |Thursday |14:00 - 14:45| Models for unbounded count data                       |
-|         |15:00 - 16:00| Practical 10: log-linear regression                   | <!--get people to interpret/discuss the results with CIs, try a genomics  dataset for the exercise -->
+|         |14:45 - 16:00| Practical 10: log-linear regression                   | <!--get people to interpret/discuss the results with CIs, try a genomics  dataset for the exercise -->
 |         |16:00 - 16:15| Break                                                 |
 |         |16:15 - 17:00| Model validation                                      |
 |         |17:00 - 17:45| Practical 11: Residuals diagnostics in GLMs           |
