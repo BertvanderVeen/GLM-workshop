@@ -1,6 +1,6 @@
 ---
 title: "Sampling and maximum likelihood estimation"
-institute: "Department of Mathematical Sciences, NTNU"
+institute: "University of Bayreuth"
 author: "Bert van der Veen"
 output: 
   beamer_presentation:
@@ -258,7 +258,7 @@ mean(y/n.picks)
 
 # MLE
 
-## Estimating parameters and quatifying uncertainty
+## Estimating parameters and quantifying uncertainty
 
 \columnsbegin
 \column{0.5\textwidth}
@@ -364,7 +364,7 @@ plot(sapply(phat, ll, n.picks = n.picks, y = y),
      x = phat, type = "l", xlab=expression(hat(p)), ylab="Likelihood")
 ```
 
-## Maximising the likelhood
+## Maximising the likelihood
 
 Trying many values (grid) is very inefficient
 
@@ -490,8 +490,15 @@ optimize(ll, n.picks = n.picks, y=y,
 
 (an estimate of) Width of the likelihood:
 \begin{equation}
-\frac{\partial^2\log\{\mathcal{L}(\textbf{y};n_{picks})\}}{\partial p^2} = -\sum \limits^{n_{times}}_{i=1} \frac{y_i}{p^2}+\frac{n_{picks}-y_i}{(1-p)^2} 
+\frac{\partial^2\log\{\mathcal{L}(\textbf{y};n_{picks})\}}{\partial p^2} = -\sum \limits^{n_{times}}_{i=1} \frac{y_i}{p^2}+\frac{n_{picks}-y_i}{(1-p)^2}
 \end{equation}
+
+<!-- At the MLE, sum(y_i) = n_total * hat{p}, so each term simplifies:
+     sum(y_i) / hat{p}^2  =  n_total / hat{p}
+     (n_total - sum(y_i)) / (1-hat{p})^2  =  n_total / (1-hat{p})
+     Together: n_total * [1/hat{p} + 1/(1-hat{p})] = n_total / [hat{p}*(1-hat{p})]
+     => SE = sqrt( hat{p}*(1-hat{p}) / n_total )
+     This equals the exact variance of hat{p} from the Binomial distribution. -->
 
 \vspace*{-\baselineskip}
 
@@ -507,6 +514,24 @@ points(x=p$maximum, y=p$objective,col="red")
 abline(v=p$maximum+1.96*se, col="red")
 abline(v=p$maximum-1.96*se, col="red")
 ```
+
+## The Central Limit Theorem
+
+<!-- Replacing y_i by its expectation E[y_i] = n_picks*p in the observed Fisher information
+     gives the expected Fisher information I(p) = n_times*n_picks / [p*(1-p)],
+     which is where the true p in the CLT variance comes from. -->
+
+In the limit as $n_{times} \to \infty$:
+
+\begin{equation}
+\hat{p} \sim \mathcal{N}\!\left(p,\; \frac{p(1-p)}{n_{times}\cdot n_{picks}}\right) \nonumber
+\end{equation}
+
+\pause
+
+- Precision grows with more field visits \textit{and} more picks per visit
+- Underpins the $\hat{p} \pm 1.96\,\text{SE}$ confidence interval
+- Breaks down when $n$ is small or $p$ is near 0 or 1
 
 ## Putting it all together
 
@@ -532,9 +557,9 @@ abline(v=p$maximum-1.96*se, col="red")
 
 ## 95% Confidence intervals
 
-Estimate of the range that the true parameter will fall in 95% of the time. 
+Estimate of the range that the true parameter will fall in 95% of the time.
 
-Different methods exist. Based on MLE not quite correct for the Binomial distribution due to **assumptions**.
+Different methods exist. The $\hat{p} \pm 1.96\,\text{SE}$ interval is not always correct for the Binomial distribution — the **normal approximation** for $\hat{p}$ breaks down when $n$ is small or $p$ is near 0 or 1.
 
 ## Why not?
 
@@ -543,7 +568,7 @@ set.seed(12345)
 p.orchid = 0.01
 n.times <- 10
 n.picks =10
-y <- rbinom(n.times, size = n.picks, prob = p.orchid) 
+y <- rbinom(n.times, size = n.picks, prob = p.orchid)
 ```
 
 ```{r, cache = TRUE, echo = FALSE, fig.height = 6}
@@ -566,7 +591,7 @@ set.seed(12345)
 p.orchid = 0.99
 n.times <- 10
 n.picks =10
-y <- rbinom(n.times, size = n.picks, prob = p.orchid) 
+y <- rbinom(n.times, size = n.picks, prob = p.orchid)
 ```
 
 ```{r, cache = TRUE, echo = FALSE, fig.height = 6}
@@ -603,7 +628,7 @@ is a linear combination of $y_i \sim Binom(1,p)$, from which we know $\biggl(\su
 
 \pause
 
-From this we also know $\text{var}(\hat{p}) = \frac{p(1-p)}{n_{times}}$, which gives us a better standard error!
+From this we also know $\text{var}(\hat{p}) = \frac{p(1-p)}{n_{times}}$.
 
 ## Improved CI for $\hat{p}$ (1)
 
