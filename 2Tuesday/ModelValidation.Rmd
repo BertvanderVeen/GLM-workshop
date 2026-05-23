@@ -1,6 +1,6 @@
 ---
 title: "Model validation"
-institute: "Department of Mathematical Sciences, NTNU"
+institute: "University of Bayreuth"
 author: "Bert van der Veen"
 output: 
   beamer_presentation:
@@ -82,7 +82,7 @@ Our models make assumptions. Sometimes, these are realistic.
 
 *All models are wrong, but some are useful*
 
-Is is important to:
+It is important to:
 
 - Know which assumptions your model makes
 - Consider if they are realistic
@@ -133,7 +133,7 @@ Tests:
 - Score test for non-constant error variance `car::ncvTest`
 - Durbin-Watson test for Autocorrelated errors `car::durbinWatsonTest`
 - Bonferroni outlier test `car::outlierTest` 
-- Shapiro-Wilk normality test `shapiro.est`
+- Shapiro-Wilk normality test `shapiro.test`
 
 Rather: **Residual plots**
 
@@ -252,13 +252,13 @@ segments(x0 = anscombe$x4, x1 = anscombe$x4, y0= predict(model4), y1=anscombe$y4
 
 ## Leverage: hat matrix
 
-$$\hat{\mu}_i = \hat{\alpha} - \sum \limits^n_{i=1}x_{ik}\hat{\beta}$$
+$$\hat{\mu}_i = \hat{\alpha} + \sum \limits^n_{i=1}x_{ik}\hat{\beta}$$
 but we can also write:
 
 $\hat{\boldsymbol{\mu}} = \textbf{H}\textbf{y}$
 
 - $\textbf{H}$ is the "hat" matrix
-- $\textbf{H} = \textbf{X}(\textbf{X}^\top\textbf{X})^{-1}\textbf{X}^\top\textbf{y}$
+- $\textbf{H} = \textbf{X}(\textbf{X}^\top\textbf{X})^{-1}\textbf{X}^\top$
 - Its diagonal gives "leverage" and is between 0 and 1
 - Leverage: observation that is far from others on the explanatory variable
 

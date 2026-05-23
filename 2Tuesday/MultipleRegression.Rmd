@@ -1,6 +1,6 @@
 ---
 title: "Multiple regression"
-institute: "Department of Mathematical Sciences, NTNU"
+institute: "University of Bayreuth"
 author: "Bert van der Veen"
 output: 
   beamer_presentation:
@@ -25,6 +25,7 @@ header-includes:
   - \setbeamercolor{enumerate subitem}{fg=orange}
   - \tcbuselibrary{skins}
   - \usepackage{emoji}
+  - \usepackage{booktabs}
 editor_options: 
   chunk_output_type: console
 urlcolor: orange
@@ -63,7 +64,7 @@ Going to largely omit code in presentation. But see .Rmd files.
 
 ## Outline Today
 
-- Mutiple linear regression
+- Multiple linear regression
 - Model validation
 - Introduction to GLMs
 
@@ -211,7 +212,7 @@ $$
 \textbf{Y} = \textbf{X} \symbf{\beta} + \symbf{\epsilon}
 $$
 
-where $\textbf{Y}$, $\symbf{\beta}$ and $\symbf{\epsilon}$ are now all vectors of length $n$, where there are $n$ data points. $\textbf{X}$ is am $n \times p$ matrix.
+where $\textbf{Y}$, $\symbf{\beta}$ and $\symbf{\epsilon}$ are now all vectors of length $n$, where there are $n$ data points. $\textbf{X}$ is an $n \times p$ matrix.
 
 We will not look at the mathematics in any detail: the point here is that the model for the effect of covariates can be written in the design matrix.
 
@@ -221,7 +222,7 @@ After a bit of matrix algebra, one can find the MLE:
 
 \begin{equation}
 \hat{\textbf{b}} = (\textbf{X}^\top \textbf{X})^{-1}\textbf{X}^\top \textbf{y}
-\eqref{mle}
+\label{mle}
 \end{equation}
 where $\textbf{b}$ is the MLE for $\symbf{\beta}$.
 
@@ -301,7 +302,7 @@ But do we need each column?
 
 There are many ways to construct a design matrix for categorical variables.
 
- `constrasts` and `constr.treatment`
+ `contrasts` and `contr.treatment`
  
  - Treatment contrast are default in \texttt{R} ("dummy")
  - Sum-to-zero
@@ -634,7 +635,7 @@ We do not usually explicitly specify regressions in terms of their imposed hyper
 
 ## The predict function
 
-In \texttt{R} we can calulate $\hat{y}_i = \hat{\alpha} + x_i\hat{\beta_1}$ with the `predict` function:
+In \texttt{R} we can calculate $\hat{y}_i = \hat{\alpha} + x_i\hat{\beta_1}$ with the `predict` function:
 
 `predict(model, newdata = newX)`
 

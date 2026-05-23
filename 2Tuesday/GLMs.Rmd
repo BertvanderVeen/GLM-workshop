@@ -1,6 +1,6 @@
 ---
 title: "Generalised linear models"
-institute: "Department of Mathematical Sciences, NTNU"
+institute: "University of Bayreuth"
 author: "Bert van der Veen"
 output: 
   beamer_presentation:
@@ -25,6 +25,7 @@ header-includes:
   - \setbeamercolor{enumerate subitem}{fg=orange}
   - \tcbuselibrary{skins}
   - \usepackage{emoji}
+  - \usepackage{booktabs}
 editor_options: 
   chunk_output_type: console
 urlcolor: orange
@@ -342,10 +343,10 @@ We need a good algorithm to find the maximum!
 
 $$\Theta^{t+1} = \Theta^t + {\frac{\partial^2\log\{\mathcal{L}(\textbf{y}_i;\Theta^t)\}}{\partial\Theta\partial\Theta^\top}}^{-1}\frac{\partial\mathcal{L}(\textbf{y}_i;\Theta^t)}{\partial\Theta}$$
 
-- (Newton-Rhapson) Can get quite expensive to evaluate.
+- (Newton-Raphson) Can get quite expensive to evaluate.
 - Nelder and Wedderburn (1972) instead suggested an algorithm that fits a LM repeatedly.
 
-## Iteratively reweighted least squares (IRLs)
+## Iteratively reweighted least squares (IRLS)
 
 1) Start at some (decent) guess (e.g., $\hat{\symbf{\eta}} = \textbf{y} + \symbf{\epsilon}$) \tiny (Wood 2017) \normalsize\pause
 2) Set $\textbf{z}^t = \symbf{\eta} + \frac{\partial \hat{\symbf{\eta}}}{\partial g^{-1}(\hat{\symbf{\eta}})}\{\textbf{y} - g^{-1}(\hat{\symbf{\eta}})\}/a(g^{-1}(\hat{\symbf{\eta}}))$\pause
@@ -357,7 +358,7 @@ $$\Theta^{t+1} = \Theta^t + {\frac{\partial^2\log\{\mathcal{L}(\textbf{y}_i;\The
 \center
 \textbf{And that is the day researchers started liking GLMs.}
 
-## Iteratively reweighted least squares (IRLs)
+## Iteratively reweighted least squares (IRLS)
 
 Prevents having to do numerical optimisation.
 
@@ -533,7 +534,7 @@ predict(model, newdata = X, type = "response")
 
 Normal: $\sum \limits^n_{i=1}(y_i-\hat{\mu_i})^2$
 Poisson: $2\sum \limits^n_{i=1} y_i\log(y_i/\hat{\mu}_i)-y_i+\hat{\mu}_i)$
-binomial: $2\sum \limits^n_{i=1} y_i\log(y_i/\hat{\mu}_i)+(N-y_i)\log\{(N-y_i)/(N-y_i)\}$
+binomial: $2\sum \limits^n_{i=1} y_i\log(y_i/\hat{\mu}_i)+(N-y_i)\log\{(N-y_i)/(N-\hat{\mu}_i)\}$
 gamma: $2\sum \limits^n_{i=1} -\log\{y_i/\hat{\mu}_i\}+(y_i-\hat{\mu_i})/\hat{\mu_i}$
 
 and so on.
