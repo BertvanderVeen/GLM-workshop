@@ -11,7 +11,7 @@ Now that we have a solid background in frequentist statistics, and linear regres
 
 In GLMs, the variance depends on the mean, and variance functions are usually non-linear. The mean is also non-linearly related to the data, and there is no explicit error term $\epsilon$. So, things work a little different in GLMs, but the specification in R is surprisingly similar to a linear regression!
 
-In this practical, we will use binomial regression. Binomial regression is usually referred to as logistic, or probit, regression; the exact terminology depends on the link function that is used. By default, R assumed a logit link function. For starters, let's simulate an example again, this time using the `rbinom` function and the `plogis` functions. We are familiar with `rbinom` from the first presentation of the workshop. The `plogis` function helps us translate from the link scale (which is where we simulate the model) $boldsymbol{\eta}$ to the response scale:
+In this practical, we will use binomial regression. Binomial regression is usually referred to as logistic, or probit, regression; the exact terminology depends on the link function that is used. By default, R assumed a logit link function. For starters, let's simulate an example again, this time using the `rbinom` function and the `plogis` functions. We are familiar with `rbinom` from the first presentation of the workshop. The `plogis` function helps us translate from the link scale (which is where we simulate the model) $\boldsymbol{\eta}$ to the response scale:
 
 ```{r, fig.width = 10}
 x1 <- rnorm(35)
@@ -92,20 +92,28 @@ We will use the same datasets as in the last practical. You can find the dataset
  
 The datasets are all stored in as ".csv" files, which means that you can load them into R by using the `read.csv("...")` function. You need to replace "..." by the link of the dataset, which you can copy by right-clicking the dataset name and choosing "copy link address".
 
-# Part 1 (we only have one part)
+# Part 1
 
 Here is what I want you to do:
 
 1. Choose your dataset and fit a binomial regression.
 
-2. Study the parameter estimates and their uncertainty. What conclusion can you draw?
+2. Study the parameter estimates and their uncertainty. The coefficients are on the log-odds scale. What can you conclude about the direction of the effects?
 
-3. How much do the parameter estimates and their uncertainty change, using a probit link function, compared to the default logit?
+3. Exponentiate the coefficients and confidence intervals with `exp(coef(...))` and `exp(confint(...))` to get odds ratios. Because the exponential function is monotonic, exponentiating the endpoints gives a valid interval on the odds scale. How do you interpret an odds ratio greater than 1? Less than 1?
 
-4. Can you predict the probability of success for a particular subset of conditions (e.g., wells with used sewers, high nitrate, low chloride)? *Hint: use the predict function and its 'newdata' and 'type' arguments*
+4. Use `predict(model, type = "response", newdata = ...)` to get predicted probabilities for two specific sets of conditions that differ in one predictor. How does the probability change?
 
-5. Plot the binomial regression against one of the predictor variables.
+# Part 2
 
-6. Plot the residuals of the model, how do they look? Can you discern any assumption violations?
+<details><summary>Open after discussion on zoom</summary>
+
+5. Compare the change in probability from Q4 to the corresponding odds ratio from Q3. An odds ratio of 2 does not mean the probability doubles — why not? How does the effect of a predictor on the probability scale depend on the baseline probability?
+
+6. How do the parameter estimates change when you switch from a logit to a probit link?
+
+7. Plot the residuals of the model. How do they look? Can you discern any assumption violations?
+
+</details>
 
 If you finish early with your dataset, you can choose another and repeat the same process.

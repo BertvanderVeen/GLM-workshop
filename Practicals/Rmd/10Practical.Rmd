@@ -28,6 +28,13 @@ And we fit a Poisson GLM:
 
 Besides the fact that we changed `family` to "poisson" in this practical, everything else still works pretty much the same as when we were fitting binomial regression.
 
+Because Poisson regression uses the log link, the coefficients are on the log scale. A coefficient of $\beta$ means that a one-unit increase in a predictor multiplies the expected count by $e^\beta$. Because the exponential function is monotonic, we can simply exponentiate the endpoints of a confidence interval to get a valid interval on the count scale:
+
+```{r}
+exp(coef(reg))
+exp(confint(reg))
+```
+
 Poisson regression assumes that the mean and the variance of the distribution are the same. In real data, this is not always the case. When this assumption is violated, we can see that in the residual plots. The variance can be lower, or higher than what is assumed in the Poisson regression, which we call underdispersion and overdispersion, respectively. In real data, overdispersion is more common than underdispersion. It is also easier to account for.
 
 When we have overdispersion, we switch to a negative-binomial regression. Negative-binomial regression relaxes the Poisson assumption of equal mean and variance, for which it includes an additional dispersion parameter, so that the variance can be greater than the mean. We can simulate from a negative-binomial distribution to demonstrate this:
@@ -76,30 +83,34 @@ Overdispersion is always relative to the Poisson assumption, so it is not possib
 
 We will use different datasets than in the last practicals (except the Baseball example, that has both Poisson and Binomial variables!). You can find the datasets in the "data" folder of the github repository.
 
-1. [Horseshoecrabs](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/Horseshoecrabs.csv): Data on the number of male sattelites attracted by female horseshoecrabs, data used in the presentation today.
+1. [Horseshoecrabs](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/Horseshoecrabs.csv): Data on the number of male satellites attracted by female horseshoecrabs, data used in the presentation today.
 2. [Roadkills](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/RoadKills.csv): Count of amphibian road kills (TOT.n) as a function of distance to a park (D.PARK), and other variables of the parks such as the amount of olive grooves, montado with and without shrubs, shrubs, urban area, water reservoirs, dirt road length, paved road length, distance to water reservoirs, water courses, and more.
 3. [Baseball](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/Baseball.csv)
 4. [Campus](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/Campus.csv)
 5. [Hurricanes](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/hurricanes.csv)
 
-# Part I
+# Part 1
 
 Here is what I want you to do:
 
 1. Pick a dataset and fit a Poisson regression. You can also do model selection as we did yesterday.
 
-2. Examine the parameter estimates, standard errors, and confidence intervals from the model. Try to draw a conclusion of the effects.
+2. Examine the parameter estimates. Use `exp(coef(...))` to interpret them on the count scale. What does a one-unit change in a predictor mean for the expected count?
 
-3. Check the residuals, and test with the `DHARMa` or `performance` packages if there is overdispersion.
+3. Examine the confidence intervals with `confint()`. You can also exponentiate them with `exp(confint(...))`. What conclusions can you draw about the effects?
 
-# Part II
+4. Check the residuals, and test with the `DHARMa` or `performance` packages if there is overdispersion.
+
+# Part 2
 
 <details><summary>Open after discussion on zoom</summary>
 
-4. Fit a negative-binomial regression, check the residuals for improvement.
+5. Fit a negative-binomial regression and check the residuals for improvement.
 
-5. Compare the parameter estimates and the confidence intervals from the negative-binomial regression with your previous Poisson regression. 
+6. Compare the parameter estimates from both models. Have they changed?
 
-6. Has your conclusion about the effects changed?
+7. Compare the confidence intervals. Have they gotten wider or narrower? What does this tell you about what overdispersion does to uncertainty in the Poisson model?
+
+8. Has your overall conclusion about the effects changed?
 
 </details>

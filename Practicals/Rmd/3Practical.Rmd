@@ -14,7 +14,7 @@ x <- runif(20, 3, 5)
 y <- rnorm(20, mean = 1 + x*2)
 ```
 
-In this simulation, $\textbf{x}$ is a predictor variable simulated between 3 and 5 (so it takes only positive values beween those numbers), and $\textbf{y} = \alpha + \textbf{x}\beta + \boldsymbol{\epsilon}$ is a response variable with intercept $\alpha = 1$ (where $x = 0$), slope for the predictor $\beta = 2$, and error term $\boldsymbol{\epsilon}$ with mean zero and standard deviation one.
+In this simulation, $\textbf{x}$ is a predictor variable simulated between 3 and 5 (so it takes only positive values between those numbers), and $\textbf{y} = \alpha + \textbf{x}\beta + \boldsymbol{\epsilon}$ is a response variable with intercept $\alpha = 1$ (where $x = 0$), slope for the predictor $\beta = 2$, and error term $\boldsymbol{\epsilon}$ with mean zero and standard deviation one.
 
 Every time we collect data, there is some randomness involved. This affects the exact value for the parameter estimate we are able to find, and might somewhat affect our conclusion. For the t-test, this means we might not find a difference in the means of groups, and in the context of simple linear regression it might mean that we do not always find an effect statistically significant. Moreover, it means that sometimes we might conclude a negative relationship between the response and explanatory variable, and other times a positive relationship.
 
@@ -65,7 +65,7 @@ You can find the datasets in the "data" folder of the github repository.
 
 1. [nickel.expand](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/nickel.expand.csv): Lung cancer due to nickel exposure in South Wales [Breslow and Day (1987)](https://pubmed.ncbi.nlm.nih.gov/3329634/)
 2. [dmn](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/dmn.csv): de novo mutations in children [Halldorsson et al. (2019)](https://www.science.org/doi/10.1126/science.aau1043), see also [this page](https://mccoy-lab.github.io/hgv_modules/setup.html)
-2. [ISIT](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/ISIT.csv): Pelagic bioluminescence ("Sources") along a depth gradient in different seasons ([Gillibrand et al. 2007](https://www.int-res.com/abstracts/meps/v341/p37-44/))
+3. [ISIT](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/ISIT.csv): Pelagic bioluminescence ("Sources") along a depth gradient in different seasons ([Gillibrand et al. 2007](https://www.int-res.com/abstracts/meps/v341/p37-44/))
 4. [TeethNitrogen](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/TeethNitrogen.csv): Nitrogen isotope ratios in teeth of stranded whales ([Mendes et al. 2007](https://link.springer.com/article/10.1007/s00442-006-0612-z))
 
 # Part 1
@@ -75,7 +75,7 @@ So far we have not used the `data` argument of the `lm` object. To fit a linear 
 Here is what I want you to do:
 
 1. Pick a dataset and identify the response variable $\textbf{y}$.
-2. Identify potential predictor variables $\textbf{x}$ for a multiple linear regression $\textbf{x}$.
+2. Identify potential predictor variables $\textbf{x}$ for a multiple linear regression.
 3. Explore the data, a good analysis always start with exploratory analysis. Use `plot` to visualize the relationship between $\textbf{y}$ and one or two predictors.
 4. Can you (visually) identify a predictor variable $\textbf{x}$ that might be suitable for explaining the response variable $\textbf{y}$?
 
@@ -95,5 +95,5 @@ Here is what I want you to do:
 
 </details>
 
-[If you finish early you can pick a different dataset, or there is also the practical from last year.](https://htmlpreview.github.io/?https://github.com/BertvanderVeen/GLM-workshop/blob/main/Practicals/2024/3Practical.html)
+[If you finish early you can pick a different dataset, or there is also the 2024 edition of this practical.](https://htmlpreview.github.io/?https://github.com/BertvanderVeen/GLM-workshop/blob/main/Practicals/2024/3Practical.html)
 

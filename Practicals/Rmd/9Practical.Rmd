@@ -101,7 +101,7 @@ Under the null hypothesis, this test-statistic follows a $\chi^2$-distribution w
 ```{r}
  Cnew <- matrix(c(1,-1, 0), ncol = 3)
  W = (coefs[1] - coefs[2])^2/Cnew%*%Sigma%*%t(Cnew)
- 1- dchisq(W, 3)
+ 1 - pchisq(W, 1)
 ```
  
  That is a lot of information! Fortunately, there are R-packages to help us with such calculations: `emmeans::emmeans` and `marginaleffects::comparisons` for example. For the example above, we can reproduce the results with the `emmeans` package like this:
@@ -147,7 +147,7 @@ We will use the same datasets as in the last practicals. You can find the datase
  
 The datasets are all stored in as ".csv" files, which means that you can load them into R by using the `read.csv("...")` function. You need to replace "..." by the link of the dataset, which you can copy by right-clicking the dataset name and choosing "copy link address".
 
-# Part I
+# Part 1
 
 Exploring and presenting results is a vital component to effectively using statistical models. Here is what I want you to do:
 
@@ -155,7 +155,7 @@ Exploring and presenting results is a vital component to effectively using stati
 2. Calculate the group effects yourself, using the `coef` and adding the right coefficients together
 3. What comparisons can you make using the information from the model, and with the `relevel` function?
 
-# Part II
+# Part 2
 
 <details><summary>Open after discussion on zoom</summary>
 

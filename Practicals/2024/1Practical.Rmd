@@ -16,7 +16,7 @@ The second presentation of the workshop focused on variation due to sampling, an
 - `replicate`: execute some code many times
 - `optimize`: single parameter numerical optimisation
 - `hist`: draws a histogram of a vector (this is not a barplot)
-- `plot`: draws all kinds of plots (controlled by `type`), but ususally a scatterplot
+- `plot`: draws all kinds of plots (controlled by `type`), but usually a scatterplot
 - `abline`: draws a straight line through a plot
 
 If you do not remember what these functions do, or what arguments they take, you can look it up by typing `?functionName` in the console. That will show you the help page of the function, which hopefully clarifies things. If it does not, try a search engine to find online resources, or ask someone. Almost always your question has been asked (and answered) by someone else before. Some hints are given with questions **in bold**.

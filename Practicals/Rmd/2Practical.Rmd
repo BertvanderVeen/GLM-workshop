@@ -7,101 +7,59 @@ output: html_document
 
 # Background
 
-We continue from the first practical. In the first practical, you simulated data from a normal distribution, along the lines:
+The lecture introduced the linear model, showed that least squares estimation is equivalent to maximum likelihood under normally distributed errors, and demonstrated that the t-test is a special case of linear regression with a single binary predictor. Both approaches yield identical estimates and p-values when equal variances are assumed.
+
+We work with the Alaska pipeline dataset from the lecture, which records wall thickness measurements of a gas pipeline taken in the field and independently in a lab. To compare field and lab methods we need both measurement types in a single column alongside a grouping variable. This is standard long-format data:
 
 ```{r}
-y1 <- rnorm(100)
+data("alaska.pipeline", package = "UsingR")
+alaska <- rbind(
+  data.frame(id = 1:nrow(alaska.pipeline), method = "lab",   depth = alaska.pipeline$lab.defect),
+  data.frame(id = 1:nrow(alaska.pipeline), method = "field", depth = alaska.pipeline$field.defect)
+)
 ```
-
-The normal distribution has parameters $\mu$ and $\sigma$, of which the MLE is the sample mean and sample standard deviation, respectively. After simulation, we exchanged data, and estimated the parameters from data that the other groups simulated. Then, the groups in return tried to guess the data they simulated from the parameter estimates.
-
-This helped us to find out that it parameter estimates in large samples tend to be closer to the truth than in small samples, although this is a trade-off with the amount of sampling variation. In this practical, we will use a t-test to formally test if the mean of the distribution is equal to zero:
-
-```{r}
-t.test(y1)
-```
-
-This is also called a One sample t-test, because we only have one sample of data. Now, let us say that there are two sets of data instead:
-
-```{r}
-y2 <- rnorm(100, mean = 5)
-```
-
-If we plot these simulated data samples together in a histogram, it looks a bit odd:
-
-```{r, fig.width = 10}
-hist(c(y1, y2))
-```
-
-that is because the distribution is bimodal; there are two means! Visually, we can tell that these means are probably not the same. But, we usually want a more formal or quantitative answer.
-
-With a Two sample t-test we can also formally test if the difference of the two means is different from zero (i.e., whether or not the two samples have the same mean). You can also represent this as a linear regression with a categorical covariate that has two categories. The test allows us to conclude whether or not the two samples have the same $\mu$:
-
-```{r}
-t.test(y1, y2, var.equal = TRUE)
-```
-
-which tells us that they are not. This t-test assumes that both samples have the same $\sigma$, which we know is true here, but that is not true if we compare the means of the data simulated by the groups. When the two sets of data have the same sample size (`n`), the test is robust to deviation from this assumption, but not when there is an uneven sample size. Let's explore this:
-
-```{r}
-y3 <- rnorm(20, 3, 3)
-t.test(y2, y3, var.equal = TRUE)
-```
-OK, perhaps it is not a problem here! But, generally such assumption violations can lead to problems. There are ways of relaxing this assumption, here we can still use `t.test` but in combination with `var.equal = FALSE`.
-
-Note, sampling variation will also affect test results. The test uses the parameter estimates for the means of the samples and their uncertainty. Since small samples have larger sampling variation, you may more often accept or reject the null hypothesis.
 
 # Part 1
 
-The goal is to get familiar with `t.test` and testing.
+1. Fit a simple linear regression of `lab.defect` on `field.defect` using `lm`. What do the intercept and slope tell you about the relationship between field and lab measurements?
 
-Here is what I want you to do:
+2. Use `confint()` on the fitted model. Does the confidence interval for the slope contain zero? What would it mean for the relationship between field and lab measurements if it did?
 
-1. Get familiar with the `t.test` function. By trying it out, or by looking at their help pages via `?...`.
-2. Compare various of the simulated data from this morning, see if you can find samples that are similar, and that are different.
-
-If you want, you can also simulate data yourself to see how different settings of `n`, `mean` and `sd` affect the test.
+3. Fit `lm(depth ~ method, data = alaska)` and compare the coefficient with the result from `t.test(alaska.pipeline$lab.defect, alaska.pipeline$field.defect, var.equal = TRUE)`. Are they the same?
 
 # Part 2
 
 <details><summary> Open after discussion on zoom</summary>
 
-## Background
+The lecture noted that many distributions resemble the normal for large samples and probabilities away from the boundaries. This assumption is the basis for using a linear model, and it breaks down for binary data when samples are small or events are rare.
 
-From the lecture we understand that the t-test and simple linear regression do very similar things (under the equal variance assumption). Now, we will use the `lm` function instead. For this we need to format the data a little:
+To illustrate this, two datasets are simulated below and fitted with `lm`. The first has 200 observations and a probability of 0.4; the second has 50 observations and a probability of 0.05.
 
-```{r}
-mydata <- data.frame(y=c(y1, y2), group = rep(c("one", "two"), c(length(y1), length(y2))))
+```{r, fig.width = 10}
+set.seed(1)
+x1 <- rnorm(200); y1 <- rbinom(200, size = 1, prob = 0.4)
+m1 <- lm(y1 ~ x1)
+plot(x1, y1, ylab = "Orchid (0/1)", xlab = "x"); abline(m1, col = "red")
 ```
 
-the `c` function stands for "concatenate" and puts the two $y$ vectors together. The `rep` function repeats the character vector put inside it as many times as is indicated by its second argument; here the length of each vector. The result is a dataset with the two variables put together, and another variable called "group" which indicates if the value in a row belongs to the first or the second vector.
-
-Then, we can use `lm` to fit a linear regression:
-
-```{r}
-reg <- lm(y ~ group, data = mydata)
-summary(reg)
+```{r, fig.width = 10}
+set.seed(1)
+x2 <- rnorm(50); y2 <- rbinom(50, size = 1, prob = 0.05)
+m2 <- lm(y2 ~ x2)
+plot(x2, y2, ylab = "Orchid (0/1)", xlab = "x"); abline(m2, col = "red")
 ```
 
-The intercept is the mean for the reference category (which is the one that comes first alphabetically): "one". The second coefficient is the difference in the group mean of the reference category and the second group.
-
-Although we will look into model diagnostics tomorrow, we can plot the residuals from the model $\hat{error}$ against the prediction of the model ("fitted") to inspect if our equal variance assumption is violated:
-
 ```{r}
-plot(reg, which = 1)
+range(predict(m1))
+range(predict(m2))
 ```
 
-if the spread of the points in the two groups is different, the assumption is violated.
+1. The response is binary and can only take values 0 or 1. What range of values does `lm` predict? Is that appropriate?
+2. Looking at the plots: does the fitted line describe the data well?
+3. When is a linear model suitable for binary data, and when does it fail? Which assumptions does `lm` make that are violated here?
 
-Here is what I want you to do:
-
-I will provide you with a dataset that includes basic information on each group, the parameters they simulated from, the parameter estimates, and whether or not the group successfully identified their own simulated data.
-
-1. Fit a linear regression with $y$ as the response variable and $identified$ as the predictor. Discuss the results in the group.
-2. Use the `confint` function and examine the confidence intervals. How are they interpreted?
-3. Go ahead and try including more than one predictor. We are going to consider multiple regression in more detail tomorrow.
-
+Tomorrow we will see how GLMs resolve these problems by modelling the data with an appropriate distribution and link function.
 
 </details>
 
-[If you finish early, there is also the practical from last year.](https://htmlpreview.github.io/?https://github.com/BertvanderVeen/GLM-workshop/blob/main/Practicals/2024/2Practical.html)
+[If you finish early, there is also the 2024 edition of this practical.](https://htmlpreview.github.io/?https://github.com/BertvanderVeen/GLM-workshop/blob/main/Practicals/2024/2Practical.html)

@@ -40,7 +40,7 @@ More specifically, usually the mean and variance are the same! That is also the 
 You can choose from the following datasets:
 
 1. ButterflyCounts: counts of the Baltimore checkerspot butterfly in 3 months for 8 years.
-2. Horseshoecrabs: Data on the number of male sattelites attracted by female horseshoecrabs, data used in the presentation today.
+2. Horseshoecrabs: Data on the number of male satellites attracted by female horseshoecrabs, data used in the presentation today.
 3. Roadkill: Count of amphibian road kills (TOT.n) as a function of distance to a park (D.PARK), and other variables of the parks such as the amount of olive grooves, montado with and without shrubs, shrubs, urban area, water reservoirs, dirt road length, paved road length, distance to water reservoirs, water courses, and more.
 4. Alternatively, you can simulate Poisson/NB distributed responses
 

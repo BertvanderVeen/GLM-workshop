@@ -7,7 +7,7 @@ output: html_document
 
 # R functions
 
-In the last practical we fitted binomial glms. In this practical we return to those models and try to figure out which model fits "best" to the data. For this you will might the following functions:
+In the last practical we fitted binomial glms. In this practical we return to those models and try to figure out which model fits "best" to the data. For this you will need the following functions:
 
 - `AIC`: extracts Akaike's Information Criteria from a model
 - `BIC`: extracts Schwarz's Bayesian Information Criteria from a model

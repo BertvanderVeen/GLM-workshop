@@ -119,7 +119,7 @@ We will use the same datasets as in the last practical. You can find the dataset
 
 1. [nickel.expand](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/nickel.expand.csv): Lung cancer due to nickel exposure in South Wales [Breslow and Day (1987)](https://pubmed.ncbi.nlm.nih.gov/3329634/)
 2. [dmn](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/dmn.csv): de novo mutations in children [Halldorsson et al. (2019)](https://www.science.org/doi/10.1126/science.aau1043), see also [this page](https://mccoy-lab.github.io/hgv_modules/setup.html)
-2. [ISIT](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/ISIT.csv): Pelagic bioluminescence ("Sources") along a depth gradient in different seasons ([Gillibrand et al. 2007](https://www.int-res.com/abstracts/meps/v341/p37-44/))
+3. [ISIT](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/ISIT.csv): Pelagic bioluminescence ("Sources") along a depth gradient in different seasons ([Gillibrand et al. 2007](https://www.int-res.com/abstracts/meps/v341/p37-44/))
 4. [TeethNitrogen](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/TeethNitrogen.csv): Nitrogen isotope ratios in teeth of stranded whales ([Mendes et al. 2007](https://link.springer.com/article/10.1007/s00442-006-0612-z))
 
 The datasets are all stored in as ".csv" files, which means that you can load them into R by using the `read.csv("...")` function. You need to replace "..." by the link of the dataset, which you can copy by right-clicking the dataset name and choosing "copy link address".
@@ -146,6 +146,10 @@ Here is what I want you to do:
 
 # Part 2
 
-Try reconstructing your plots from part 1 using the `ggplot2` package. You need the `ggplot` function in combination with `geom_line` and `geom_ribbon`, `geom_point` and `geom_errorbar`
+<details><summary>Open after discussion on zoom</summary>
 
-[If you finish early you can pick a different dataset, or there is also the practical from last year.](https://htmlpreview.github.io/?https://github.com/BertvanderVeen/GLM-workshop/blob/main/Practicals/2024/5Practical.html) \newline
+Try reconstructing your plots from Part 1 using the `ggplot2` package. You need the `ggplot` function in combination with `geom_line` and `geom_ribbon`, `geom_point` and `geom_errorbar`.
+
+</details>
+
+[If you finish early you can pick a different dataset, or there is also the 2024 edition of this practical.](https://htmlpreview.github.io/?https://github.com/BertvanderVeen/GLM-workshop/blob/main/Practicals/2024/5Practical.html) \newline

@@ -120,7 +120,7 @@ Here is what I want you to do:
 
 3. Deciding on a "full model" (i.e., the most complex or realistic model that you can define for a dataset), try going through a model selection procedure by comparing potential submodels. You can use `AICcmodavg::aictab` in combination with `second.ord  = FALSE`. Try not to use `MuMIn::dredge`.
 
-4. Now use `MuMin::dredge` and see if it finds the best model to be the same. If not, consider why that might be.
+4. Now use `MuMIn::dredge` and see if it finds the best model to be the same. If not, consider why that might be.
 
 # Part 2
 

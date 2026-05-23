@@ -40,7 +40,7 @@ We can see that the second model is nested in the first. "Nested" here means tha
 anova(reg1, reg2)
 ```
 
-from which we conclude, because the reported p-value is smaller than 0.05, that the second model is improvement over the first. For GLMs, the likelihood ratio test is performed on the basis of the deviance, hence that is reported by the `anova` function. As pedagogical example, we can manually implement what the `anova` function does:
+from which we conclude, because the reported p-value is larger than 0.05, that the second model is not an improvement over the first. For GLMs, the likelihood ratio test is performed on the basis of the deviance, hence that is reported by the `anova` function. As pedagogical example, we can manually implement what the `anova` function does:
 
 ```{r}
 resid.dev <- deviance(reg1)-deviance(reg2)
@@ -95,13 +95,13 @@ The goal of this practical is to go over the models that you fitted during the l
 
 3. Formulate a hypothesis, fit two models, and use `anova` to compare them. Do you accept or reject the alternative hypothesis?
 
-4. Use `anova` with the most complex of the two models in 3 (or ane ven more complex model). Compare the results of `anova(model)` to `car::Anova(model, type = "II")` and `car::Anova(model, type = "III")` how do the results of the two functions differ?
+4. Use `anova` with the most complex of the two models in 3 (or an even more complex model). Compare the results of `anova(model)` to `car::Anova(model, type = "II")` and `car::Anova(model, type = "III")` how do the results of the two functions differ?
 
 # Part 2
 
 <details><summary>Open after discussion on zoom</summary>
 
-5. Your analysis of deviance table to a model comparison with AIC/AICc/BIC. Do the two approaches give you the same or similar results?
+5. Compare your analysis of deviance table to a model comparison with AIC/AICc/BIC. Do the two approaches give you the same or similar results?
 
 6. To build intuition for the procedures of confirmatory hypothesis testing, choose another dataset and repeat all steps.
 

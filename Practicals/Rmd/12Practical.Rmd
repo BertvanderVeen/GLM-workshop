@@ -38,13 +38,13 @@ hist(y)
 
 If we fit out gamma regression, we see that the parameters are well estimated:
 
-```{r}
+```{r, error=TRUE}
 (model1 <- glm(y ~ x1 + x2, family = Gamma(link = log), start = c(mean(log(y)), coef(lm(log(y)~x1+x2))[2:3])))
 ```
 
 Let's fit the remaining models:
 
-```{r, warning=FALSE}
+```{r, warning=FALSE, error=TRUE}
 (model2 <- lm(log(y) ~ x1 + x2))
 (model3 <- glm(y ~ x1 + x2, family = inverse.gaussian, start = c(mean(1/y^2), coef(lm(I(1/y)~x1+x2))[2:3])))
 model4 <- NULL
@@ -64,7 +64,7 @@ The last part of code is used to find the power parameter in the tweedie regress
 
 The inverse-gaussian model returns poor estimates, perhaps because we used the incorrect link function. We used the default, but we simulated using a log-link function. We can change this to see if we get something more accurate:
 
-```{r}
+```{r, error=TRUE}
 model3 <- glm(y ~ x1 + x2, family = inverse.gaussian(link=log), start = c(mean(log(y)), coef(lm(log(y)~x1+x2))[2:3]))
 ```
 

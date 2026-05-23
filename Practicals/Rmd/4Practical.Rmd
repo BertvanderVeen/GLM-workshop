@@ -153,7 +153,7 @@ Here is what I want you to do:
 
 </details>
 
-[If you finish early you can pick a different dataset, or there is also the practical from last year.](https://htmlpreview.github.io/?https://github.com/BertvanderVeen/GLM-workshop/blob/main/Practicals/2024/4Practical.html) \newline
+[If you finish early you can pick a different dataset, or there is also the 2024 edition of this practical.](https://htmlpreview.github.io/?https://github.com/BertvanderVeen/GLM-workshop/blob/main/Practicals/2024/4Practical.html) \newline
 
 You can also try simulating data from a (multiple) linear regression where the assumptions are violated!
 
