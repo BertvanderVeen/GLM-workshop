@@ -1,6 +1,6 @@
 ---
 title: "Beyond GLMs: Mixed effects models"
-institute: "Department of Mathematical Sciences, NTNU"
+institute: "University of Bayreuth"
 author: "Bert van der Veen"
 output: 
   beamer_presentation:
@@ -111,7 +111,7 @@ There is more.
 
 ## Why is it called a random effect?
 
-"Random" is in contract to "fixed"
+"Random" is in contrast to "fixed"
 
 - Fixed effects we maximize
 - Random effects we marginalize
@@ -1319,7 +1319,7 @@ t = \frac{
 - Nakagawa $R^2$ for mixed models (also approximation)
 
 \begin{center}
-\textcolor{red}{Focus on estimates (effect sizes) and statistical uncertainy}
+\textcolor{red}{Focus on estimates (effect sizes) and statistical uncertainty}
 \end{center}
 
 # End

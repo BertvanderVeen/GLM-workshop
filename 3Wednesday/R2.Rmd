@@ -1,6 +1,6 @@
 ---
 title: "Variance explained and partitioning"
-institute: "Department of Mathematical Sciences, NTNU"
+institute: "University of Bayreuth"
 author: "Bert van der Veen"
 output: 
   beamer_presentation:
@@ -143,7 +143,7 @@ R^2 = 1 - \frac{\sum \limits^n_{i=1}  (y_i - \mu_i)^2}{\sum \limits^n_{i=1}  (y_
 \end{equation}
 
 - the numerator represents the unexplained variation of a model
-- the numerator represents the explainable variation of a model
+- the denominator represents the explainable variation of a model
 - One minus their fraction is the explained variation
 
 ## Adjusted $R^2$
@@ -159,7 +159,7 @@ R^2_{adjusted} = 1-(1-R^2)\frac{(n-1)}{n-p-1}
 
 \pause 
 
-- Native with $p>n$, otherwise always lower than $R^2$
+- Negative with $p>n$, otherwise always lower than $R^2$
 - Penalize the statistic for increased complexity
 - Penalty is large when $p$ approaches $n$
 - Such as for small samples
@@ -202,7 +202,7 @@ R^2_k = 1 - \frac{\sum \limits^n_{i=1}  (y_i - \mu_i)^2}{\sum \limits^n_{i=1}  (
 \begin{itemize}
 \itemsep-0.5em 
 \item the numerator represents the unexplained variation of a model
-\item the numerator represents the explainable variation of a \textbf{covariate}
+\item the denominator represents the explainable variation of a \textbf{covariate}
 \item One minus their fraction is the explained variation
 \end{itemize}
 
@@ -291,7 +291,7 @@ Based on reduction in deviance
 ## McFadden $R^2$
 
 \begin{equation}
-\text{McFadden }R^2 = 1-\frac{\log\mathcal{L}(\textbf{y};\Theta_1)}{\log\mathcal{L}(\textbf{y};\Theta_1)}
+\text{McFadden }R^2 = 1-\frac{\log\mathcal{L}(\textbf{y};\Theta_1)}{\log\mathcal{L}(\textbf{y};\Theta_0)}
 \end{equation}
 
 Based on reduction in the ratio of log-likelihoods.

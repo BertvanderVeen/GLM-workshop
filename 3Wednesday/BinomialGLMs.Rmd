@@ -1,6 +1,6 @@
 ---
 title: "Binomial regression"
-institute: "Department of Mathematical Sciences, NTNU"
+institute: "University of Bayreuth"
 author: "Bert van der Veen"
 output: 
   beamer_presentation:
@@ -26,6 +26,7 @@ header-includes:
   - \tcbuselibrary{skins}
   - \usepackage{emoji}
   - \usepackage{longtable, booktabs}
+  - \usepackage{ulem}
 editor_options: 
   chunk_output_type: console
 urlcolor: orange
@@ -77,7 +78,7 @@ Generalised linear models are a unifying class
 \begin{itemize}
 \item They have many things in common
 \item Two key components: the distribution and the link function
-  \item They link the sytematic and the random components
+  \item They link the systematic and the random components
 \end{itemize}
   
 \begin{equation}
@@ -251,7 +252,7 @@ In a binomial GLM we can change the link function
 \begin{itemize}
 \item Logit: $\log(\frac{p_i}{1-p_i})$ and inverse $\frac{\exp(\eta_i)}{1+\exp(\eta_i)}$ - \textit{the canonical link}
 \item Probit: $\Phi^{-1}(p_i)$ and inverse  $\Phi(\eta_i)$
-\item Complementary log-log: $\log(-\log(1-p_i)$ and inverse $1-\exp(-\exp(\eta_i))$
+\item Complementary log-log: $\log(-\log(1-p_i))$ and inverse $1-\exp(-\exp(\eta_i))$
 \item \sout{Log-log}
 \end{itemize}
 
@@ -452,8 +453,6 @@ Suppose you have ordered data:
 
 Cumulative link functions facilitate this kind of response by introducing **order**. **More on Thursday**.
 
-\textbf{More on Friday}
-
 # Example 2
 
 ## Example: Lizard habitat preference
@@ -628,7 +627,7 @@ performance::check_overdispersion(model)
 ```
 
 
-## Accouting for overdispersion
+## Accounting for overdispersion
 
 - Beta-binomial GLM
 - Quasibinomial GLM
@@ -679,7 +678,7 @@ cbind(y, signif(predict(model, type = "response"),2))
 
 ## Summary
 
-- Binomial GLMs for binary of count (succeses/failures) responses
+- Binomial GLMs for binary or count (successes/failures) responses
 - Four potential link functions: logit, probit, cloglog, loglog
 - Fixed dispersion: can exhibit overdispersion issues
 - Perfect separation

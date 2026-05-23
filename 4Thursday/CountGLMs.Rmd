@@ -1,6 +1,6 @@
 ---
 title: "Models for unbounded count data"
-institute: "Department of Mathematical Sciences, NTNU"
+institute: "University of Bayreuth"
 author: "Bert van der Veen"
 output: 
   beamer_presentation:
@@ -78,7 +78,7 @@ knitr::opts_chunk$set(echo = TRUE)
 \textbf{Response data}: $r$ the number of successes in $N$ trials\newline
 \textbf{Predictor variables}: $x_i$ albeit continuous and/or categorical \newline
 \textbf{Parameters}: probability of success $p_i$ in trial $i$\newline
-\textbf{Goal}: estimate $pi_i$ for each observation
+\textbf{Goal}: estimate $\pi_i$ for each observation
 
 ## Binomial GLM use
 
@@ -118,7 +118,7 @@ legend("bottomright", lty=c(1,2,3,4), legend = c("Logit","Probit", "Complementar
 - Number of deaths due to lung cancer or other diseases
 - Seizure counts
 - Times a behavior is expressed
-- Number of pidgeons in a city
+- Number of pigeons in a city
 - Number of [Bigfoot reports](https://zslpublications.onlinelibrary.wiley.com/doi/abs/10.1111/jzo.13148)
 - Number of wrongful convictions
 - Number of stars in the night sky
@@ -146,7 +146,7 @@ legend("bottomright", lty=c(1,2,3,4), legend = c("Logit","Probit", "Complementar
 
 \columnsend
 
-\textbf{The Poisson paramater $\lambda$ is the mean of the counting process}
+\textbf{The Poisson parameter $\lambda$ is the mean of the counting process}
 
 ## Is Poisson regression in the EF?
 
@@ -219,10 +219,10 @@ Counts are usually collected over time or space:
 - The number of deaths on a population of 10.000
 - The number of seizures a patient has during the night
 - The number of times a behavior is expressed during a treatment
-- Number of pidgeons in a city the size of Los Angeles
+- Number of pigeons in a city the size of Los Angeles
 - The number of bigfoot reports collected in a small forest, yesterday, by 3 people
 - Number of wrongful convictions in Germany last year
-- Number of starts in the night sky
+- Number of stars in the night sky
 
 ## The Poisson distribution: rates
 
@@ -514,7 +514,7 @@ Deaths due to hurricanes
 
 ## Hurricanes: the data
 
-Data from Jung et al. (2914)
+Data from Jung et al. (2014)
 
 - 94 observations
 - Year, name, Binary name categorization (male, female), Masulinity-Femininity score, strength of the hurricane, prior air pressure
@@ -533,7 +533,7 @@ knitr::kable(head(hurricanes[,-5], 7), format="latex", booktabs = T)%>%kableExtr
 
 \normalsize
 
-## Are female hurricanes more deadline than male hurricanes?
+## Are female hurricanes more deadly than male hurricanes?
 
 \vspace*{-\baselineskip}
 

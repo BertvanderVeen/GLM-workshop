@@ -1,6 +1,6 @@
 ---
 title: "P-values"
-institute: "Department of Mathematical Sciences, NTNU"
+institute: "University of Bayreuth"
 author: "Bert van der Veen"
 output: 
   beamer_presentation:
@@ -112,7 +112,7 @@ Unpacking:
 ## P-values: how to interpret them?
 
 $P<0.05$: This result is probably not due to chance
-$P>0.05$: This result is likely to due chance
+$P>0.05$: This result is likely due to chance
 
 - P-values from a single study will change!
 - P-values are computed assuming the null hypothesis is true

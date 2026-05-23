@@ -1,6 +1,6 @@
 ---
 title: "Model comparison: Confirmatory and Exploratory analysis"
-institute: "Department of Mathematical Sciences, NTNU"
+institute: "University of Bayreuth"
 author: "Bert van der Veen"
 output: 
   beamer_presentation:
@@ -25,6 +25,7 @@ header-includes:
   - \setbeamercolor{enumerate subitem}{fg=orange}
   - \tcbuselibrary{skins}
   - \usepackage{emoji}
+  - \usepackage{booktabs}
 editor_options: 
   chunk_output_type: console
 urlcolor: orange
@@ -66,7 +67,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Steps
 
-## Principles for statistical ecology
+## Principles for best practice
 
 ![](popovic.png)
 
@@ -92,6 +93,12 @@ knitr::opts_chunk$set(echo = TRUE)
  \item Develop a model
  \item Think about the distribution
  \item Generally consider data properties (e.g., dependence)
+\end{itemize}
+\item
+\begin{itemize}
+ \item Emphasise effect sizes
+ \item Replace statistical significance with relevance
+ \item Report confidence intervals
 \end{itemize}
 \item
 \begin{itemize}
@@ -170,7 +177,7 @@ A simpler model might
 - Make fewer assumptions
 - Be easier to interpret
 - Be less prone to overfitting
-- \textbf{Inadequatley accommodate properties of data}
+- \textbf{Inadequately accommodate properties of data}
 
 \column{0.5\textwidth}
 
@@ -182,7 +189,7 @@ If two competing models fit the data equally well, we continue with the simpler 
 
 ## The problem of model complexity
 
-A model with always fit better if you add a parameter
+A model will always fit better if you add a parameter
 
 ```{r, echo=FALSE, fig.height = 6}
 # Adapted from Bob Ohara

@@ -1,6 +1,6 @@
 ---
 title: "Generalized linear model validation"
-institute: "Department of Mathematical Sciences, NTNU"
+institute: "University of Bayreuth"
 author: "Bert van der Veen"
 output: 
   beamer_presentation:
@@ -117,7 +117,7 @@ as long as $\mathams{E}(\epsilon_i) = 0$.
 
 - ~~Tests~~
 - Outliers: Cook's distance, Residual vs. fitted
-- Independence: Partial residual plots, Residuals vs. fitted, Rresiduals vs. lagged residuals
+- Independence: Partial residual plots, Residuals vs. fitted, Residuals vs. lagged residuals
 - Correct distribution: QQ-plot
 - Correct link function: residuals vs. fitted, include $\eta_i$ in the model \footnotesize (Hinkley 1985) \normalsize, linear predictor against transformed response
 - Correct variance function: Abs(residuals) vs. fitted

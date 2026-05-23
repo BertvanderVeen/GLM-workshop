@@ -1,6 +1,6 @@
 ---
 title: "Other useful models"
-institute: "Department of Mathematical Sciences, NTNU"
+institute: "University of Bayreuth"
 author: "Bert van der Veen"
 output: 
   beamer_presentation:
@@ -91,6 +91,24 @@ knitr::opts_chunk$set(echo = TRUE)
 \end{itemize}
 
 \textcolor{blue}{is EF and GLM}, \textcolor{orange}{is EF but not GLM}, \textcolor{red}{is not EF or GLM}
+
+## Which model for which data?
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+\toprule
+\textbf{Data type} & \textbf{Example} & \textbf{Model} \\
+\midrule
+Positive continuous & Biomass, rainfall & Gamma, log-normal, Tweedie \\
+Proportions (known $N$) & Successes/failures & Binomial \\
+Proportions (unknown $N$) & Coverage, win rate & Beta regression \\
+Ordered categories & Ratings, cover classes & Ordinal regression \\
+Nominal categories & Species, vote share & Multinomial regression \\
+Counts with excess zeros & Rare species counts & ZIP, ZINB, hurdle \\
+\bottomrule
+\end{tabular}
+\end{center}
 
 # Positive continuous data
 
