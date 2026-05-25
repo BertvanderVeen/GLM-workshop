@@ -281,7 +281,7 @@ cat("P-values larger than 0.05:\n", sum(Ps>0.05)/1000, "                        
 \columnsbegin
 \column{0.5\textwidth}
 
-- 5% of the time we will wrongly accept the alternative hypothesis
+- 5% of the time we will wrongly reject the null hypothesis
 - Thus \textbf{your} statistically significant result may be due to chance
 - ?% of the time we will wrongly accept the null hypothesis
 - "Highly significant" does not exist. Everything $p<0.05$ is statistically significant

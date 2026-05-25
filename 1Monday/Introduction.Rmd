@@ -140,16 +140,16 @@ A \tiny small \normalsize amount of \tiny \color{red}{maths}
 \center
 ![](model.png){width=40%}
 
-## Detailed outline today
+## Outline Today
 
 * Who am I, who are you
 * Brief reminder of R programming
 * Reminder of foundational statistical concepts (sampling theory)
 * Introduction to linear models
 
-* 15 minute break 15:45-16:00
-* 45 minute break 17:45-18:30
-* 2 Lectures/presentations 
+* 15 minute break
+* 45 minute break at 17:45
+* 2 Lectures/presentations
 * 2 Practicals
 
 # Logistics

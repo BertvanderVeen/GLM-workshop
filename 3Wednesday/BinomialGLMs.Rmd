@@ -58,13 +58,18 @@ knit_hooks$set(
 
 knitr::opts_chunk$set(echo = TRUE)
 ```
-# Outline
+## Outline Today
 
 - Binomial regression
 - Model comparison
 - P-values
 - $R^2$
 - Q & A
+
+- 15 minute break
+- 45 minute break at 17:45
+- 4 Lectures/presentations
+- 3 Practicals
 
 ## Questions about yesterday?
 
@@ -253,7 +258,7 @@ In a binomial GLM we can change the link function
 \item Logit: $\log(\frac{p_i}{1-p_i})$ and inverse $\frac{\exp(\eta_i)}{1+\exp(\eta_i)}$ - \textit{the canonical link}
 \item Probit: $\Phi^{-1}(p_i)$ and inverse  $\Phi(\eta_i)$
 \item Complementary log-log: $\log(-\log(1-p_i))$ and inverse $1-\exp(-\exp(\eta_i))$
-\item \sout{Log-log}
+\item \sout{Log-log} \tiny (rarely useful) \normalsize
 \end{itemize}
 
 - Logit is canonical and easier to interpret

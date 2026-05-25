@@ -1,5 +1,5 @@
 # Physalia Generalised Linear Model workshop by Bert van der Veen
-This repository includes material for the Physalia workshop on Generalized linear models, 24-28 February 2025. Feel free to share, alter, or re-use this material with appropriate referencing of this repository.
+This repository includes material for the Physalia workshop on Generalized linear models, 25-29 May 2026. Feel free to share, alter, or re-use this material with appropriate referencing of this repository.
 
 Workshop webpage: https://www.physalia-courses.org/courses-workshops/glm-in-r-1
 
@@ -83,8 +83,8 @@ On the first day we will go through R basics and background theory of frequentis
 |   Day   |Time         |Subject                                                |
 |---------|-------------|-------------------------------------------------------|
 |Monday   |14:00 - 14:30| Introduction, getting started                         |
-|         |14:30 - 15:15| Recap R (coding)                                      |
-|         |15:15 - 16:00| Sampling theory and Maximum likelihood estimation     |
+|         |14:30 - 15:00| Recap R (coding)                                      |
+|         |15:00 - 16:00| Sampling theory and Maximum likelihood estimation     |
 |         |16:00 - 16:15| Break                                                 |
 |         |16:15 - 17:45| Practical 1: Sampling and variance                    |
 |         |17:45 - 18:30| Break                                                 |

@@ -68,6 +68,11 @@ Going to largely omit code in presentation. But see .Rmd files.
 - Model validation
 - Introduction to GLMs
 
+- 15 minute break
+- 45 minute break at 17:45
+- 3 Lectures/presentations
+- 3 Practicals
+
 ## Questions about yesterday?
 
 \center

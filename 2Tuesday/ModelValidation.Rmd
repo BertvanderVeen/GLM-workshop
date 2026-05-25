@@ -97,7 +97,7 @@ $$y_i = \alpha + \sum \limits^p_{k=1}x_{ik}\beta_k + \epsilon_i\sim \mathcal{N}(
 
 - Linearity
 - Normality: normally distributed errors
-- Homoscedastcity: same variance for all errors
+- Homoscedasticity: same variance for all errors
 - Independence of errors
 - Lack of perfect multicollinearity ($\textbf{x}_1 \neq \textbf{x}_2$)
 - No outliers

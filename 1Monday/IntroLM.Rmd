@@ -64,8 +64,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r, echo = TRUE}
 set.seed(12345) # For reproducibility
-n.times <- 50;n.picks=10;p.orchid <- 0.4
-y <- rbinom(n.times, size = n.picks, prob = p.orchid) 
+n.fields <- 50;n.picks=10;p.orchid <- 0.4
+y <- rbinom(n.fields, size = n.picks, prob = p.orchid) 
 ```
 
 \columnsbegin
@@ -84,8 +84,8 @@ lines(density(y), col = "red", lty = "dashed")
 
 ```{r, echo = TRUE}
 set.seed(12345) # For reproducibility
-n.times <- 100;n.picks=1;p.orchid <- 0.4
-y <- rbinom(n.times, size = n.picks, prob = p.orchid) 
+n.fields <- 100;n.picks=1;p.orchid <- 0.4
+y <- rbinom(n.fields, size = n.picks, prob = p.orchid) 
 ```
 
 \columnsbegin
@@ -510,7 +510,7 @@ Minimize the sum of squared residuals:
 \begin{equation}
 RSS = \sum \limits^n_{i=1} \epsilon_i^2
 \end{equation}
-which is the same to maximizing the normal likelihood!
+which is the same as maximizing the normal likelihood!
 
 - $\hat{\alpha}= \frac{1}{N}(\sum y_i - \hat{\beta}\sum x_i)$
 - $\hat{\beta} = \frac{\sum (x_i - \sum \frac{x_i}{N})(y_i - \sum \frac{y_i}{N})}{\sum (x_i - \sum \frac{x_i}{N})^2}$

@@ -1,0 +1,4 @@
+\beamer@sectionintoc {1}{Introduction}{2}{0}{1}
+\beamer@sectionintoc {2}{\(\mathcal {N}(\mu ,\sigma ^2)\)}{7}{0}{2}
+\beamer@sectionintoc {3}{Example 1}{14}{0}{3}
+\beamer@sectionintoc {4}{Simple linear regression}{19}{0}{4}

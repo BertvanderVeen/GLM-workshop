@@ -63,7 +63,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## The problem of model complexity
 
-A model with always fit better if you add a parameter
+A model will always fit better if you add a parameter
 
 ```{r, echo=FALSE, fig.height = 6}
 # Adapted from Bob Ohara

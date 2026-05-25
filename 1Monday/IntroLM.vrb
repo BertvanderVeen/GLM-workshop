@@ -1,0 +1,25 @@
+\frametitle{Summary}
+\phantomsection\label{summary}
+\begin{itemize}
+\tightlist
+\item
+  Normal-distribution and t-distribution
+\item
+  Simple linear regression: one covariate
+\item
+  Least squares estimation
+\item
+  Difference in LMs with categorical or continuous explanatory variables
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Categorical: intercept/mean parameter
+  \item
+    Continuous: slope parameter
+  \end{itemize}
+\item
+  Fortunately we have the \texttt{lm()} function in R!
+\item
+  More on assumptions checking tomorrow
+\end{itemize}

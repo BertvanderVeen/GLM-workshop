@@ -59,11 +59,16 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-## Outline
+## Outline Today
 
 - Models for count data
 - Residual diagnostics in GLMs
 - Other useful models
+
+- 15 minute break
+- 45 minute break at 17:45
+- 3 Lectures/presentations
+- 3 Practicals
 
 ## Questions about yesterday?
 
@@ -426,7 +431,7 @@ format(cbind(data.frame("No offset" = coef(model),
 ## Overdispersion
 
 Our assumption: $\lambda = \text{var}(\textbf{y})$ \newline
-Reality: $\lambda \geq \text{var}(\textbf{y})$
+Reality: $\lambda \leq \text{var}(\textbf{y})$
 
 - Mean = variance
 - If there is more variation, this assumption fails
@@ -437,7 +442,7 @@ For our example: many females have few satellites, but some females have very ma
 ## Underdispersion
 
 Our assumption: $\lambda = \text{var}(\textbf{y})$ \newline
-Reality: $\lambda \leq \text{var}(\textbf{y})$
+Reality: $\lambda \geq \text{var}(\textbf{y})$
 
 Considerably less common than overdispersion.
 

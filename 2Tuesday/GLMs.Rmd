@@ -312,8 +312,8 @@ Mathematically more involved than LMs.
 set.seed(12345)
 p.orchid = 0.4
 n.picks = 100
-n.times <- 50
-y <- rbinom(n.times, size = n.picks, prob = p.orchid) # Collecting data
+n.fields <- 50
+y <- rbinom(n.fields, size = n.picks, prob = p.orchid) # Collecting data
 ```
 
 
@@ -533,7 +533,7 @@ predict(model, newdata = X, type = "response")
 \pause
 
 Normal: $\sum \limits^n_{i=1}(y_i-\hat{\mu_i})^2$
-Poisson: $2\sum \limits^n_{i=1} y_i\log(y_i/\hat{\mu}_i)-y_i+\hat{\mu}_i)$
+Poisson: $2\sum \limits^n_{i=1} (y_i\log(y_i/\hat{\mu}_i)-y_i+\hat{\mu}_i)$
 binomial: $2\sum \limits^n_{i=1} y_i\log(y_i/\hat{\mu}_i)+(N-y_i)\log\{(N-y_i)/(N-\hat{\mu}_i)\}$
 gamma: $2\sum \limits^n_{i=1} -\log\{y_i/\hat{\mu}_i\}+(y_i-\hat{\mu_i})/\hat{\mu_i}$
 

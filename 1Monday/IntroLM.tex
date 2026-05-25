@@ -155,7 +155,7 @@
 \DeclareMathAlphabet{\mathams}{U}{msb}{m}{n}
 \newcommand{\ex}{\mathams{E}}
 \usepackage{tcolorbox}
-\newtcolorbox{codebox}{enhanced,colback=shadecolor,colframe=orange,boxrule=.2pt, arc=0pt, width=\paperwidth, enlarge left by=-10mm}
+\newtcolorbox{codebox}{enhanced,colback=shadecolor,colframe=orange,boxrule=.2pt, arc=0pt, width=\paperwidth, enlarge left by=-10mm, after skip=2pt}
 \AtBeginSection{}
 \useoutertheme{miniframes}
 \setbeamertemplate{frametitle}{\vskip0.3cm\usebeamerfont*{frametitle}\insertframetitle\vskip-1.5ex\begin{beamercolorbox}[colsep=0.2pt, wd=\textwidth]{lower separation line head}\end{beamercolorbox}}
@@ -215,8 +215,8 @@
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{set.seed}\NormalTok{(}\DecValTok{12345}\NormalTok{) }\CommentTok{\# For reproducibility}
-\NormalTok{n.times }\OtherTok{\textless{}{-}} \DecValTok{50}\NormalTok{;n.picks}\OtherTok{=}\DecValTok{10}\NormalTok{;p.orchid }\OtherTok{\textless{}{-}} \FloatTok{0.4}
-\NormalTok{y }\OtherTok{\textless{}{-}} \FunctionTok{rbinom}\NormalTok{(n.times, }\AttributeTok{size =}\NormalTok{ n.picks, }\AttributeTok{prob =}\NormalTok{ p.orchid) }
+\NormalTok{n.fields }\OtherTok{\textless{}{-}} \DecValTok{50}\NormalTok{;n.picks}\OtherTok{=}\DecValTok{10}\NormalTok{;p.orchid }\OtherTok{\textless{}{-}} \FloatTok{0.4}
+\NormalTok{y }\OtherTok{\textless{}{-}} \FunctionTok{rbinom}\NormalTok{(n.fields, }\AttributeTok{size =}\NormalTok{ n.picks, }\AttributeTok{prob =}\NormalTok{ p.orchid) }
 \end{Highlighting}
 \end{Shaded}
 
@@ -238,8 +238,8 @@
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{set.seed}\NormalTok{(}\DecValTok{12345}\NormalTok{) }\CommentTok{\# For reproducibility}
-\NormalTok{n.times }\OtherTok{\textless{}{-}} \DecValTok{100}\NormalTok{;n.picks}\OtherTok{=}\DecValTok{1}\NormalTok{;p.orchid }\OtherTok{\textless{}{-}} \FloatTok{0.4}
-\NormalTok{y }\OtherTok{\textless{}{-}} \FunctionTok{rbinom}\NormalTok{(n.times, }\AttributeTok{size =}\NormalTok{ n.picks, }\AttributeTok{prob =}\NormalTok{ p.orchid) }
+\NormalTok{n.fields }\OtherTok{\textless{}{-}} \DecValTok{100}\NormalTok{;n.picks}\OtherTok{=}\DecValTok{1}\NormalTok{;p.orchid }\OtherTok{\textless{}{-}} \FloatTok{0.4}
+\NormalTok{y }\OtherTok{\textless{}{-}} \FunctionTok{rbinom}\NormalTok{(n.fields, }\AttributeTok{size =}\NormalTok{ n.picks, }\AttributeTok{prob =}\NormalTok{ p.orchid) }
 \end{Highlighting}
 \end{Shaded}
 
@@ -776,7 +776,7 @@ Distance from model (line) to data: ``error''
 \phantomsection\label{least-squares-estimation}
 Minimize the sum of squared residuals: \begin{equation}
 RSS = \sum \limits^n_{i=1} \epsilon_i^2
-\end{equation} which is the same to maximizing the normal likelihood!
+\end{equation} which is the same as maximizing the normal likelihood!
 
 \begin{itemize}
 \tightlist

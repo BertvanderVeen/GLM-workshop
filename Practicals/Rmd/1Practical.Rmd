@@ -7,56 +7,73 @@ output: html_document
 
 # Background
 
-In the lecture we used an orchid example to introduce sampling variation and maximum likelihood estimation. We imagined walking through a field and recording whether each spot had an orchid or not, binary data that follows a binomial distribution.
+In the lecture we used an orchid example to introduce sampling variation and maximum likelihood estimation. We imagined walking through a field and recording whether each spot had an orchid or not, such binary data that follows a binomial distribution.
 
-The binomial distribution has two parameters: `size` (the number of picks per field visit, $N$) and `prob` (the true probability of finding an orchid, $p$). In R, `rbinom(n, size, prob)` simulates `n` field visits, each with `size` picks.
+The binomial distribution has two parameters: `size` (the number of picks per field, $n_{picks}$) and `prob` (the true probability of finding an orchid, $p$). In R, `rbinom(n.fields, size = n.picks, prob)` simulates `n.fields` field visits, each with `n.picks` picks.
+
+Everyone uses `n.picks = 10` picks per field.
 
 ```{r}
-y <- rbinom(n = 20, size = 10, prob = 0.4)
+n.picks <- 10
+y <- rbinom(n = 1, size = n.picks, prob = 0.4)
 y
 ```
 
-Each value is the number of orchids found in 10 picks. Running this again gives different results, that is sampling variation.
+The value is the number of orchids found in 10 picks. Running this again gives different results, that is sampling variation.
 
-The likelihood tells us how probable our observed data is for a given value of $p$. `dbinom` computes it directly, we just need to sum over all observations and maximise over $p$. We can do this with `optimize`, just as in the lecture:
+The likelihood tells us how probable our observed data is for a given value of $p$. `dbinom` computes it directly; we sum over all observations and maximise over $p$ using `optimize`:
 
 ```{r}
-mle <- optimize(function(p) sum(dbinom(y, size = 10, prob = p, log = TRUE)),
+mle <- optimize(function(p) sum(dbinom(y, size = n.picks, prob = p, log = TRUE)),
                 lower = 0, upper = 1, maximum = TRUE)
 mle$maximum
 ```
+
+With more data the MLE gets closer to the truth:
+
+```{r}
+y_more <- rbinom(n = 200, size = n.picks, prob = 0.4)
+mle_more <- optimize(function(p) sum(dbinom(y_more, size = n.picks, prob = p, log = TRUE)),
+                     lower = 0, upper = 1, maximum = TRUE)
+mle_more$maximum
+```
+
+Once we have the MLE we can quantify uncertainty with confidence intervals. The normal CI uses the asymptotic standard error from the CLT:
+
+```{r}
+n.fields  <- length(y)
+n_total   <- n.fields * n.picks
+se        <- sqrt(mle$maximum * (1 - mle$maximum) / n_total)
+ci_normal <- c(mle$maximum - 1.96 * se, mle$maximum + 1.96 * se)
+ci_normal
+```
+
+Because $\sum y_i \sim \text{Binom}(n_{total}, p)$ exactly, we can also use the exact binomial distribution directly:
+
+```{r}
+ci_exact <- c(qbinom(0.025, n_total, mle$maximum) / n_total,
+              qbinom(0.975, n_total, mle$maximum) / n_total)
+ci_exact
+```
+
 
 # Part 1
 
 Here is what I want you to do:
 
-1. Secretly choose values for `prob` (between 0 and 1), `size` (picks per visit), and `n` (number of visits). Do not tell the other groups.
+1. Choose values for `prob` (between 0 and 1) and `n.fields` (number of fields to sample). Everyone uses `n.picks = 10`.
 2. Simulate data using `rbinom` and plot a histogram with `hist`.
-3. Find the MLE using `optimize` and `dbinom`, as shown in the background above, just swap in your own `size` and `y`.
-4. Repeat the simulation many times and look at the distribution of the MLE. Simulate `B = 500` datasets using your chosen parameters, find the MLE for each, and plot a histogram:
-
-```{r, eval = FALSE}
-B <- 500
-mles <- numeric(B)
-for (i in 1:B) {
-  ysim <- rbinom(n = 20, size = 10, prob = 0.4)  # use your own n, size, prob
-  fit <- optimize(function(p) sum(dbinom(ysim, size = 10, prob = p, log = TRUE)),
-                  lower = 0, upper = 1, maximum = TRUE)
-  mles[i] <- fit$maximum
-}
-hist(mles, xlab = "MLE of p", main = "Sampling distribution of the MLE")
-abline(v = 0.4, col = "red")  # add your true prob here
-```
-
-What shape does the distribution take? What happens if you increase `n` or `size`? How does this connect to what was shown in the lecture about the Central Limit Theorem?
-
-5. Save your simulated data and share the file via Slack, do not reveal your parameter values:
+3. Find the MLE using `optimize` and `dbinom`. Then repeat with ten times as many fields. Does the MLE get closer to the truth?
+4. Compute both confidence intervals for your MLE. Do the normal and exact CIs agree?
+5. What happens to the intervals when you increase `n.fields`?
+6. What do you expect to happen if `prob` were close to 0 or 1? Try it.
+7. One person per group: save your simulated data and share the file via Slack. Do not reveal your parameter values to the other groups:
 
 ```{r, eval = FALSE}
 save(y, file = "y.RData")
 ```
 
-6. Show your histogram on Zoom. We will discuss as a group before opening Part 2.
+8. Show your histogram on Zoom. We will discuss as a group before opening Part 2.
 
 # Part 2
 
@@ -70,39 +87,11 @@ load("y.RData")
 
 Make sure the file is in your working directory, you can check with `getwd()`.
 
-Now find the MLE for $p$ from their data. The `size` parameter can be read off from the data, what is `max(y)`?
-
-```{r, eval = FALSE}
-size <- max(y)   # or eyeball it from the histogram
-mle <- optimize(function(p) sum(dbinom(y, size = size, prob = p, log = TRUE)),
-                lower = 0, upper = 1, maximum = TRUE)
-mle$maximum
-```
-
-You can also compute two confidence intervals, just as the lecture showed. The CLT slide gives an asymptotic normal CI:
-
-```{r, eval = FALSE}
-n_total <- length(y) * size       # total picks: n_times * n_picks
-se      <- sqrt(mle$maximum * (1 - mle$maximum) / n_total)
-ci_normal <- c(mle$maximum - 1.96 * se, mle$maximum + 1.96 * se)
-ci_normal
-```
-
-Because we also know the exact distribution — $\sum y_i \sim \text{Binom}(n_{total},\, p)$ — we can use it directly for a CI that does not rely on the normal approximation:
-
-```{r, eval = FALSE}
-ci_exact <- c(qbinom(0.025, n_total, mle$maximum) / n_total,
-              qbinom(0.975, n_total, mle$maximum) / n_total)
-ci_exact
-```
-
-Compare the two. Do they agree? When might they differ?
-
-Discuss with your group:
-
-1. Does your confidence interval seem narrow or wide? What determined that?
-2. Which group do you think simulated the data? Think back to the histograms on Zoom.
-3. After the groups reveal their true parameters: did groups that used larger `n` or `size` get identified more easily or less easily? What does this tell you about the relationship between sample size and the precision of a parameter estimate?
+1. Plot a histogram of the data. Can you guess the true `prob` and `n.fields` used by the other group?
+2. Find the MLE and compute both confidence intervals as shown in the background.
+3. What is your MLE estimate of `prob`? Interpret it in plain language: what does it mean for the orchid field?
+4. Do the normal and exact CIs agree? What drives any difference between them?
+5. After the groups reveal their true parameters: does your CI contain the true `prob`? Did groups with larger `n.fields` get narrower intervals, and were their parameters easier to identify?
 
 </details>
 

@@ -65,6 +65,14 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
+## Outline Today
+
+- Beyond GLMs: mixed-effects models
+- Bring your own data
+- Q & A
+
+- 15 minute break
+
 # Recap
 
 ## Questions about yesterday?

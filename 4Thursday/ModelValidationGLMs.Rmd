@@ -446,7 +446,7 @@ Or another metric. "AUC" is often used in binomial models.\newline
 ```{r, echo = FALSE}
 #prevent issues with factors in cross-validation
 hcrabs <- data.frame(cbind(model.matrix(Sat ~ 0+Spine + Colour + Width + Weight, hcrabs), Sat = hcrabs$Sat))
-model2 <- update(model2, formula = Sat~SpineBothOK+SpineOneOK+SpineNoneOK+ColourMedium+ColourDark.medium+ColourDark+Width+Weight)
+model2 <- glm(Sat ~ SpineBothOK + SpineOneOK + SpineNoneOK + ColourMedium + ColourDark.medium + ColourDark + Width + Weight, family = "poisson", data = hcrabs)
 ```
 
 

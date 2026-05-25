@@ -19,21 +19,9 @@ alaska <- rbind(
 )
 ```
 
-# Part 1
+The lecture also noted that many distributions resemble the normal for large samples, such as probabilities away from the boundaries as in the first part of today. This assumption is the basis for using a linear model, and it breaks down for non-normal data quite quickly. For binary data this happens when samples are small or events are rare.
 
-1. Fit a simple linear regression of `lab.defect` on `field.defect` using `lm`. What do the intercept and slope tell you about the relationship between field and lab measurements?
-
-2. Use `confint()` on the fitted model. Does the confidence interval for the slope contain zero? What would it mean for the relationship between field and lab measurements if it did?
-
-3. Fit `lm(depth ~ method, data = alaska)` and compare the coefficient with the result from `t.test(alaska.pipeline$lab.defect, alaska.pipeline$field.defect, var.equal = TRUE)`. Are they the same?
-
-# Part 2
-
-<details><summary> Open after discussion on zoom</summary>
-
-The lecture noted that many distributions resemble the normal for large samples and probabilities away from the boundaries. This assumption is the basis for using a linear model, and it breaks down for binary data when samples are small or events are rare.
-
-To illustrate this, two datasets are simulated below and fitted with `lm`. The first has 200 observations and a probability of 0.4; the second has 50 observations and a probability of 0.05.
+To illustrate this, we can simulate two datasets below and fit with `lm`. The first has 200 observations and a probability of 0.4; the second has 50 observations and a probability of 0.05.
 
 ```{r, fig.width = 10}
 set.seed(1)
@@ -54,7 +42,19 @@ range(predict(m1))
 range(predict(m2))
 ```
 
-1. The response is binary and can only take values 0 or 1. What range of values does `lm` predict? Is that appropriate?
+# Part 1
+
+1. Fit a simple linear regression to the Alaska pipeline data of `lab.defect` on `field.defect` using `lm`. What do the intercept and slope tell you about the relationship between field and lab measurements?
+
+2. Use `confint()` on the fitted model. Does the confidence interval for the slope contain zero? What would it mean for the relationship between field and lab measurements if it did?
+
+3. Fit `lm(depth ~ method, data = alaska)` and compare the coefficient with the result from `t.test(alaska.pipeline$lab.defect, alaska.pipeline$field.defect, var.equal = TRUE)`. Are they the same?
+
+# Part 2
+
+<details><summary> Open after discussion on zoom</summary>
+
+1. Now we fit `lm` to the binary data simulated above. The response is binary and can only take values 0 or 1. What range of values does `lm` predict? Is that appropriate for binary data?
 2. Looking at the plots: does the fitted line describe the data well?
 3. When is a linear model suitable for binary data, and when does it fail? Which assumptions does `lm` make that are violated here?
 
