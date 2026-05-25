@@ -360,63 +360,75 @@ display: none;
 <h1>Background</h1>
 <p>In the lecture we used an orchid example to introduce sampling
 variation and maximum likelihood estimation. We imagined walking through
-a field and recording whether each spot had an orchid or not, binary
-data that follows a binomial distribution.</p>
+a field and recording whether each spot had an orchid or not, such
+binary data that follows a binomial distribution.</p>
 <p>The binomial distribution has two parameters: <code>size</code> (the
-number of picks per field visit, <span class="math inline">\(N\)</span>)
-and <code>prob</code> (the true probability of finding an orchid, <span class="math inline">\(p\)</span>). In R,
-<code>rbinom(n, size, prob)</code> simulates <code>n</code> field
-visits, each with <code>size</code> picks.</p>
-<pre class="r"><code>y &lt;- rbinom(n = 20, size = 10, prob = 0.4)
+number of picks per field, <span class="math inline">\(n_{picks}\)</span>) and <code>prob</code> (the
+true probability of finding an orchid, <span class="math inline">\(p\)</span>). In R,
+<code>rbinom(n.fields, size = n.picks, prob)</code> simulates
+<code>n.fields</code> field visits, each with <code>n.picks</code>
+picks.</p>
+<p>Everyone uses <code>n.picks = 10</code> picks per field.</p>
+<pre class="r"><code>n.picks &lt;- 10
+y &lt;- rbinom(n = 1, size = n.picks, prob = 0.4)
 y</code></pre>
-<pre><code>##  [1] 4 2 5 6 2 4 3 3 5 4 4 3 4 3 2 3 2 2 0 4</code></pre>
-<p>Each value is the number of orchids found in 10 picks. Running this
+<pre><code>## [1] 1</code></pre>
+<p>The value is the number of orchids found in 10 picks. Running this
 again gives different results, that is sampling variation.</p>
 <p>The likelihood tells us how probable our observed data is for a given
 value of <span class="math inline">\(p\)</span>. <code>dbinom</code>
-computes it directly, we just need to sum over all observations and
-maximise over <span class="math inline">\(p\)</span>. We can do this
-with <code>optimize</code>, just as in the lecture:</p>
-<pre class="r"><code>mle &lt;- optimize(function(p) sum(dbinom(y, size = 10, prob = p, log = TRUE)),
+computes it directly; we sum over all observations and maximise over
+<span class="math inline">\(p\)</span> using <code>optimize</code>:</p>
+<pre class="r"><code>mle &lt;- optimize(function(p) sum(dbinom(y, size = n.picks, prob = p, log = TRUE)),
                 lower = 0, upper = 1, maximum = TRUE)
 mle$maximum</code></pre>
-<pre><code>## [1] 0.3249919</code></pre>
+<pre><code>## [1] 0.1000006</code></pre>
+<p>With more data the MLE gets closer to the truth:</p>
+<pre class="r"><code>y_more &lt;- rbinom(n = 200, size = n.picks, prob = 0.4)
+mle_more &lt;- optimize(function(p) sum(dbinom(y_more, size = n.picks, prob = p, log = TRUE)),
+                     lower = 0, upper = 1, maximum = TRUE)
+mle_more$maximum</code></pre>
+<pre><code>## [1] 0.410003</code></pre>
+<p>Once we have the MLE we can quantify uncertainty with confidence
+intervals. The normal CI uses the asymptotic standard error from the
+CLT:</p>
+<pre class="r"><code>n.fields  &lt;- length(y)
+n_total   &lt;- n.fields * n.picks
+se        &lt;- sqrt(mle$maximum * (1 - mle$maximum) / n_total)
+ci_normal &lt;- c(mle$maximum - 1.96 * se, mle$maximum + 1.96 * se)
+ci_normal</code></pre>
+<pre><code>## [1] -0.08594181  0.28594311</code></pre>
+<p>Because <span class="math inline">\(\sum y_i \sim
+\text{Binom}(n_{total}, p)\)</span> exactly, we can also use the exact
+binomial distribution directly:</p>
+<pre class="r"><code>ci_exact &lt;- c(qbinom(0.025, n_total, mle$maximum) / n_total,
+              qbinom(0.975, n_total, mle$maximum) / n_total)
+ci_exact</code></pre>
+<pre><code>## [1] 0.0 0.3</code></pre>
 </div>
 <div id="part-1" class="section level1">
 <h1>Part 1</h1>
 <p>Here is what I want you to do:</p>
 <ol style="list-style-type: decimal">
-<li>Secretly choose values for <code>prob</code> (between 0 and 1),
-<code>size</code> (picks per visit), and <code>n</code> (number of
-visits). Do not tell the other groups.</li>
+<li>Choose values for <code>prob</code> (between 0 and 1) and
+<code>n.fields</code> (number of fields to sample). Everyone uses
+<code>n.picks = 10</code>.</li>
 <li>Simulate data using <code>rbinom</code> and plot a histogram with
 <code>hist</code>.</li>
-<li>Find the MLE using <code>optimize</code> and <code>dbinom</code>, as
-shown in the background above, just swap in your own <code>size</code>
-and <code>y</code>.</li>
-<li>Repeat the simulation many times and look at the distribution of the
-MLE. Simulate <code>B = 500</code> datasets using your chosen
-parameters, find the MLE for each, and plot a histogram:</li>
-</ol>
-<pre class="r"><code>B &lt;- 500
-mles &lt;- numeric(B)
-for (i in 1:B) {
-  ysim &lt;- rbinom(n = 20, size = 10, prob = 0.4)  # use your own n, size, prob
-  fit &lt;- optimize(function(p) sum(dbinom(ysim, size = 10, prob = p, log = TRUE)),
-                  lower = 0, upper = 1, maximum = TRUE)
-  mles[i] &lt;- fit$maximum
-}
-hist(mles, xlab = &quot;MLE of p&quot;, main = &quot;Sampling distribution of the MLE&quot;)
-abline(v = 0.4, col = &quot;red&quot;)  # add your true prob here</code></pre>
-<p>What shape does the distribution take? What happens if you increase
-<code>n</code> or <code>size</code>? How does this connect to what was
-shown in the lecture about the Central Limit Theorem?</p>
-<ol start="5" style="list-style-type: decimal">
-<li>Save your simulated data and share the file via Slack, do not reveal
-your parameter values:</li>
+<li>Find the MLE using <code>optimize</code> and <code>dbinom</code>.
+Then repeat with ten times as many fields. Does the MLE get closer to
+the truth?</li>
+<li>Compute both confidence intervals for your MLE. Do the normal and
+exact CIs agree?</li>
+<li>What happens to the intervals when you increase
+<code>n.fields</code>?</li>
+<li>What do you expect to happen if <code>prob</code> were close to 0 or
+1? Try it.</li>
+<li>One person per group: save your simulated data and share the file
+via Slack. Do not reveal your parameter values to the other groups:</li>
 </ol>
 <pre class="r"><code>save(y, file = &quot;y.RData&quot;)</code></pre>
-<ol start="6" style="list-style-type: decimal">
+<ol start="8" style="list-style-type: decimal">
 <li>Show your histogram on Zoom. We will discuss as a group before
 opening Part 2.</li>
 </ol>
@@ -431,34 +443,25 @@ Open after discussion on zoom
 <pre class="r"><code>load(&quot;y.RData&quot;)</code></pre>
 <p>Make sure the file is in your working directory, you can check with
 <code>getwd()</code>.</p>
-<p>Now find the MLE for <span class="math inline">\(p\)</span> from
-their data. The <code>size</code> parameter can be read off from the
-data, what is <code>max(y)</code>?</p>
-<pre class="r"><code>size &lt;- max(y)   # or eyeball it from the histogram
-mle &lt;- optimize(function(p) sum(dbinom(y, size = size, prob = p, log = TRUE)),
-                lower = 0, upper = 1, maximum = TRUE)
-mle$maximum</code></pre>
-<p>You can also compute a confidence interval. The lecture showed that
-the width of the likelihood captures uncertainty, a quick approach using
-the binomial distribution directly:</p>
-<pre class="r"><code>n_total &lt;- length(y) * size  # total number of picks
-ci_lower &lt;- qbinom(0.025, n_total, mle$maximum) / n_total
-ci_upper &lt;- qbinom(0.975, n_total, mle$maximum) / n_total
-c(ci_lower, ci_upper)</code></pre>
-<p>Discuss with your group:</p>
 <ol style="list-style-type: decimal">
-<li>Does your confidence interval seem narrow or wide? What determined
-that?</li>
-<li>Which group do you think simulated the data? Think back to the
-histograms on Zoom.</li>
-<li>After the groups reveal their true parameters: did groups that used
-larger <code>n</code> or <code>size</code> get identified more easily or
-less easily? What does this tell you about the relationship between
-sample size and the precision of a parameter estimate?</li>
+<li>Plot a histogram of the data. Can you guess the true
+<code>prob</code> and <code>n.fields</code> used by the other
+group?</li>
+<li>Find the MLE and compute both confidence intervals as shown in the
+background.</li>
+<li>What is your MLE estimate of <code>prob</code>? Interpret it in
+plain language: what does it mean for the orchid field?</li>
+<li>Do the normal and exact CIs agree? What drives any difference
+between them?</li>
+<li>After the groups reveal their true parameters: does your CI contain
+the true <code>prob</code>? Did groups with larger <code>n.fields</code>
+get narrower intervals, and were their parameters easier to
+identify?</li>
 </ol>
 </details>
 <p><a href="https://htmlpreview.github.io/?https://github.com/BertvanderVeen/GLM-workshop/blob/main/Practicals/2024/1Practical.html">If
-you finish early, there is also the practical from last year.</a></p>
+you finish early, there is also the 2024 edition of this
+practical.</a></p>
 </div>
 
 
