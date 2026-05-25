@@ -372,8 +372,8 @@ picks.</p>
 <pre class="r"><code>n.picks &lt;- 10
 y &lt;- rbinom(n = 1, size = n.picks, prob = 0.4)
 y</code></pre>
-<pre><code>## [1] 3</code></pre>
-<p>Each value is the number of orchids found in 10 picks. Running this
+<pre><code>## [1] 5</code></pre>
+<p>The value is the number of orchids found in 10 picks. Running this
 again gives different results, that is sampling variation.</p>
 <p>The likelihood tells us how probable our observed data is for a given
 value of <span class="math inline">\(p\)</span>. <code>dbinom</code>
@@ -382,13 +382,13 @@ computes it directly; we sum over all observations and maximise over
 <pre class="r"><code>mle &lt;- optimize(function(p) sum(dbinom(y, size = n.picks, prob = p, log = TRUE)),
                 lower = 0, upper = 1, maximum = TRUE)
 mle$maximum</code></pre>
-<pre><code>## [1] 0.2999942</code></pre>
+<pre><code>## [1] 0.5</code></pre>
 <p>With more data the MLE gets closer to the truth:</p>
 <pre class="r"><code>y_more &lt;- rbinom(n = 200, size = n.picks, prob = 0.4)
 mle_more &lt;- optimize(function(p) sum(dbinom(y_more, size = n.picks, prob = p, log = TRUE)),
                      lower = 0, upper = 1, maximum = TRUE)
 mle_more$maximum</code></pre>
-<pre><code>## [1] 0.4085028</code></pre>
+<pre><code>## [1] 0.418004</code></pre>
 <p>Once we have the MLE we can quantify uncertainty with confidence
 intervals. The normal CI uses the asymptotic standard error from the
 CLT:</p>
@@ -397,14 +397,14 @@ n_total   &lt;- n.fields * n.picks
 se        &lt;- sqrt(mle$maximum * (1 - mle$maximum) / n_total)
 ci_normal &lt;- c(mle$maximum - 1.96 * se, mle$maximum + 1.96 * se)
 ci_normal</code></pre>
-<pre><code>## [1] 0.01596481 0.58402366</code></pre>
+<pre><code>## [1] 0.1900968 0.8099032</code></pre>
 <p>Because <span class="math inline">\(\sum y_i \sim
 \text{Binom}(n_{total}, p)\)</span> exactly, we can also use the exact
 binomial distribution directly:</p>
 <pre class="r"><code>ci_exact &lt;- c(qbinom(0.025, n_total, mle$maximum) / n_total,
               qbinom(0.975, n_total, mle$maximum) / n_total)
 ci_exact</code></pre>
-<pre><code>## [1] 0.0 0.6</code></pre>
+<pre><code>## [1] 0.2 0.8</code></pre>
 </div>
 <div id="part-1" class="section level1">
 <h1>Part 1</h1>
@@ -418,15 +418,17 @@ ci_exact</code></pre>
 <li>Find the MLE using <code>optimize</code> and <code>dbinom</code>.
 Then repeat with ten times as many fields. Does the MLE get closer to
 the truth?</li>
-<li>Compute both confidence intervals for your MLE. Does the normal CI
-and exact CI agree? What happens to the intervals when you increase
-<code>n.fields</code>? What do you expect to happen if <code>prob</code>
-were close to 0 or 1? Try it.</li>
+<li>Compute both confidence intervals for your MLE. Do the normal and
+exact CIs agree?</li>
+<li>What happens to the intervals when you increase
+<code>n.fields</code>?</li>
+<li>What do you expect to happen if <code>prob</code> were close to 0 or
+1? Try it.</li>
 <li>One person per group: save your simulated data and share the file
 via Slack. Do not reveal your parameter values to the other groups:</li>
 </ol>
 <pre class="r"><code>save(y, file = &quot;y.RData&quot;)</code></pre>
-<ol start="6" style="list-style-type: decimal">
+<ol start="8" style="list-style-type: decimal">
 <li>Show your histogram on Zoom. We will discuss as a group before
 opening Part 2.</li>
 </ol>
@@ -446,13 +448,11 @@ Open after discussion on zoom
 <code>prob</code> and <code>n.fields</code> used by the other
 group?</li>
 <li>Find the MLE and compute both confidence intervals as shown in the
-background. Do the normal and exact CIs agree? What drives any
-difference between them?</li>
-</ol>
-<p>Discuss with your group:</p>
-<ol style="list-style-type: decimal">
+background.</li>
 <li>What is your MLE estimate of <code>prob</code>? Interpret it in
 plain language: what does it mean for the orchid field?</li>
+<li>Do the normal and exact CIs agree? What drives any difference
+between them?</li>
 <li>After the groups reveal their true parameters: does your CI contain
 the true <code>prob</code>? Did groups with larger <code>n.fields</code>
 get narrower intervals, and were their parameters easier to

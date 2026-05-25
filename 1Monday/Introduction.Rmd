@@ -97,9 +97,10 @@ Which topic(s) should we look into on Friday?
 
 ## How we will do it
 
-Lectures of about 45 minutes \newline
+Lectures of about 45 minutes
+
   - with examples
-Practicals of about 45-60 minutes: datasets and R
+  - Practicals of about 45-60 minutes: datasets and R
   - 2 parts
 
 ## Practicals
