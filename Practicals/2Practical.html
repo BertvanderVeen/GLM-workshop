@@ -400,10 +400,15 @@ plot(x2, y2, ylab = &quot;Orchid (0/1)&quot;, xlab = &quot;x&quot;); abline(m2, 
 <div id="part-1" class="section level1">
 <h1>Part 1</h1>
 <ol style="list-style-type: decimal">
-<li><p>Fit a simple linear regression to the Alaska pipeline data of
-<code>lab.defect</code> on <code>field.defect</code> using
-<code>lm</code>. What do the intercept and slope tell you about the
-relationship between field and lab measurements?</p></li>
+<li><p>Plot <code>lab.defect</code> against <code>field.defect</code>.
+Add a 1:1 reference line (<code>abline(0, 1, lty = 2)</code>). Do the
+field and lab measurements appear to agree?</p></li>
+<li><p>Fit a simple linear regression of <code>lab.defect</code> on
+<code>field.defect</code> using <code>lm</code> and add the regression
+line to the plot with <code>abline()</code>. What do the intercept and
+slope tell you about the relationship between field and lab
+measurements? Does the regression line deviate from the 1:1
+line?</p></li>
 <li><p>Use <code>confint()</code> on the fitted model. Does the
 confidence interval for the slope contain zero? What would it mean for
 the relationship between field and lab measurements if it did?</p></li>

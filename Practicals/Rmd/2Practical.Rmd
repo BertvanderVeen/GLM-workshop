@@ -44,11 +44,13 @@ range(predict(m2))
 
 # Part 1
 
-1. Fit a simple linear regression to the Alaska pipeline data of `lab.defect` on `field.defect` using `lm`. What do the intercept and slope tell you about the relationship between field and lab measurements?
+1. Plot `lab.defect` against `field.defect`. Add a 1:1 reference line (`abline(0, 1, lty = 2)`). Do the field and lab measurements appear to agree?
 
-2. Use `confint()` on the fitted model. Does the confidence interval for the slope contain zero? What would it mean for the relationship between field and lab measurements if it did?
+2. Fit a simple linear regression of `lab.defect` on `field.defect` using `lm` and add the regression line to the plot with `abline()`. What do the intercept and slope tell you about the relationship between field and lab measurements? Does the regression line deviate from the 1:1 line?
 
-3. Fit `lm(depth ~ method, data = alaska)` and compare the coefficient with the result from `t.test(alaska.pipeline$lab.defect, alaska.pipeline$field.defect, var.equal = TRUE)`. Are they the same?
+3. Use `confint()` on the fitted model. Does the confidence interval for the slope contain zero? What would it mean for the relationship between field and lab measurements if it did?
+
+4. Fit `lm(depth ~ method, data = alaska)` and compare the coefficient with the result from `t.test(alaska.pipeline$lab.defect, alaska.pipeline$field.defect, var.equal = TRUE)`. Are they the same?
 
 # Part 2
 
