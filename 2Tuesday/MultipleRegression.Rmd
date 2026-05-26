@@ -446,7 +446,7 @@ normtemp$celsius <- (normtemp$temperature- 32) * 5/9;normtemp$gender<-factor(nor
 ## Body temperature: two simple models
 
 \begin{equation}
-y_i = \alpha_i + x_i\beta_i + \epsilon_i
+y_i = \alpha + x_i\beta + \epsilon_i
 \end{equation}
 
 For this data that means:
@@ -557,7 +557,6 @@ $$
    \beta_1 \\
    \beta_2 \\
    \beta_3\\
-   \beta_4\\
   \end{array}  \right)
  +   \left( \begin{array}{c}
    \epsilon_1 \\
@@ -567,8 +566,8 @@ $$
    \epsilon_n \\
   \end{array}  \right)
 $$
-A separate regression line for each category. Here, $\alpha$ and $\beta_2$ are the slope and intercept for the regression line of the first category.\newline
-$\alpha+\beta_1$ is the intercept and $\beta_3+\beta_4$ is the slope of the regression line for the second category.
+A separate regression line for each category. Here, $\alpha$ and $\beta_2$ are the intercept and slope for the regression line of the first category.\newline
+$\alpha+\beta_1$ is the intercept and $\beta_2+\beta_3$ is the slope of the regression line for the second category.
 
 ## Interactions: categorical-continuous
 

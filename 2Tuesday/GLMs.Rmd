@@ -24,6 +24,7 @@ header-includes:
   - \setbeamercolor{enumerate item}{fg=orange}
   - \setbeamercolor{enumerate subitem}{fg=orange}
   - \tcbuselibrary{skins}
+  - \tcbset{after skip=0pt}
   - \usepackage{emoji}
   - \usepackage{booktabs}
 editor_options: 
@@ -217,27 +218,28 @@ $\text{g}^{-1}(\cdot)$ is the **inverse link function** \newline
 
 <!-- A smooth function with an inverse. -->
 
+\begin{columns}[onlytextwidth]
+\column{0.5\textwidth}
+\begin{itemize}
+\item Is a smooth/monotone function
+\item Has an inverse $g^{-1}(\cdot)$
+\item Restricts the scale
+\item $\text{g}(\cdot)$ can be e.g.
+\end{itemize}
+\column{0.5\textwidth}
 \columnsbegin
 \column{0.5\textwidth}
-- Is a smooth/monotone function
-- Has an inverse $g^{-1}(\cdot)$
-- Restricts the scale
-- $\text{g}(\cdot)$ can be e.g.
 
-\column{0.5\textwidth}
-
-```{r, echo = FALSE, out.height="90%"}
+```{r, echo = FALSE,  out.height = "26%"}
+par(mar=c(2,0,4,0))
 x<-seq(binomial(link=logit)$linkinv(-5),binomial(link=logit)$linkinv(5),length.out=1000)
 plot(x=binomial()$linkfun(x),x, cex.main = 5, cex.lab = 5, ylim = c(0,1), xlim = c(-5,5), type = "l", xlab=NA, ylab=NA, xaxt="n", yaxt="n")
 abline(v=0,h=0,lty="dashed")
 text(-3,.8,"Logit", cex=5)
 ```
-\columnsend
-\vspace*{-1.840\baselineskip}
-\columnsbegin
-\column{0.5\textwidth}
 
-```{r, echo = FALSE, fig.align="center"}
+```{r, echo = FALSE, out.height = "26%"}
+par(mar=c(2,0,4,0))
 x<-seq(poisson(link=log)$linkinv(-5),poisson(link=log)$linkinv(5),length.out=1000)
 plot(x=poisson(link=log)$linkfun(x),x, cex.main = 5, xlim = c(-5,5), type = "l", xlab=NA, ylab=NA, xaxt="n", yaxt="n")
 abline(v= 0, h = 0, lty="dashed")
@@ -245,8 +247,13 @@ text(-3,125,"Log", cex=5)
 ```
 
 \column{0.5\textwidth}
+```{r, echo = FALSE, out.height = "26%"}
+par(mar=c(2,0,4,0))
+plot.new()
+```
 
-```{r, echo = FALSE, fig.align="center"}
+```{r, echo = FALSE, out.height = "26%"}
+par(mar=c(2,0,4,0))
 x<-seq(-5,5,length.out = 1000)
 plot(x=x, 1/x, cex.main = 5, xlim =  c(-5,5),type = "l", xlab=NA, ylab=NA, xaxt="n", yaxt="n")
 abline(v= 0, h = 0, lty="dashed")
@@ -254,6 +261,7 @@ text(-3,125,"Inverse", cex=5)
 ```
 
 \columnsend
+\end{columns}
 
 \vfill
 
@@ -262,7 +270,7 @@ text(-3,125,"Inverse", cex=5)
 Variance changes with the mean:
 
 $$
-\text{var}(y_i;\mu_i,\phi) = \frac{\partial^2g(\eta_i)}{\partial\eta_i^2} a(\phi)
+\text{var}(y_i;\mu_i,\phi) = \frac{\partial^2 b(\eta_i)}{\partial\eta_i^2} a(\phi)
 $$
 
 - $\phi$: the dispersion parameter, constant over observations
@@ -337,11 +345,13 @@ lines(x=pphat,y=a+b*pphat, col = "red")
 }
 ```
 
+\vspace*{-\baselineskip}
+
 We need a good algorithm to find the maximum!
 
 ## Finding the maximum: GLMs
 
-$$\Theta^{t+1} = \Theta^t + {\frac{\partial^2\log\{\mathcal{L}(\textbf{y}_i;\Theta^t)\}}{\partial\Theta\partial\Theta^\top}}^{-1}\frac{\partial\mathcal{L}(\textbf{y}_i;\Theta^t)}{\partial\Theta}$$
+$$\Theta^{t+1} = \Theta^t + {\frac{\partial^2\log\{\mathcal{L}(\textbf{y};\Theta^t)\}}{\partial\Theta\partial\Theta^\top}}^{-1}\frac{\partial\mathcal{L}(\textbf{y};\Theta^t)}{\partial\Theta}$$
 
 - (Newton-Raphson) Can get quite expensive to evaluate.
 - Nelder and Wedderburn (1972) instead suggested an algorithm that fits a LM repeatedly.
@@ -349,8 +359,8 @@ $$\Theta^{t+1} = \Theta^t + {\frac{\partial^2\log\{\mathcal{L}(\textbf{y}_i;\The
 ## Iteratively reweighted least squares (IRLS)
 
 1) Start at some (decent) guess (e.g., $\hat{\symbf{\eta}} = \textbf{y} + \symbf{\epsilon}$) \tiny (Wood 2017) \normalsize\pause
-2) Set $\textbf{z}^t = \symbf{\eta} + \frac{\partial \hat{\symbf{\eta}}}{\partial g^{-1}(\hat{\symbf{\eta}})}\{\textbf{y} - g^{-1}(\hat{\symbf{\eta}})\}/a(g^{-1}(\hat{\symbf{\eta}}))$\pause
-3) Calculate weights $\textbf{w} = a(g^{-1}(\hat{\symbf{\eta}}))/\{\frac{\partial \hat{\symbf{\eta}}}{\partial g^{-1}(\hat{\symbf{\eta}})}^2\text{var}(\textbf{y}_i)\}$\pause
+2) Set $\textbf{z}^t = \symbf{\eta} + \frac{\partial \hat{\symbf{\eta}}}{\partial g^{-1}(\hat{\symbf{\eta}})}\{\textbf{y} - g^{-1}(\hat{\symbf{\eta}})\}$\pause
+3) Calculate weights $\textbf{w} = 1/\{\frac{\partial \hat{\symbf{\eta}}}{\partial g^{-1}(\hat{\symbf{\eta}})}^2\text{var}(y_i)\}$\pause
 4) Fit weighted LM with $\symbf{z}$ as "data" and $\textbf{w}$ as weights\pause
 5) Repeat until convergence\pause
 
@@ -422,7 +432,7 @@ Data from Cochran (2002)
 
 - 838 games
 - Many variables: team, league, division, year, runs scores, wins
-- Response variable: attendance
+- Response variable: wins
 
 \tiny
 

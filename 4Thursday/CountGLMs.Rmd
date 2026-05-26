@@ -430,8 +430,8 @@ format(cbind(data.frame("No offset" = coef(model),
 
 ## Overdispersion
 
-Our assumption: $\lambda = \text{var}(\textbf{y})$ \newline
-Reality: $\lambda \leq \text{var}(\textbf{y})$
+Our assumption: $\lambda = \text{var}(y_i)$ \newline
+Reality: $\lambda \leq \text{var}(y_i)$
 
 - Mean = variance
 - If there is more variation, this assumption fails
@@ -441,8 +441,8 @@ For our example: many females have few satellites, but some females have very ma
 
 ## Underdispersion
 
-Our assumption: $\lambda = \text{var}(\textbf{y})$ \newline
-Reality: $\lambda \geq \text{var}(\textbf{y})$
+Our assumption: $\lambda = \text{var}(y_i)$ \newline
+Reality: $\lambda \geq \text{var}(y_i)$
 
 Considerably less common than overdispersion.
 

@@ -61,7 +61,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Outline
 
-- Normal distribution
 - Linear models
 - Assumption violation
 
@@ -157,8 +156,8 @@ The fitted model:
 
 $$y_i = \hat{\alpha} + \sum \limits^p_{k=1}x_{ik}\hat{\beta}_k + \hat{\epsilon}_i$$
 
-- $\epsilon_i = y_i - \alpha - \sum \limits^n_{i=1}x_{ik}\beta$
-- $\hat{\epsilon}_i = y_i - \hat{\alpha} - \sum \limits^n_{i=1}x_{ik}\hat{\beta}$
+- $\epsilon_i = y_i - \alpha - \sum \limits^p_{k=1}x_{ik}\beta_k$
+- $\hat{\epsilon}_i = y_i - \hat{\alpha} - \sum \limits^p_{k=1}x_{ik}\hat{\beta}_k$
 
 Residuals are the **observed** deviation from the regression line.
 
@@ -252,7 +251,7 @@ segments(x0 = anscombe$x4, x1 = anscombe$x4, y0= predict(model4), y1=anscombe$y4
 
 ## Leverage: hat matrix
 
-$$\hat{\mu}_i = \hat{\alpha} + \sum \limits^n_{i=1}x_{ik}\hat{\beta}$$
+$$\hat{\mu}_i = \hat{\alpha} + \sum \limits^p_{k=1}x_{ik}\hat{\beta}_k$$
 but we can also write:
 
 $\hat{\boldsymbol{\mu}} = \textbf{H}\textbf{y}$
