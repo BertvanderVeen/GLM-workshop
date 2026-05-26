@@ -69,7 +69,7 @@ Now, we have not yet added uncertainty to the predictions. For this, we need the
 
 ```{r, fig.width = 10}
 predictions3 <- predict(reg3, newdata = newdata, se.fit = TRUE)
-plot(y ~ x, ylim = range(c(y, predictions3)), type = "n")
+plot(y ~ x, ylim = range(c(y, predictions3$fit)), type = "n")
 predictions3$LI <- predictions3$fit - predictions3$se.fit*1.96
 predictions3$UI <- predictions3$fit + predictions3$se.fit*1.96
 
@@ -130,25 +130,26 @@ The goal is to have a little fun, while making visualizations that effectively c
 
 Here is what I want you to do:
 
-1. Make a plot of your data and the prediction. For a multiple linear regression, you may want to try for various predictor variables. $\textbf{x}$.
+1. Make a plot of your data and the prediction. For a multiple linear regression, you may want to try for various predictor variables $\textbf{x}$. Does the regression line capture the trend in the data well?
 
-2. Change the point shape, size, and color of the observations.
+2. Add a confidence interval band to the prediction. Where is the uncertainty largest, and why?
 
-3. Change the line width and color for the regression.
+3. If you have two continuous covariates in the model, fix one at its mean and plot the effect of the other. How does the choice of fixed value change the plot?
 
-4. How could you make a plot of the prediction if you have two continuous covariates in the model?
+4. Construct a caterpillar plot of the coefficients. Which predictors have confidence intervals that do not cross zero?
 
-5. Construct a caterpillar plot.
-
-6. Use `par(mfrow=c(..,..))` to plot multiple base R plots together.
-
-7. Use `effects::allEffects` or `ggeffects::ggeffect` to visualize your regression.
+5. Use `effects::allEffects` or `ggeffects::ggeffect` to visualize your regression. How does this compare to the plot you made manually?
 
 # Part 2
 
-<details><summary>Open after discussion on zoom</summary>
+<details><summary>Open after Part 1</summary>
 
-Try reconstructing your plots from Part 1 using the `ggplot2` package. You need the `ggplot` function in combination with `geom_line` and `geom_ribbon`, `geom_point` and `geom_errorbar`.
+Try reconstructing your plots from Part 1 using the `ggplot2` package.
+
+1. Start with `ggplot(data = ..., aes(x = ..., y = ...))` and add `geom_point()` to plot the observations.
+2. Add the regression line using `geom_line()`, passing the predictions as a separate data frame via the `data` argument.
+3. Add a confidence interval band with `geom_ribbon(aes(ymin = LI, ymax = UI))`.
+4. Reconstruct the caterpillar plot using `geom_point()` and `geom_errorbarh()` on the coefficients and confidence intervals.
 
 </details>
 

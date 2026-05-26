@@ -83,7 +83,7 @@ We will use different datasets than in the last practicals (except the Baseball 
 
 # Part 2
 
-<details><summary>Open after discussion on zoom</summary>
+<details><summary>Open after Part 1</summary>
 
 4. Fit a negative-binomial regression to the same dataset.
 

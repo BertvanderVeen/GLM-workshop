@@ -106,7 +106,7 @@ Here is what I want you to do:
 
 # Part 2
 
-<details><summary>Open after discussion on zoom</summary>
+<details><summary>Open after Part 1</summary>
 
 5. Compare the change in probability from Q4 to the corresponding odds ratio from Q3. An odds ratio of 2 does not mean the probability doubles — why not? How does the effect of a predictor on the probability scale depend on the baseline probability?
 

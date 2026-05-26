@@ -7,7 +7,7 @@ output: html_document
 
 # Background
 
-Yesterday, we learned about sampling variation, uncertainty, t-tests and simple linear regression. We did this by simulating data from a normal distribution. In this practical we will focus on linear regression, for which we can also simulate some data:
+Yesterday, we learned about sampling variation, uncertainty, t-tests and simple linear regression. In this practical we will focus on linear regression, for which we can simulate some data:
 
 ```{r}
 x <- runif(20, 3, 5)
@@ -67,8 +67,11 @@ You can find the datasets in the "data" folder of the github repository.
 2. [dmn](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/dmn.csv): de novo mutations in children [Halldorsson et al. (2019)](https://www.science.org/doi/10.1126/science.aau1043), see also [this page](https://mccoy-lab.github.io/hgv_modules/setup.html)
 3. [ISIT](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/ISIT.csv): Pelagic bioluminescence ("Sources") along a depth gradient in different seasons ([Gillibrand et al. 2007](https://www.int-res.com/abstracts/meps/v341/p37-44/))
 4. [TeethNitrogen](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/TeethNitrogen.csv): Nitrogen isotope ratios in teeth of stranded whales ([Mendes et al. 2007](https://link.springer.com/article/10.1007/s00442-006-0612-z))
+5. normtemp (load with `data(normtemp, package = "UsingR")`): Body temperature and resting heart rate of 130 individuals ([Mackowiak et al. 1992](https://doi.org/10.1001/jama.1992.03490120092034))
 
-# Part 1
+*Note: this is a large practical and you may not finish all parts. You can continue later if time allows.*
+
+# Part 1: exploration
 
 So far we have not used the `data` argument of the `lm` object. To fit a linear regression with a dataset, you will have to do that.
 
@@ -79,9 +82,9 @@ Here is what I want you to do:
 3. Explore the data, a good analysis always start with exploratory analysis. Use `plot` to visualize the relationship between $\textbf{y}$ and one or two predictors.
 4. Can you (visually) identify a predictor variable $\textbf{x}$ that might be suitable for explaining the response variable $\textbf{y}$?
 
-# Part 2
+# Part 2: multiple regression
 
-<details><summary> Open after discussion on zoom</summary>
+<details><summary>Open after Part 1</summary>
 
 Here is what I want you to do:
 
@@ -90,8 +93,22 @@ Here is what I want you to do:
 3. Fit a multiple linear regression with $\textbf{y}$ as the response variable and with all the predictors $\textbf{x}$ from 1.
 4. Compare the parameter estimates and confidence intervals to the results from 1. How have the results changed?
 5. What is the interpretation of the intercept? Could centering the covariates change its interpretation?
-6. Try including interactions with `x1*x2` or quadratic terms for continuous predictors (with `I(x^2)`) in the model. Can you figure out how to interpret their parameter estimates?
-7. Overall, what conclusions can you draw for the relationship of $\textbf{y}$ and $\textbf{x}$?
+6. Overall, what conclusions can you draw for the relationship of $\textbf{y}$ and $\textbf{x}$?
+7. Simulate a random variable `z <- rnorm(nrow(dataset))` and add it to your multiple regression. Is it significant? How does its inclusion affect the estimates and confidence intervals for the real predictors?
+
+</details>
+
+# Part 3: interactions
+
+<details><summary>Open after Part 2</summary>
+
+Load the `normtemp` dataset (and convert the temperature to Celsius with `(temperature - 32) * 5/9` if preferred). Convert `gender` to a factor with `factor(gender, labels = c("Male", "Female"))`.
+
+1. Fit a multiple regression with `gender` and `hr` as predictors. What is the interpretation of the intercept and each coefficient?
+2. Change the reference category using `relevel`. How does the model summary change, and what does it now mean?
+3. Fit a model that includes the interaction between `gender` and `hr`. Does the effect of heart rate on body temperature differ between males and females?
+4. Plot the fitted regression lines for each group.
+5. A quadratic term is a special type of interaction — the variable interacts with itself. Add a quadratic term for `hr` with `I(hr^2)`. Does body temperature have a nonlinear relationship with heart rate? How does this change your interpretation?
 
 </details>
 

@@ -103,7 +103,7 @@ Here is what I want you to do:
 
 # Part 2
 
-<details><summary>Open after discussion on zoom</summary>
+<details><summary>Open after Part 1</summary>
 
 5. Fit a negative-binomial regression and check the residuals for improvement.
 

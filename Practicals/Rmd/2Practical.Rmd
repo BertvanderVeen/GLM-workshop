@@ -54,7 +54,7 @@ range(predict(m2))
 
 # Part 2
 
-<details><summary> Open after discussion on zoom</summary>
+<details><summary>Open after Part 1</summary>
 
 1. Now we fit `lm` to the binary data simulated above. The response is binary and can only take values 0 or 1. What range of values does `lm` predict? Is that appropriate for binary data?
 2. Looking at the plots: does the fitted line describe the data well?

@@ -77,7 +77,7 @@ save(y, file = "y.RData")
 
 # Part 2
 
-<details><summary> Open after discussion on zoom</summary>
+<details><summary>Open after Part 1</summary>
 
 You have received a file from another group. Load it with:
 

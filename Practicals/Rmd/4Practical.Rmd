@@ -118,7 +118,15 @@ We will use the same datasets as in the last practical. You can find the dataset
 
 The datasets are all stored in as ".csv" files, which means that you can load them into R by using the `read.csv("...")` function. You need to replace "..." by the link of the dataset, which you can copy by right-clicking the dataset name and choosing "copy link address".
  
-# Part 1
+# Part 1: Anscombe's quartet
+
+The `anscombe` dataset is built into R and can be loaded with `data(anscombe)`. It contains four pairs of x and y variables (`x1`/`y1` through `x4`/`y4`) that all produce nearly identical regression summaries, but look very different.
+
+1. Fit a simple linear regression for each of the four datasets: `lm(y1~x1)`, `lm(y2~x2)`, etc. Compare the coefficients and $R^2$ across models.
+2. Use `plot` to visualize the residuals of each model.
+3. Which assumptions are violated in each case, and how can you tell?
+
+# Part 2
 
 Here is what I want you to do:
 
@@ -130,17 +138,17 @@ Here is what I want you to do:
   - independence of errors
   - homoscedasticity
 4. Which plot(s) did you use to conclude an assumption was violated in 3.?
-  
-# Part 2
 
-<details><summary>Open after discussion on zoom</summary>
+# Part 3
+
+<details><summary>Open after Part 2</summary>
 
 Assumption violations can generally be addressed by adjusting to model to accommodate the issue. Some of the assumption violations are more difficult to accommodate than others. Violation of:
 
 - linearity: can be addressed by specifying functions of covariates; quadratic or more non-linear terms
-- normality: can be addressed by normalizing the data (`log(y)` for example) before regression
+- normality: can be pragmatically addressed by normalizing the data (`log(y)` for example) before regression
 - independence of errors: this one is tricky, we might come back to it on friday, but occasionally it can be accounted for by including a missing covariate
-- homoscedasticity: can be addressed by applying a variance-stabilizing transformation (`sqrt(y)`for example) before regression, or by incorporating a missing covariate
+- homoscedasticity: can be pragmatically addressed by applying a variance-stabilizing transformation (`sqrt(y)`for example) before regression, or by incorporating a missing covariate
 
 Especially normality and homoscedasticity are issues that arise when fitting a linear model when you should be fitting a generalised linear model to your data instead.
 

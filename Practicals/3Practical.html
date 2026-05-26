@@ -359,9 +359,8 @@ display: none;
 <div id="background" class="section level1">
 <h1>Background</h1>
 <p>Yesterday, we learned about sampling variation, uncertainty, t-tests
-and simple linear regression. We did this by simulating data from a
-normal distribution. In this practical we will focus on linear
-regression, for which we can also simulate some data:</p>
+and simple linear regression. In this practical we will focus on linear
+regression, for which we can simulate some data:</p>
 <pre class="r"><code>x &lt;- runif(20, 3, 5)
 y &lt;- rnorm(20, mean = 1 + x*2)</code></pre>
 <p>In this simulation, <span class="math inline">\(\textbf{x}\)</span>
@@ -489,10 +488,16 @@ al. 2007</a>)</li>
 <li><a href="https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/TeethNitrogen.csv">TeethNitrogen</a>:
 Nitrogen isotope ratios in teeth of stranded whales (<a href="https://link.springer.com/article/10.1007/s00442-006-0612-z">Mendes
 et al. 2007</a>)</li>
+<li>normtemp (load with
+<code>data(normtemp, package = &quot;UsingR&quot;)</code>): Body temperature and
+resting heart rate of 130 individuals (<a href="https://doi.org/10.1001/jama.1992.03490120092034">Mackowiak et
+al. 1992</a>)</li>
 </ol>
+<p><em>Note: this is a large practical and you may not finish all parts.
+You can continue later if time allows.</em></p>
 </div>
-<div id="part-1" class="section level1">
-<h1>Part 1</h1>
+<div id="part-1-exploration" class="section level1">
+<h1>Part 1: exploration</h1>
 <p>So far we have not used the <code>data</code> argument of the
 <code>lm</code> object. To fit a linear regression with a dataset, you
 will have to do that.</p>
@@ -509,11 +514,11 @@ predictors.</li>
 explaining the response variable <span class="math inline">\(\textbf{y}\)</span>?</li>
 </ol>
 </div>
-<div id="part-2" class="section level1">
-<h1>Part 2</h1>
+<div id="part-2-multiple-regression" class="section level1">
+<h1>Part 2: multiple regression</h1>
 <details>
 <summary>
-Open after discussion on zoom
+Open after Part 1
 </summary>
 <p>Here is what I want you to do:</p>
 <ol style="list-style-type: decimal">
@@ -528,15 +533,44 @@ from 1.</li>
 results from 1. How have the results changed?</li>
 <li>What is the interpretation of the intercept? Could centering the
 covariates change its interpretation?</li>
-<li>Try including interactions with <code>x1*x2</code> or quadratic
-terms for continuous predictors (with <code>I(x^2)</code>) in the model.
-Can you figure out how to interpret their parameter estimates?</li>
 <li>Overall, what conclusions can you draw for the relationship of <span class="math inline">\(\textbf{y}\)</span> and <span class="math inline">\(\textbf{x}\)</span>?</li>
+<li>Simulate a random variable <code>z &lt;- rnorm(nrow(dataset))</code>
+and add it to your multiple regression. Is it significant? How does its
+inclusion affect the estimates and confidence intervals for the real
+predictors?</li>
+</ol>
+</details>
+</div>
+<div id="part-3-interactions" class="section level1">
+<h1>Part 3: interactions</h1>
+<details>
+<summary>
+Open after Part 2
+</summary>
+<p>Load the <code>normtemp</code> dataset (and convert the temperature
+to Celsius with <code>(temperature - 32) * 5/9</code> if preferred).
+Convert <code>gender</code> to a factor with
+<code>factor(gender, labels = c(&quot;Male&quot;, &quot;Female&quot;))</code>.</p>
+<ol style="list-style-type: decimal">
+<li>Fit a multiple regression with <code>gender</code> and
+<code>hr</code> as predictors. What is the interpretation of the
+intercept and each coefficient?</li>
+<li>Change the reference category using <code>relevel</code>. How does
+the model summary change, and what does it now mean?</li>
+<li>Fit a model that includes the interaction between
+<code>gender</code> and <code>hr</code>. Does the effect of heart rate
+on body temperature differ between males and females?</li>
+<li>Plot the fitted regression lines for each group.</li>
+<li>A quadratic term is a special type of interaction — the variable
+interacts with itself. Add a quadratic term for <code>hr</code> with
+<code>I(hr^2)</code>. Does body temperature have a nonlinear
+relationship with heart rate? How does this change your
+interpretation?</li>
 </ol>
 </details>
 <p><a href="https://htmlpreview.github.io/?https://github.com/BertvanderVeen/GLM-workshop/blob/main/Practicals/2024/3Practical.html">If
 you finish early you can pick a different dataset, or there is also the
-practical from last year.</a></p>
+2024 edition of this practical.</a></p>
 </div>
 
 

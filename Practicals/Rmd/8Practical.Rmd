@@ -99,7 +99,7 @@ The goal of this practical is to go over the models that you fitted during the l
 
 # Part 2
 
-<details><summary>Open after discussion on zoom</summary>
+<details><summary>Open after Part 1</summary>
 
 5. Compare your analysis of deviance table to a model comparison with AIC/AICc/BIC. Do the two approaches give you the same or similar results?
 

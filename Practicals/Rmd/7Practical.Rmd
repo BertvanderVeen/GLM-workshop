@@ -124,7 +124,7 @@ Here is what I want you to do:
 
 # Part 2
 
-<details><summary>Open after discussion on zoom</summary>
+<details><summary>Open after Part 1</summary>
 
 5. Repeat steps 1-3 with `AICc` and/or with `BIC`. Are there differences in the comparisons when you use a different information criteria?.
 

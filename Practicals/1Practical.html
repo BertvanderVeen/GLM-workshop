@@ -372,7 +372,7 @@ picks.</p>
 <pre class="r"><code>n.picks &lt;- 10
 y &lt;- rbinom(n = 1, size = n.picks, prob = 0.4)
 y</code></pre>
-<pre><code>## [1] 1</code></pre>
+<pre><code>## [1] 6</code></pre>
 <p>The value is the number of orchids found in 10 picks. Running this
 again gives different results, that is sampling variation.</p>
 <p>The likelihood tells us how probable our observed data is for a given
@@ -382,13 +382,13 @@ computes it directly; we sum over all observations and maximise over
 <pre class="r"><code>mle &lt;- optimize(function(p) sum(dbinom(y, size = n.picks, prob = p, log = TRUE)),
                 lower = 0, upper = 1, maximum = TRUE)
 mle$maximum</code></pre>
-<pre><code>## [1] 0.1000006</code></pre>
+<pre><code>## [1] 0.5999985</code></pre>
 <p>With more data the MLE gets closer to the truth:</p>
 <pre class="r"><code>y_more &lt;- rbinom(n = 200, size = n.picks, prob = 0.4)
 mle_more &lt;- optimize(function(p) sum(dbinom(y_more, size = n.picks, prob = p, log = TRUE)),
                      lower = 0, upper = 1, maximum = TRUE)
 mle_more$maximum</code></pre>
-<pre><code>## [1] 0.410003</code></pre>
+<pre><code>## [1] 0.4155037</code></pre>
 <p>Once we have the MLE we can quantify uncertainty with confidence
 intervals. The normal CI uses the asymptotic standard error from the
 CLT:</p>
@@ -397,14 +397,14 @@ n_total   &lt;- n.fields * n.picks
 se        &lt;- sqrt(mle$maximum * (1 - mle$maximum) / n_total)
 ci_normal &lt;- c(mle$maximum - 1.96 * se, mle$maximum + 1.96 * se)
 ci_normal</code></pre>
-<pre><code>## [1] -0.08594181  0.28594311</code></pre>
+<pre><code>## [1] 0.2963564 0.9036406</code></pre>
 <p>Because <span class="math inline">\(\sum y_i \sim
 \text{Binom}(n_{total}, p)\)</span> exactly, we can also use the exact
 binomial distribution directly:</p>
 <pre class="r"><code>ci_exact &lt;- c(qbinom(0.025, n_total, mle$maximum) / n_total,
               qbinom(0.975, n_total, mle$maximum) / n_total)
 ci_exact</code></pre>
-<pre><code>## [1] 0.0 0.3</code></pre>
+<pre><code>## [1] 0.3 0.9</code></pre>
 </div>
 <div id="part-1" class="section level1">
 <h1>Part 1</h1>
@@ -437,7 +437,7 @@ opening Part 2.</li>
 <h1>Part 2</h1>
 <details>
 <summary>
-Open after discussion on zoom
+Open after Part 1
 </summary>
 <p>You have received a file from another group. Load it with:</p>
 <pre class="r"><code>load(&quot;y.RData&quot;)</code></pre>

@@ -147,9 +147,6 @@ consider adding equation and equation in words for the examples?!
 
 <!--
 notes:
-1) les time needed for r coding / recap and introduction. The first exerise needs more time for the redistribution of data and a slow start
-2) redistributing the data requires a lot of time; I should put the "save" command directly in the exercise 1
-3) "curve" function is a bit unclear, needs further explanation what the exercise uses it for.
-4) "subset" needs to be mentioned in the exercise 1 for knowing how to compare the groups with a t test
-5) 2 10 minute breaks better than 1 15 minute break
+1) Practical 1, exercise 1.1: the plot should be the t-test plot as shown in the lecture
+2) The 2024 exercise (combining simulation from ex 1 and lm from ex 2) is a nice addition and should be properly incorporated into Practical 2
 -->
