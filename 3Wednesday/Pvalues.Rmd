@@ -274,6 +274,36 @@ cat("P-values larger than 0.05:\n", sum(Ps>0.05)/1000, "                        
 ```
 
 
+# Multiple testing
+
+## Multiple testing
+
+Running many tests inflates the probability of at least one false positive \textit{(assuming independent tests)}:
+
+```{r, echo = FALSE, fig.height = 4}
+k <- 1:50
+plot(k, 1-(1-0.05)^k, type = "l", ylab = "Pr(at least one false positive)", xlab = "Number of tests", ylim = c(0,1))
+abline(h = 0.05, lty = "dashed", col = "red")
+```
+
+## Corrections for multiple testing
+
+\textbf{Familywise error rate (FWER)}: probability of at least one false positive across a family of tests
+
+- Tests in regression are rarely independent: estimators share a covariance matrix
+- The curve on the previous slide is a conservative upper bound in practice
+
+\pause
+
+\textbf{Bonferroni correction}: reject when $p < \alpha / k$
+
+- Follows from the union bound: $\text{FWER} \leq \sum \alpha_i$, so set each $\alpha_i = \alpha/k$
+- Makes \textbf{no} independence assumption, so works regardless of dependence structure
+
+\pause
+
+\textbf{In practice}: report uncorrected p-values but be transparent about the number of tests performed.
+
 # Conclusion
 
 \small

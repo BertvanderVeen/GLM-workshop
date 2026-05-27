@@ -26,7 +26,7 @@ header-includes:
   - \tcbuselibrary{skins}
   - \usepackage{emoji}
   - \usepackage{longtable, booktabs}
-  - \usepackage{ulem}
+  - \usepackage[normalem]{ulem}
 editor_options: 
   chunk_output_type: console
 urlcolor: orange
@@ -635,7 +635,7 @@ performance::check_overdispersion(model)
 ## Accounting for overdispersion
 
 - Beta-binomial GLM
-- Quasibinomial GLM
+- Quasibinomial GLM: inflates standard errors by the overdispersion factor, but does \textbf{not} change point estimates
 - Mixed-effects model See [GLMM workshop](https://www.physalia-courses.org/courses-workshops/glmms-in-r/)
 
 ## Perfect separation

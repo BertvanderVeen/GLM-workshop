@@ -227,7 +227,7 @@ Allows us to partition the explained variation over the covariates.
 
 Measures increase in uncertainty of a parameter estimator when changing the model.
 
-## Psuedo $R^2$ in Generalised Linear Models
+## Pseudo $R^2$ in Generalised Linear Models
 
 1) GLMs lack the error term of LMs
 2) There is often no (clear) residual variance parameter
