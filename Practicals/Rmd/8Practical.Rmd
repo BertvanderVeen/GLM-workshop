@@ -34,13 +34,13 @@ reg1 <- glm(y ~ x1 + x2, family = "binomial")
 reg2 <- glm(y ~ x1 + x2 + x1:x2, family = "binomial")
 ```
 
-We can see that the second model is nested in the first. "Nested" here means that the terms in the first model ($\textbf{x}_1$ and $\textbf{x}_2$) are also present in the second model, in addition to a term that is not included in the first model. This is different than with information criteria, where we do not need models to be nested. Applying the `anova` function is straightforward:
+We can see that the first model is nested in the second. "Nested" here means that the terms in the first model ($\textbf{x}_1$ and $\textbf{x}_2$) are also present in the second model, in addition to a term that is not included in the first model. This is different than with information criteria, where we do not need models to be nested. Applying the `anova` function is straightforward:
 
 ```{r}
 anova(reg1, reg2)
 ```
 
-from which we conclude, because the reported p-value is larger than 0.05, that the second model is not an improvement over the first. For GLMs, the likelihood ratio test is performed on the basis of the deviance, hence that is reported by the `anova` function. As pedagogical example, we can manually implement what the `anova` function does:
+from which we conclude, because the reported p-value is larger than 0.05, that the second model is not an improvement over the first. For GLMs, the likelihood ratio test is performed on the basis of the deviance, hence the deviance is reported by the `anova` function. As pedagogical example, we can manually implement what the `anova` function does:
 
 ```{r}
 resid.dev <- deviance(reg1)-deviance(reg2)
@@ -89,13 +89,25 @@ The datasets are all stored in as ".csv" files, which means that you can load th
 
 The goal of this practical is to go over the models that you fitted during the last practicals (or for the multiple linear regression practical) and perform a confirmatory analysis. You can also use $R^2$ measures for supporting your conclusions. 
 
-1. To begin, can you shortly summarize (in your own words) what the difference is between confirmatory and exploratory analysis?
+1. To begin, can you briefly summarize (in your own words) what the difference is between confirmatory and exploratory analysis?
 
-2. Can you calculate deviance by hand for the binomial distribution? *Hint: it is included in the slides from yesterday*
+2. Can you calculate deviance by hand for the binomial distribution? *Hint: it is included in today's lecture slides*
 
 3. Formulate a hypothesis, fit two models, and use `anova` to compare them. Do you accept or reject the alternative hypothesis?
 
-4. Use `anova` with the most complex of the two models in 3 (or an even more complex model). Compare the results of `anova(model)` to `car::Anova(model, type = "II")` and `car::Anova(model, type = "III")` how do the results of the two functions differ?
+4. Use `anova` with the most complex of the two models in 3 (or an even more complex model) to get an analysis of deviance table. Then apply `car::Anova(model, type = "II")` and `car::Anova(model, type = "III")` to the same model. Do all three give the same result?
+
+<details><summary>Why don't they give the same answer?</summary>
+
+The three types differ in *what each term is tested against*:
+
+- **Type I (sequential):** terms are added one at a time in the order you wrote the formula. Each term is tested against the model without it, but *including* all terms that came before it. The result therefore depends on the order of terms in the formula.
+- **Type II (marginal, no interactions):** each main effect is tested against a model that includes all other main effects, but *not* higher-order terms involving that effect. Order does not matter. This is usually the right choice when there are no interactions, or when you want to test main effects in the presence of other main effects only.
+- **Type III (marginal, all terms):** each term is tested against a model that includes *all* other terms, including interactions. This means a main effect is tested while its interaction is in the model, which can give misleading results when interactions are present and the predictors are not centred.
+
+Try reordering the predictors in your formula and applying `anova` again. Notice that the Type I results change, while Type II and III do not.
+
+</details>
 
 # Part 2
 

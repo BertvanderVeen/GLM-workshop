@@ -13,7 +13,7 @@ In this practical we focus on *information criterion*. An information criterion 
 
 For these information criteria, "better" means either 1) in a predictive manner in the case of AIC, or 2) the model that is closest to the truth in terms of BIC.
 
-To AIC and BIC, first we need to have a model. Let's take the simulation from the previous practical:
+To calculate AIC and BIC, we first need a model. Let's take the simulation from the previous practical:
 
 ```{r, fig.width = 10}
 x1 <- rnorm(35)
@@ -60,14 +60,14 @@ logL2 = logLik(reg2)
 (bic2 = k2*log(n) - 2*logL2)
 ```
 
-we received a warning, indicating that the model is overfitting, but for the moment we will ignore that. AIC and BIC are used for comparison between models by examining their difference, which we is generally denoted $\Delta AIC$ and $\Delta BIC$. There exist rules of thumb when we should consider one model better than another; generally the rule that is maintained is if the alternative model's AIC or BIC is at least a 2 points lower than that of the first, per added parameter, we can consider it to be better. If the difference is less than that, we will stick to the simpler model per the principle of parsimony. Here, we addded one parameter (for the interaction of the two predictors), so we need the the AIC or BIC to be 2 points lower than for the first model:
+we received a warning, indicating that the model is overfitting, but for the moment we will ignore that. AIC and BIC are used for comparison between models by examining their difference, which is generally denoted $\Delta AIC$ and $\Delta BIC$. There exist rules of thumb for when we should consider one model better than another; generally the rule maintained is that if the alternative model's AIC or BIC is at least 2 points lower than that of the first model, per added parameter, we can consider it to be better. If the difference is less than that, we prefer the simpler model per the principle of parsimony. Here, we added one parameter (for the interaction of the two predictors), so we need the AIC or BIC to be 2 points lower than for the first model:
 
 ```{r}
 (daic = aic1-aic2)
 (dbic = bic1-bic2)
 ```
 
-In both cases, the second model's information criteria are larger than the first; we immediately know the model is not an improvement. The difference in AIC is less than 2 points, so we consider the two models to fit the data equally well, and thus to the simpler model. From this we conclude that the interaction term does not improve our model, i.e., it does not help in better explaining the response variable.
+In both cases, the second model's information criteria are larger than the first; we immediately know the model is not an improvement. The difference in AIC is less than 2 points, so we consider the two models to fit the data equally well, and thus prefer the simpler model. From this we conclude that the interaction term does not improve our model, i.e., it does not help in better explaining the response variable.
 
 Here, we calculated AIC and BIC ourselves, but R actually has functions to do that for us: `AIC` and `BIC`, which we can use from this point forward. There is no standard `AICc` function, the AIC corrected for small sample sizes, but it is available in the `AICcmodavg` or `MuMIn` packages. `AICcmodavg` can even make tables for us that include the difference in AIC(c) or BIC for the models, making things even easier:
 
@@ -77,7 +77,7 @@ AICcmodavg::aictab(list(reg1 = reg1, reg2 = reg2))
 
 This function requires that we provide the models in a list, and spits out a bunch of metrics for us to use. By default, `aictab` actually implements the AICc, which we can turn off using the `second.ord` argument if we want it to return the AIC instead. In the table, $K$ is the number of parameters, `Delta_AICc` is the difference in AICc to the "best" model of the ones provided, "AICcWt" is a weight (between zero and one) calculated from the difference in AICc. The weights can be used to infer which model is likely to be best; in a manner it is a reflection of relative support for a model. The "Cum.Wt" column is simply a sum of those weights, and gives a straightforward overview of the cut-off after which we do not need to consider models.
 
-Such tables should be used cautiously for model comparison. Years ago, groups of researchers got so caught up in model comparison that studies would report entire tables of all potential submodels of the most complex model that was possible to fit for a given dataset. Such tables (and the submodels) can automatically be fitted using an approached called "dredging", which is the automatic fitting of models, and ranking following some information criteria. As a demonstration, we can here use the `dredge` function from the `MuMIn` package. We apply this to the second model, as it is more complelx than the first, and the first is nested in the more complex model:
+Such tables should be used cautiously for model comparison. Years ago, groups of researchers got so caught up in model comparison that studies would report entire tables of all potential submodels of the most complex model that was possible to fit for a given dataset. Such tables (and the submodels) can automatically be fitted using an approach called "dredging", which is the automatic fitting of models, and ranking following some information criteria. As a demonstration, we can here use the `dredge` function from the `MuMIn` package. We apply this to the second model, as it is more complex than the first, and the first is nested in the more complex model:
 
 ```{r}
 reg2 <- update(reg2, na.action = na.fail)
@@ -90,7 +90,7 @@ MuMIn::get.models(res, subset = delta < 2)
 
 ```
 
-which returns our original (true) model. There is an issue that can arise here: models can automatically be fitted where the interaction term is included, but the main model terms are not. Such models are not (nearly) always sensible, and the general recommendation is to only consider models that include lower order (i.e., main terms) when there are higher order terms in the model. The `dredge` function has all kinds of possibilities for customising, you can also rank models with BIC, $R^2$ or otherwise, but we do not explore this further here.
+which returns our original (true) model. There is an issue that can arise here: models can automatically be fitted where the interaction term is included, but the main model terms are not. Such models are almost never sensible, and the general recommendation is to only consider models that include lower-order terms (i.e., main effects) when higher-order terms are present. The `dredge` function has all kinds of possibilities for customising, you can also rank models with BIC, $R^2$ or otherwise, but we do not explore this further here.
 
 What is vital to remember, is that information criteria are used for **comparison**, they are not a tool for assessing goodness-of-fit for any particular model, because they only compare models within the considered set of models. In that set, the "best" model may still be a very poor model! 
 
@@ -120,14 +120,18 @@ Here is what I want you to do:
 
 3. Deciding on a "full model" (i.e., the most complex or realistic model that you can define for a dataset), try going through a model selection procedure by comparing potential submodels. You can use `AICcmodavg::aictab` in combination with `second.ord  = FALSE`. Try not to use `MuMIn::dredge`.
 
-4. Now use `MuMIn::dredge` and see if it finds the best model to be the same. If not, consider why that might be.
+4. Before moving on: write down the model you landed on as "best" and your full ranking of the models you compared. Are you confident you considered every plausible submodel of your full model?
+
+5. Now use `MuMIn::dredge` to perform an exhaustive search. Did it find the same best model as you did in Q3? If the rankings differ, can you identify which models you missed or ordered differently?
+
+6. When would dredging be a bad idea? Think about: the number of predictors relative to sample size, the difference between exploratory and confirmatory analysis, and what happens to p-values and confidence intervals of the "winning" model after selection.
 
 # Part 2
 
 <details><summary>Open after Part 1</summary>
 
-5. Repeat steps 1-3 with `AICc` and/or with `BIC`. Are there differences in the comparisons when you use a different information criteria?.
+7. Repeat steps 1-3 with `AICc` and/or with `BIC`. Are there differences in the comparisons when you use a different information criterion?
 
-6. Compare the confidence intervals of the parameter estimates that are present in both your original model and in the final model from one of the selection procedures. How have they changed?
+8. Compare the confidence intervals of the parameter estimates that are present in both your original model and in the final model from one of the selection procedures. How have they changed?
 
 </details>

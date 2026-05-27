@@ -30,7 +30,7 @@ The most classical scenario in which we want to compare to a single reference ar
 
 For any two groups, we can calculate the group effect by summing the effect of the reference category and the group we are interested in. However, for a comparison we also need the uncertainty for the sum of the two effects, which requires the variance and the **covariance** of the two estimators.
 
-The next part is a little technical, but necessary to explain how we can get to a pairwise comparison. If you recall from earlier lectures, the maximum likelihood estimator is normally distribution in large samples. However, we have not yet discussed what the sampling distribution is when there is more than one estimator. When there is more than one estimator, the sampling distribution is **multivariate normal**, i.e., normal in more than one dimension. Formally, we write:
+The next part is a little technical, but necessary to explain how we can get to a pairwise comparison. If you recall from earlier lectures, the maximum likelihood estimator is normally distributed in large samples. However, we have not yet discussed what the sampling distribution is when there is more than one estimator. When there is more than one estimator, the sampling distribution is **multivariate normal**, i.e., normal in more than one dimension. Formally, we write:
 
 \begin{equation}
 \hat{\boldsymbol{\beta}} \sim \mathcal{N}(\boldsymbol{\beta}, \boldsymbol{\Sigma})
@@ -48,7 +48,7 @@ if we write the summation over the coefficients as matrix; $\textbf{S} = \textbf
 \text{var}(\beta_1 + \beta_3) = \textbf{S}
 \end{equation}
 
-The only thing we need to do is work out what $\textbf{C}$ should look like. The rows of $\textbf{C}$ represent the new parameter estimate that we want, as a function of the parameters that we already have (the columns), here that is $\beta_1$ and $\beta_3$. For the parameters that we need to sum, we place a 1 in the correct row and column. For the example above, where there are three groups and group 2 is the reference category, is we want the effect for group 1, $\textbf{C}$ is:
+The only thing we need to do is work out what $\textbf{C}$ should look like. The rows of $\textbf{C}$ represent the new parameter estimate that we want, as a function of the parameters that we already have (the columns), here that is $\beta_1$ and $\beta_3$. For the parameters that we need to sum, we place a 1 in the correct row and column. For the example above, where there are three groups and group 2 is the reference category, if we want the effect for group 1, $\textbf{C}$ is:
 
 \begin{equation}
 \textbf{C} = \begin{bmatrix}1 0 1 0 \end{bmatrix}
@@ -90,13 +90,13 @@ So that the group effects and their covariance matrix are:
 (coefs <- C%*%coef(reg2))
 (Sigma <- C%*%vcov(reg2)%*%t(C))
 ```
- the `vcov` function extracts the covariance matrix from the model, which we needed to calculate the uncertainties from the "new" parameter estimates. Now, these are the only two pieces of information that we need to construct pairwise tests of the coefficients; we just need to decide on the test. Usually, we want to test whether or not a parameter is zero. For two parameter estimates, $\hat{\beta_1}$ and $\hat{\beta_2}$, we can calculate a wald-test statistic to test if they are the same:
+ the `vcov` function extracts the covariance matrix from the model, which we need to calculate the uncertainties of the "new" parameter estimates. Now, these are the only two pieces of information that we need to construct pairwise tests of the coefficients; we just need to decide on the test. Usually, we want to test whether or not a parameter is zero. For two parameter estimates, $\hat{\beta_1}$ and $\hat{\beta_2}$, we can calculate a wald-test statistic to test if they are the same:
  
  \begin{equation}
  W = \frac{(\hat{\beta}_1 - \hat{\beta_2})}{\text{var}(\hat{\beta_1}-\hat{\beta_2)}}
  \end{equation}
  
-Under the null hypothesis, this test-statistic follows a $\chi^2$-distribution with $k$ degrees of freedom, where $k$ is the number of unique parameters involved. The only thing we need to do is calculate out test statistics and their associated p-values. $\text{var}(\hat{\beta_1}-\hat{\beta_2}) = \sigma^2_{\beta_1} + \sigma^2_{\beta_3} - 2\sigma_{\beta_1, \beta_3}$ is given by a summation over variances but now minus the covariance of the involved parameter estimates, so it is calculated similarly as before, but entering a -1 in the correct location:
+Under the null hypothesis, this test-statistic follows a $\chi^2$-distribution with $k$ degrees of freedom, where $k$ is the number of unique parameters involved. The only thing we need to do is calculate our test statistics and their associated p-values. $\text{var}(\hat{\beta_1}-\hat{\beta_2}) = \sigma^2_{\beta_1} + \sigma^2_{\beta_3} - 2\sigma_{\beta_1, \beta_3}$ is given by a summation over variances but now minus the covariance of the involved parameter estimates, so it is calculated similarly as before, but entering a -1 in the correct location:
  
 ```{r}
  Cnew <- matrix(c(1,-1, 0), ncol = 3)
@@ -132,7 +132,7 @@ and their pairwise comparisons via:
 comparisons(reg2, variables = "x2", newdata = datagrid(x1 = 0), type = "link")
 ```
  
-`marginaleffects` makes it a bit easier for us to get the results on the response scale, by switching to `type = "response"`, similar as in the `predict` function. It also include (separate) functions for plotting the comparisons; `plot_comparisons` and `plot_predictions`.
+`marginaleffects` makes it a bit easier for us to get the results on the response scale, by switching to `type = "response"`, similar as in the `predict` function. It also includes separate functions for plotting the comparisons; `plot_comparisons` and `plot_predictions`.
  
 # Datasets
 
@@ -151,7 +151,7 @@ The datasets are all stored in as ".csv" files, which means that you can load th
 
 Exploring and presenting results is a vital component to effectively using statistical models. Here is what I want you to do:
 
-1. Fit a model to one of the dataset, that includes a categorical predictor variable
+1. Fit a model to one of the datasets that includes a categorical predictor variable
 2. Calculate the group effects yourself, using the `coef` and adding the right coefficients together
 3. What comparisons can you make using the information from the model, and with the `relevel` function?
 

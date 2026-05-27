@@ -11,7 +11,7 @@ Now that we have a solid background in frequentist statistics, and linear regres
 
 In GLMs, the variance depends on the mean, and variance functions are usually non-linear. The mean is also non-linearly related to the data, and there is no explicit error term $\epsilon$. So, things work a little different in GLMs, but the specification in R is surprisingly similar to a linear regression!
 
-In this practical, we will use binomial regression. Binomial regression is usually referred to as logistic, or probit, regression; the exact terminology depends on the link function that is used. By default, R assumed a logit link function. For starters, let's simulate an example again, this time using the `rbinom` function and the `plogis` functions. We are familiar with `rbinom` from the first presentation of the workshop. The `plogis` function helps us translate from the link scale (which is where we simulate the model) $\boldsymbol{\eta}$ to the response scale:
+In this practical, we will use binomial regression. Binomial regression is usually referred to as logistic, or probit, regression; the exact terminology depends on the link function that is used. By default, R assumes a logit link function. For starters, let's simulate an example again, this time using the `rbinom` function and the `plogis` functions. We are familiar with `rbinom` from the first presentation of the workshop. The `plogis` function helps us translate from the link scale (which is where we simulate the model) $\boldsymbol{\eta}$ to the response scale:
 
 ```{r, fig.width = 10}
 x1 <- rnorm(35)
@@ -22,7 +22,7 @@ hist(p, breaks = 20)
 (y <- rbinom(35, 1, p))
 ```
 
-In the first lecture, $p$ was the same for all observations. Now, as in a GLM, $p$ is observation-specific. Because $p$ was different per observation, a-priori guessing the number of 1s and 0s in the data is much more challenging. Because the `size` argument was set to 1, we only simulates 1s and 0s. 
+In the first lecture, $p$ was the same for all observations. Now, as in a GLM, $p$ is observation-specific. Because $p$ was different per observation, a-priori guessing the number of 1s and 0s in the data is much more challenging. Because the `size` argument was set to 1, we only simulate 1s and 0s. 
 
 We can plot the simulated data $\textbf{y}$ with the `hist` function, but a combination of `plot` and `table` makes for a nicer plot:
 
@@ -43,9 +43,9 @@ The true parameters we simulated for were $\alpha = -2$, $\beta_1 = 2$ and $\bet
 (reg2 <- glm(y ~ x1 + x2, family = "binomial"))
 ```
 
-The parameter estimate are much closer to the ones we simulated from. They are still a little different, but this is due to the "small" sample. They cannot be directly interpreted in terms of the response scale, i.e., the scale the data is on, but they can be interpreted in terms of changes in the log-odds. Generally speaking, a negative coefficient means a negative relationship between $p_i$ and the predictor, and positive the opposite.
+The parameter estimates are much closer to the ones we simulated from. They are still a little different, but this is due to the "small" sample. They cannot be directly interpreted in terms of the response scale, i.e., the scale the data is on, but they can be interpreted in terms of changes in the log-odds. Generally speaking, a negative coefficient means a negative relationship between $p_i$ and the predictor, and positive the opposite.
 
-The `marginaleffects` can help us to interpret effects on the response scale; in particular the `plot_slopes` function is help to assess how the probability of success $p_i$ changes with a covariate, which provides similar interpretation to that in a linear model:
+The `marginaleffects` can help us to interpret effects on the response scale; in particular the `plot_slopes` function helps to assess how the probability of success $p_i$ changes with a covariate, which provides similar interpretation to that in a linear model:
 
 ```{r, warning=FALSE, message=FALSE, fig.width = 10}
 library(marginaleffects)
@@ -104,15 +104,17 @@ Here is what I want you to do:
 
 4. Use `predict(model, type = "response", newdata = ...)` to get predicted probabilities for two specific sets of conditions that differ in one predictor. How does the probability change?
 
+5. Use `marginaleffects::plot_slopes(model, variables = "x", condition = "z")` to visualise how the effect of one predictor on the probability scale varies across values of another predictor. Then use `marginaleffects::avg_slopes(model)` to summarise the average marginal effect across all observations. How does this compare to simply reading off the regression coefficient?
+
 # Part 2
 
 <details><summary>Open after Part 1</summary>
 
-5. Compare the change in probability from Q4 to the corresponding odds ratio from Q3. An odds ratio of 2 does not mean the probability doubles — why not? How does the effect of a predictor on the probability scale depend on the baseline probability?
+6. Compare the change in probability from Q4 to the corresponding odds ratio from Q3. An odds ratio of 2 does not mean the probability doubles — why not? How does the effect of a predictor on the probability scale depend on the baseline probability?
 
-6. How do the parameter estimates change when you switch from a logit to a probit link?
+7. How do the parameter estimates change when you switch from a logit to a probit link?
 
-7. Plot the residuals of the model. How do they look? Can you discern any assumption violations?
+8. Plot the residuals of the model. How do they look? Can you discern any assumption violations?
 
 </details>
 
