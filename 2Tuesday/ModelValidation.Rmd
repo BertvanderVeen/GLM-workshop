@@ -264,7 +264,7 @@ $\hat{\boldsymbol{\mu}} = \textbf{H}\textbf{y}$
 ## Influence
 
 
-```{r, echo = FALSE, fig.align = "center", fig.height = 5}
+```{r, echo = FALSE, fig.align = "center", fig.height = 3.5, fig.width = 5, out.width = "80%"}
 plot(y3~x3, data = anscombe)
 model3 <- lm(y3~x3, data = anscombe)
 abline(model3, col = "red")
@@ -277,7 +277,7 @@ An observation that has undue impact on the regression line.
 \columnsbegin
 \column{0.5\textwidth}
 
-```{r, echo = FALSE, fig.align = "center"}
+```{r, echo = FALSE, fig.align = "center", fig.height = 3.5, fig.width = 4, out.width = "\\linewidth"}
 plot(y3~x3, data = anscombe)
 model3 <- lm(y3~x3, data = anscombe)
 abline(model3, col = "red")
