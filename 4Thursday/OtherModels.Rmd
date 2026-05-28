@@ -95,7 +95,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Which model for which data?
 
 \begin{center}
-\small
+\footnotesize
 \begin{tabular}{lll}
 \toprule
 \textbf{Data type} & \textbf{Example} & \textbf{Model} \\
@@ -280,7 +280,7 @@ summary(model2)
 
 \normalsize
 
-Interpretation is -very- difficult with inverse-type link functions
+Interpretation is \emph{very} difficult with inverse-type link functions
 
 ## Inverse Gaussian GLM: results
 
@@ -482,18 +482,18 @@ When there are zeros and/or ones..zero-inflated models or hurdle models (ZIB or 
 
 Two parameter distribution with mean and variance
 
-```{r, echo = FALSE, fig.height=5, fig.align="center"}
+```{r, echo = FALSE, fig.height=8, fig.width=13, fig.align="center", out.height="0.7\\textheight"}
 par(mfrow=c(2,2))
 meanb <- function(shape1, shape2)shape1/(shape1+shape2)
 varb <- function(shape1, shape2)(shape1*shape2)/((shape1+shape2)^2*(shape1+shape2+1))
 shape1 <- 0.5;shape2<-0.5
-hist((y<-rbeta(1000,shape1, shape2)), xlab = expression(y[i]), main = bquote(mu == .(meanb(1,1)) ~ "," ~ sigma^2 == .(varb(shape1,shape2))), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")
+hist((y<-rbeta(1000,shape1, shape2)), xlab = expression(y[i]), main = bquote(mu == .(meanb(shape1,shape2)) ~ "," ~ sigma^2 == .(varb(shape1,shape2))), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")
 shape1 <- 5;shape2<-1
-hist((y<-rbeta(1000,shape1, shape2)), xlab = expression(y[i]), main = bquote(mu == .(meanb(1,1)) ~ "," ~ sigma^2 == .(varb(shape1,shape2))), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")
+hist((y<-rbeta(1000,shape1, shape2)), xlab = expression(y[i]), main = bquote(mu == .(meanb(shape1,shape2)) ~ "," ~ sigma^2 == .(varb(shape1,shape2))), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")
 shape1 <- 1;shape2<-3
-hist((y<-rbeta(1000,shape1, shape2)), xlab = expression(y[i]), main = bquote(mu == .(meanb(1,1)) ~ "," ~ sigma^2 == .(varb(shape1,shape2))), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")
+hist((y<-rbeta(1000,shape1, shape2)), xlab = expression(y[i]), main = bquote(mu == .(meanb(shape1,shape2)) ~ "," ~ sigma^2 == .(varb(shape1,shape2))), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")
 shape1 <- 2;shape2<-2
-hist((y<-rbeta(1000,shape1, shape2)), xlab = expression(y[i]), main = bquote(mu == .(meanb(1,1)) ~ "," ~ sigma^2 == .(varb(shape1,shape2))), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")
+hist((y<-rbeta(1000,shape1, shape2)), xlab = expression(y[i]), main = bquote(mu == .(meanb(shape1,shape2)) ~ "," ~ sigma^2 == .(varb(shape1,shape2))), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")
 ```
 
 # Example 2

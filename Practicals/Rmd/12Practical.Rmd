@@ -86,7 +86,7 @@ y2 <- t(sapply(1:30, function(i)rmultinom(1, 1, ps[i,])))
 cutoff <- sort(rnorm(5), decreasing = FALSE)
 p2 = plogis(replicate(5, eta)+matrix(cutoff,nrow=30,ncol=5,byrow=TRUE))
 ps2 <- t(apply(p2, 1, function(x) x / sum(x))) # needs to sum to 1
-y3 <- t(sapply(1:30, function(i)rmultinom(1, 1, p[i,])))
+y3 <- t(sapply(1:30, function(i)rmultinom(1, 1, ps2[i,])))
 (y3v <- factor(apply(y3, 1, function(row) which(row == 1))))
 hist(as.numeric(y3v))
 (model6 <- MASS::polr(y3v ~ x1 + x2))
@@ -98,9 +98,9 @@ Proportion data might be a result of standardised binomially-distributed respons
 
 ```{r, fig.width = 10, message=FALSE}
 mu2 = plogis(eta)
-var2 = 0.5
-beta = (1-mu2)*mu2/(var*mu2 - mu2^2 + mu2)
-alpha = mu2/(1-mu2)*beta
+phi = 0.5
+alpha = mu2*phi
+beta = (1-mu2)*phi
 (y4 <- rbeta(30, shape1 = alpha, shape2 = beta))
 hist(y4)
 library(betareg)#or glmmTMB
@@ -133,11 +133,11 @@ You can choose from the following datasets:
 
 1. [lime](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/lime.csv): foliage measurements of small-leaved lime trees.
 2. [brachy](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/brachy.csv): cover class data for Brachythecium rutabulum with multiple covariates
-3. [r6data](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/R6data.csv): data of two plant species under low and high nitrate supply. Response is the proportion of biomass in roots ("LMF"), stems ("SMF"), and leaves ("LMF").
+3. [r6data](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/R6data.csv): data of two plant species under low and high nitrate supply. Response is the proportion of biomass in roots ("RMF"), stems ("SMF"), and leaves ("LMF").
 4. [fish](https://stats.idre.ucla.edu/stat/data/fish.csv): fish caught by campers (with children or van).
 5. [mistletoe](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/MistletoeV2.csv): mistletoe infections in trees.
 6. [OralHealth](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/OralHealth.csv): decayed teeth in children.
-7. [wafer](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/wafer.csv) in faraway: wafer resitivity. 
+7. [wafer](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/wafer.csv) in faraway: wafer resistivity. 
 8. [chedder](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/cheddar.csv) taste of cheddar based on composition.
 9. Try one of the binomial datasets for a beta regression, or any of the count datasets for a zero-inflated regression.
 

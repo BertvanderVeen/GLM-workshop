@@ -156,7 +156,7 @@ legend("bottomright", lty=c(1,2,3,4), legend = c("Logit","Probit", "Complementar
 ## Is Poisson regression in the EF?
 
 \begin{equation}
-\mathcal{L}(y_i;\Theta) = \text{exp}\biggl\{\frac{y_i\textcolor{blue}{\log(\lambda)}+\textcolor{red}{\log(\lambda)}}{1} + \textcolor{orange}{\log(y_i!)}\biggr\}
+\mathcal{L}(y_i;\Theta) = \text{exp}\biggl\{\frac{y_i\textcolor{blue}{\log(\lambda)}-\textcolor{red}{\lambda}}{1} \textcolor{orange}{- \log(y_i!)}\biggr\}
 \end{equation}
 
 All GLMs can be formulated as:
@@ -167,7 +167,7 @@ All GLMs can be formulated as:
 
 ## The Poisson distribution visually
 
-```{r, echo = FALSE, fig.height=5, fig.align="center"}
+```{r, echo = FALSE, fig.height=8, fig.width=13, fig.align="center", out.height="0.7\\textheight"}
 par(mfrow=c(2,2))
 plot(table(y<-rpois(1000,1)), xlab = expression(y[i]), main = expression(lambda == 1), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")
 plot(table(y<-rpois(1000,5)), xlab = expression(y[i]), main = expression(lambda == 5), cex.main = 2, cex.lab = 1.5, ylab = "Frequency")

@@ -65,7 +65,7 @@ DHARMa::plotResiduals(model2)
 
 # Datasets
 
-We will use different datasets than in the last practicals (except the Baseball example, that has both Poisson and Binomial variables!). You can find the datasets in the "data" folder of the github repository.
+You can continue with the dataset from Practical 10, or pick a new one from the list below. You can find the datasets in the "data" folder of the github repository.
 
 1. [Horseshoecrabs](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/Horseshoecrabs.csv): Data on the number of male satellites attracted by female horseshoecrabs, data used in the presentation today.
 2. [Roadkills](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/RoadKills.csv): Count of amphibian road kills (TOT.n) as a function of distance to a park (D.PARK), and other variables of the parks such as the amount of olive grooves, montado with and without shrubs, shrubs, urban area, water reservoirs, dirt road length, paved road length, distance to water reservoirs, water courses, and more.

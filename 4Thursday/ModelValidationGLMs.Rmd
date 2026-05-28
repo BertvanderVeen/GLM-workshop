@@ -25,7 +25,6 @@ header-includes:
   - \setbeamercolor{enumerate subitem}{fg=orange}
   - \tcbuselibrary{skins}
   - \usepackage{emoji}
-  - \usepackage{ulem}
   - \usepackage{longtable,booktabs}
 editor_options: 
   chunk_output_type: console
@@ -159,7 +158,7 @@ We do not have a $\epsilon_i$ term in GLMs, but we do have the deviance function
 \pause
 
 \begin{equation}
-D(\textbf{y};\hat{\symbf{\mu}}) = \sum \limits^n_{i=1} 2y_i\{g(y_i)-g(\hat{\mu}_i)\} - y_i + \hat{\mu}_i
+D(\textbf{y};\hat{\symbf{\mu}}) = \sum \limits^n_{i=1} 2\bigl[y_i\{g(y_i)-g(\hat{\mu}_i)\} - y_i + \hat{\mu}_i\bigr]
 \end{equation}
 
 Which represents distance to the saturated model
@@ -167,21 +166,21 @@ Which represents distance to the saturated model
 ## GLM residuals: deviance
 
 \begin{equation}
-D(\textbf{y};\hat{\symbf{\mu}}) = \sum \limits^n_{i=1} 2y_i\{g(y_i)-g(\hat{\mu}_i)\} - y_i + \hat{\mu}_i
+D(\textbf{y};\hat{\symbf{\mu}}) = \sum \limits^n_{i=1} 2\bigl[y_i\{g(y_i)-g(\hat{\mu}_i)\} - y_i + \hat{\mu}_i\bigr]
 \end{equation}
 
 \pause
 
 - Note the summation over the observations
 - Each observation has a defined contribution to the deviance
-- $d_i = 2y_i\{g(y_i)-g(\hat{\mu}_i)\} - y_i + \hat{\mu}_i$
+- $d_i = 2\bigl[y_i\{g(y_i)-g(\hat{\mu}_i)\} - y_i + \hat{\mu}_i\bigr]$
 - We can use this to define a residual
 
 \pause
 
 \textbf{Deviance residuals}\newline
 \begin{equation}
-\hat{\epsilon_{i,deviance}} = \text{sign}(y_i - \hat{\mu}_i)\sqrt{d_i}, \qquad \text{so that } \sum \limits^n_{i=1} \hat{\epsilon_{deviance,i}}^2
+\hat{\epsilon_{i,deviance}} = \text{sign}(y_i - \hat{\mu}_i)\sqrt{d_i}, \qquad \text{so that } \sum \limits^n_{i=1} \hat{\epsilon_{deviance,i}}^2 = D(\textbf{y};\hat{\symbf{\mu}})
 \end{equation}
 
 \center
