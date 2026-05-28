@@ -79,7 +79,7 @@ We will use the same datasets as in the last practicals. You can find the datase
 1. [nickel.expand](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/nickel.expand.csv): Lung cancer due to nickel exposure in South Wales [Breslow and Day (1987)](https://pubmed.ncbi.nlm.nih.gov/3329634/). You can use lung cancer and nasal cancer rates as response variable
 2. [dmn](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/dmn.csv): de novo mutations in children [Halldorsson et al. (2019)](https://www.science.org/doi/10.1126/science.aau1043), see also [this page](https://mccoy-lab.github.io/hgv_modules/setup.html). You can use de novo mutations of father and mother as a response variable
 3. [Baseball](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/Baseball.csv): attendance to baseball games [Cochran 2002](https://jse.amstat.org/v10n2/datasets.cochran.html)
-4. [OME]: Counts of correct identifications, used in the presentation ([MASS package](https://rdrr.io/cran/MASS/man/OME.html))
+4. [OME]: Counts of correct identifications, used in the presentation ([MASS package](https://rdrr.io/cran/MASS/man/OME.html)). Load with `data(OME, package = "MASS")`
 5. [Lizards](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/lizards.csv): Lizard counts, used in the presentation, includes a count of two lizard species and multiple categorical covariates [(Schoener 1970)](https://esajournals.onlinelibrary.wiley.com/doi/10.2307/1935376)
 6. [wells](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/wells.csv): Water quality of contaminated wells (y vs n) in New York with variables of surrounding land use, sewer usage, and nitrate and chloride concentration [(Eckhard et al. 1989)](https://pubs.usgs.gov/publication/wri864142)
  
@@ -113,7 +113,7 @@ Try reordering the predictors in your formula and applying `anova` again. Notice
 
 <details><summary>Open after Part 1</summary>
 
-5. Compare your analysis of deviance table to a model comparison with AIC/AICc/BIC. Do the two approaches give you the same or similar results?
+5. Compare your confirmatory results to the model comparison with AIC/AICc/BIC from Practical 7 (the exploratory analysis). Do the two approaches agree on which model is "best"? Can you think of reasons why they might or might not overlap?
 
 6. To build intuition for the procedures of confirmatory hypothesis testing, choose another dataset and repeat all steps.
 

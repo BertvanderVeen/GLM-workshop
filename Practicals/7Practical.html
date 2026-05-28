@@ -392,16 +392,16 @@ y &lt;- rbinom(35, 1, p)
 ## 
 ## Coefficients:
 ## (Intercept)           x1           x2  
-##      -1.864        2.319        2.130  
+##      -1.909        2.615        4.178  
 ## 
 ## Degrees of Freedom: 34 Total (i.e. Null);  32 Residual
-## Null Deviance:       35.03 
-## Residual Deviance: 19.4  AIC: 25.4</code></pre>
+## Null Deviance:       47.8 
+## Residual Deviance: 17.46     AIC: 23.46</code></pre>
 <p>Information criteria are calculated from the likelihood of a model,
 which we can retrieve by using the <code>logLik</code> function on our
 model object:</p>
 <pre class="r"><code>logLik(reg1)</code></pre>
-<pre><code>## &#39;log Lik.&#39; -9.700394 (df=3)</code></pre>
+<pre><code>## &#39;log Lik.&#39; -8.730956 (df=3)</code></pre>
 <p>This returns two pieces of information: 1) the binomial
 log-likelihood as a function of the parameter estimates, and 2) the
 number of parameters (3). By themselves, this information is not
@@ -423,29 +423,30 @@ AIC and BIC:</p>
 logL1 = logLik(reg1)
 n = length(y)
 (aic1 = 2*k1 - 2*logL1)</code></pre>
-<pre><code>## &#39;log Lik.&#39; 25.40079 (df=3)</code></pre>
+<pre><code>## &#39;log Lik.&#39; 23.46191 (df=3)</code></pre>
 <pre class="r"><code>(bic1 = k1*log(n) - 2*logL1)</code></pre>
-<pre><code>## &#39;log Lik.&#39; 30.06683 (df=3)</code></pre>
+<pre><code>## &#39;log Lik.&#39; 28.12796 (df=3)</code></pre>
 <p>we cannot compare AIC and BIC; they are meant for comparison between
 two models, not within a single model. Let’s fit another model so we can
 make the comparison:</p>
 <pre class="r"><code>(reg2 &lt;- glm(y ~ x1*x2, family = &quot;binomial&quot;))</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
 <pre><code>## 
 ## Call:  glm(formula = y ~ x1 * x2, family = &quot;binomial&quot;)
 ## 
 ## Coefficients:
 ## (Intercept)           x1           x2        x1:x2  
-##     -2.0682       2.4332       2.5469      -0.6357  
+##      -5.238        7.105        8.029       -4.995  
 ## 
 ## Degrees of Freedom: 34 Total (i.e. Null);  31 Residual
-## Null Deviance:       35.03 
-## Residual Deviance: 19.17     AIC: 27.17</code></pre>
+## Null Deviance:       47.8 
+## Residual Deviance: 14.69     AIC: 22.69</code></pre>
 <pre class="r"><code>k2 = attr(logLik(reg2), &quot;df&quot;)
 logL2 = logLik(reg2)
 (aic2 = 2*k2 - 2*logL2)</code></pre>
-<pre><code>## &#39;log Lik.&#39; 27.17004 (df=4)</code></pre>
+<pre><code>## &#39;log Lik.&#39; 22.68729 (df=4)</code></pre>
 <pre class="r"><code>(bic2 = k2*log(n) - 2*logL2)</code></pre>
-<pre><code>## &#39;log Lik.&#39; 33.39143 (df=4)</code></pre>
+<pre><code>## &#39;log Lik.&#39; 28.90868 (df=4)</code></pre>
 <p>we received a warning, indicating that the model is overfitting, but
 for the moment we will ignore that. AIC and BIC are used for comparison
 between models by examining their difference, which is generally denoted
@@ -458,9 +459,9 @@ prefer the simpler model per the principle of parsimony. Here, we added
 one parameter (for the interaction of the two predictors), so we need
 the AIC or BIC to be 2 points lower than for the first model:</p>
 <pre class="r"><code>(daic = aic1-aic2)</code></pre>
-<pre><code>## &#39;log Lik.&#39; -1.769249 (df=3)</code></pre>
+<pre><code>## &#39;log Lik.&#39; 0.7746253 (df=3)</code></pre>
 <pre class="r"><code>(dbic = bic1-bic2)</code></pre>
-<pre><code>## &#39;log Lik.&#39; -3.324597 (df=3)</code></pre>
+<pre><code>## &#39;log Lik.&#39; -0.7807227 (df=3)</code></pre>
 <p>In both cases, the second model’s information criteria are larger
 than the first; we immediately know the model is not an improvement. The
 difference in AIC is less than 2 points, so we consider the two models
@@ -480,8 +481,8 @@ even easier:</p>
 ## Model selection based on AICc:
 ## 
 ##      K  AICc Delta_AICc AICcWt Cum.Wt    LL
-## reg1 3 26.17       0.00   0.76   0.76 -9.70
-## reg2 4 28.50       2.33   0.24   1.00 -9.59</code></pre>
+## reg2 4 24.02       0.00   0.53   0.53 -7.34
+## reg1 3 24.24       0.22   0.47   1.00 -8.73</code></pre>
 <p>This function requires that we provide the models in a list, and
 spits out a bunch of metrics for us to use. By default,
 <code>aictab</code> actually implements the AICc, which we can turn off
@@ -504,53 +505,69 @@ following some information criteria. As a demonstration, we can here use
 the <code>dredge</code> function from the <code>MuMIn</code> package. We
 apply this to the second model, as it is more complex than the first,
 and the first is nested in the more complex model:</p>
-<pre class="r"><code>reg2 &lt;- update(reg2, na.action = na.fail)
-(res &lt;- MuMIn::dredge(reg2))</code></pre>
+<pre class="r"><code>reg2 &lt;- update(reg2, na.action = na.fail)</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre class="r"><code>(res &lt;- MuMIn::dredge(reg2))</code></pre>
 <pre><code>## Fixed term is &quot;(Intercept)&quot;</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
 <pre><code>## Global model call: glm(formula = y ~ x1 * x2, family = &quot;binomial&quot;, na.action = na.fail)
 ## ---
 ## Model selection table 
-##    (Int)    x1    x2   x1:x2 df  logLik AICc delta weight
-## 4 -1.864 2.319 2.130          3  -9.700 26.2  0.00  0.588
-## 2 -2.241 1.972                2 -11.869 28.1  1.94  0.223
-## 8 -2.068 2.433 2.547 -0.6357  4  -9.585 28.5  2.33  0.184
-## 3 -1.163       1.138          2 -16.116 36.6 10.43  0.003
-## 1 -1.386                      1 -17.514 37.1 10.97  0.002
+##     (Int)     x1    x2  x1:x2 df  logLik AICc delta weight
+## 8 -5.2380 7.1050 8.029 -4.995  4  -7.344 24.0  0.00  0.521
+## 4 -1.9090 2.6150 4.178         3  -8.731 24.2  0.22  0.468
+## 3 -1.4110        2.497         2 -13.638 31.7  7.63  0.011
+## 2 -0.2417 0.7525               2 -21.934 48.2 24.22  0.000
+## 1 -0.2877                      1 -23.902 49.9 25.90  0.000
 ## Models ranked by AICc(x)</code></pre>
+<p>Note: <code>dredge</code> requires the model to have
+<code>na.action = na.fail</code>, otherwise it will throw an error. You
+can set this per model as above, or globally at the start of your script
+with <code>options(na.action = na.fail)</code>.</p>
+<p>To prevent <code>dredge</code> from fitting models where an
+interaction is included but its constituent main effects are not, use
+the <code>subset</code> argument with <code>dc()</code> (dependency
+constraint). <code>dc(x, ...)</code> means: if term <code>x</code> is in
+the model, all <code>...</code> must also be present:</p>
+<pre class="r"><code>MuMIn::dredge(model, subset = dc(&quot;A:B&quot;, &quot;A&quot;, &quot;B&quot;))</code></pre>
+<p>For multiple interactions, chain constraints with
+<code>&amp;</code>:</p>
+<pre class="r"><code>MuMIn::dredge(model, subset = dc(&quot;A:B&quot;, &quot;A&quot;, &quot;B&quot;) &amp; dc(&quot;A:C&quot;, &quot;A&quot;, &quot;C&quot;))</code></pre>
 <p>This function returns us another table, with the first columns being
 the coefficients for a particular covariate or term in a model. If a
 term is left blank it was not included in the model. We can now use this
 <code>dredge</code> table to select all models within 2 difference AICc
 of the top model:</p>
 <pre class="r"><code>MuMIn::get.models(res, subset = delta &lt; 2)</code></pre>
-<pre><code>## $`4`
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## $`8`
+## 
+## Call:  glm(formula = y ~ x1 + x2 + x1:x2 + 1, family = &quot;binomial&quot;, na.action = na.fail)
+## 
+## Coefficients:
+## (Intercept)           x1           x2        x1:x2  
+##      -5.238        7.105        8.029       -4.995  
+## 
+## Degrees of Freedom: 34 Total (i.e. Null);  31 Residual
+## Null Deviance:       47.8 
+## Residual Deviance: 14.69     AIC: 22.69
+## 
+## $`4`
 ## 
 ## Call:  glm(formula = y ~ x1 + x2 + 1, family = &quot;binomial&quot;, na.action = na.fail)
 ## 
 ## Coefficients:
 ## (Intercept)           x1           x2  
-##      -1.864        2.319        2.130  
+##      -1.909        2.615        4.178  
 ## 
 ## Degrees of Freedom: 34 Total (i.e. Null);  32 Residual
-## Null Deviance:       35.03 
-## Residual Deviance: 19.4  AIC: 25.4
-## 
-## $`2`
-## 
-## Call:  glm(formula = y ~ x1 + 1, family = &quot;binomial&quot;, na.action = na.fail)
-## 
-## Coefficients:
-## (Intercept)           x1  
-##      -2.241        1.972  
-## 
-## Degrees of Freedom: 34 Total (i.e. Null);  33 Residual
-## Null Deviance:       35.03 
-## Residual Deviance: 23.74     AIC: 27.74
+## Null Deviance:       47.8 
+## Residual Deviance: 17.46     AIC: 23.46
 ## 
 ## attr(,&quot;rank&quot;)
 ## function (x) 
 ## rank(x)
-## &lt;environment: 0x5e1335262de8&gt;
+## &lt;environment: 0x60ba6952bbc0&gt;
 ## attr(,&quot;beta&quot;)
 ## [1] &quot;none&quot;</code></pre>
 <p>which returns our original (true) model. There is an issue that can
@@ -585,7 +602,9 @@ variable</li>
 <li><a href="https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/Baseball.csv">Baseball</a>:
 attendance to baseball games <a href="https://jse.amstat.org/v10n2/datasets.cochran.html">Cochran
 2002</a></li>
-<li></li>
+<li>[OME]: Counts of correct identifications, used in the presentation
+(<a href="https://rdrr.io/cran/MASS/man/OME.html">MASS package</a>).
+Load with <code>data(OME, package = &quot;MASS&quot;)</code></li>
 <li><a href="https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/lizards.csv">Lizards</a>:
 Lizard counts, used in the presentation, includes a count of two lizard
 species and multiple categorical covariates <a href="https://esajournals.onlinelibrary.wiley.com/doi/10.2307/1935376">(Schoener

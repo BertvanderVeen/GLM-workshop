@@ -83,6 +83,20 @@ Such tables should be used cautiously for model comparison. Years ago, groups of
 reg2 <- update(reg2, na.action = na.fail)
 (res <- MuMIn::dredge(reg2))
 ```
+
+Note: `dredge` requires the model to have `na.action = na.fail`, otherwise it will throw an error. You can set this per model as above, or globally at the start of your script with `options(na.action = na.fail)`.
+
+To prevent `dredge` from fitting models where an interaction is included but its constituent main effects are not, use the `subset` argument with `dc()` (dependency constraint). `dc(x, ...)` means: if term `x` is in the model, all `...` must also be present:
+
+```{r, eval = FALSE}
+MuMIn::dredge(model, subset = dc("A:B", "A", "B"))
+```
+
+For multiple interactions, chain constraints with `&`:
+
+```{r, eval = FALSE}
+MuMIn::dredge(model, subset = dc("A:B", "A", "B") & dc("A:C", "A", "C"))
+```
 This function returns us another table, with the first columns being the coefficients for a particular covariate or term in a model. If a term is left blank it was not included in the model. We can now use this `dredge` table to select all models within 2 difference AICc of the top model:
 
 ```{r}
@@ -101,7 +115,7 @@ We will use the same datasets as in the last practicals. You can find the datase
 1. [nickel.expand](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/nickel.expand.csv): Lung cancer due to nickel exposure in South Wales [Breslow and Day (1987)](https://pubmed.ncbi.nlm.nih.gov/3329634/). You can use lung cancer and nasal cancer rates as response variable
 2. [dmn](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/dmn.csv): de novo mutations in children [Halldorsson et al. (2019)](https://www.science.org/doi/10.1126/science.aau1043), see also [this page](https://mccoy-lab.github.io/hgv_modules/setup.html). You can use de novo mutations of father and mother as a response variable
 3. [Baseball](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/Baseball.csv): attendance to baseball games [Cochran 2002](https://jse.amstat.org/v10n2/datasets.cochran.html)
-4. [OME]: Counts of correct identifications, used in the presentation ([MASS package](https://rdrr.io/cran/MASS/man/OME.html))
+4. [OME]: Counts of correct identifications, used in the presentation ([MASS package](https://rdrr.io/cran/MASS/man/OME.html)). Load with `data(OME, package = "MASS")`
 5. [Lizards](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/lizards.csv): Lizard counts, used in the presentation, includes a count of two lizard species and multiple categorical covariates [(Schoener 1970)](https://esajournals.onlinelibrary.wiley.com/doi/10.2307/1935376)
 6. [wells](https://raw.githubusercontent.com/BertvanderVeen/GLM-workshop/refs/heads/main/data/wells.csv): Water quality of contaminated wells (y vs n) in New York with variables of surrounding land use, sewer usage, and nitrate and chloride concentration [(Eckhard et al. 1989)](https://pubs.usgs.gov/publication/wri864142)
  
