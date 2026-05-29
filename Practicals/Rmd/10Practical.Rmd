@@ -12,11 +12,13 @@ Yesterday, we focused on binomial regression with either 1) a probit link or 2) 
 When the counts have no upperbound, such as with stars in the night sky, or grains of sand on a beach, we use Poisson regression. In Poisson regression, we allow the counts to be unbounded, but still require the prediction to be larger than zero. To make sure of that, Poisson regression uses the log link function. Let's simulate an example with two continuous predictor variables to demonstrate this:
 
 ```{r, fig.width = 10}
-x1 <- rnorm(100, sd = 0.5)
-x2 <- runif(100, -1, 1)
-eta <- 1-2*x1-0.5*x2
+set.seed(123)
+n <- 200
+x1 <- runif(n, 0, 3)
+x2 <- runif(n, -1, 1)
+eta <- 1+x1 - 0.3*x2
 lambda <- exp(eta)
-(y <- rpois(100, lambda))
+(y <- rpois(n, lambda))
 hist(y)
 ```
 
@@ -39,8 +41,8 @@ Poisson regression assumes that the mean and the variance of the distribution ar
 
 When we have overdispersion, we switch to a negative-binomial regression. Negative-binomial regression relaxes the Poisson assumption of equal mean and variance, for which it includes an additional dispersion parameter, so that the variance can be greater than the mean. We can simulate from a negative-binomial distribution to demonstrate this:
 
-```{r, fig.width = 10}
-(y2 <- rnbinom(100, mu = lambda, size = .1))
+```{r, fig.width = 10, seed = 2}
+(y2 <- rnbinom(n, mu = lambda, size = 1))
 hist(y2)
 ```
 
@@ -53,10 +55,12 @@ If we fit a Poisson regression to this negative-binomially distributed simulatio
 and plot the residuals:
 
 ```{r, fig.width = 10}
-plot(reg2, which = 1)
+plot(log(fitted(reg2)), residuals(reg2, type = "pearson"),
+     xlab = "log(Fitted values)", ylab = "Pearson residuals")
+abline(h = 0, col = "red")
 ```
 
-we see that they look poor. Typically, when there is overdispersion present in the model, residuals will "fan out", i.e., the spread increases, with the mean (the horizontal axis). This pattern is typical when there is an issue of overdispersion. Instead of looking at the residuals, an identifying overdispersion visually, we can also quantify the overdispersion with an overdispersion factor:
+we see that they look poor. Typically, when there is overdispersion present in the model, residuals will "fan out", i.e., the spread increases with the fitted values (horizontal axis). This pattern is typical when there is an issue of overdispersion. Instead of looking at the residuals, and identifying overdispersion visually, we can also quantify the overdispersion with an overdispersion factor:
 
 ```{r}
 deviance(reg2)/df.residual(reg2)
