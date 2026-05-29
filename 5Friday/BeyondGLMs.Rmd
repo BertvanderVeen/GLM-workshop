@@ -410,10 +410,10 @@ However, we are really interested in $\boldsymbol{u}\vert\textbf{y}$ instead; th
 ```{r, echo=F, eval=T, fig.show="hold", out.width="40%", fig.align="center"}
 library(ggplot2)
 
-ggplot(data.frame(x=0), aes(x=x))+stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1))+theme_classic()+geom_vline(aes(xintercept=0), col="red",lty="dashed")+theme(text = element_text(size=24))+xlim(c(-3,3))+xlab("Random effect")+ylab("Likelihood")
+ggplot(data.frame(x=0), aes(x=x))+stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1))+theme_classic()+geom_vline(aes(xintercept=0), col="red",lty="dashed")+theme(text = element_text(size=24))+xlim(c(-3,3))+xlab("Random effect")+ylab("Likelihood")+annotate("text",x=0.6,y=0.35,label="mean = mode",col="red",size=6)
 
-ggplot(data.frame(x=0), aes(x=x))+stat_function(fun = dgamma, n = 101, args = list(shape = 2, scale = 2))+theme_classic()+geom_vline(aes(xintercept=2), col="red",lty="dashed")+geom_vline(aes(xintercept=4), col="red",lty="dashed")+theme(text = element_text(size=24))+xlim(c(0,14))+ xlab("Random effect")+ylab("Likelihood")
-#gamma mode is (k-1)*theta so here 2
+# gamma: shape=2, scale=2 -> mode=(k-1)*scale=2, mean=k*scale=4
+ggplot(data.frame(x=0), aes(x=x))+stat_function(fun = dgamma, n = 101, args = list(shape = 2, scale = 2))+theme_classic()+geom_vline(aes(xintercept=2), col="red",lty="dashed")+geom_vline(aes(xintercept=4), col="blue",lty="dashed")+theme(text = element_text(size=24))+xlim(c(0,14))+xlab("Random effect")+ylab("Likelihood")+annotate("text",x=2,y=0.17,label="mode",col="red",size=6,hjust=-0.1)+annotate("text",x=4,y=0.17,label="mean",col="blue",size=6,hjust=-0.1)
 
 
 ```
@@ -1314,7 +1314,7 @@ t = \frac{
 - Try not to -blindly- assume approximations perform well
 - Always check (residual) assumptions
 - Be pragmatic
-- Consult a statistician
+- When in doubt: simulate from your fitted model (e.g., \texttt{DHARMa})
 
 ## Write article?
 
