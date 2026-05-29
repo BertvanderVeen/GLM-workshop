@@ -1,0 +1,963 @@
+---
+title: "Beyond GLMs with splines"
+institute: "University of Bayreuth"
+author: "Bert van der Veen"
+output:
+  beamer_presentation:
+    toc: false
+    slide_level: 2
+    latex_engine: lualatex
+    includes:
+      in_header: ../header.tex
+header-includes:
+  - \AtBeginSection{}
+  - \useoutertheme{miniframes}
+  - \setbeamertemplate{frametitle}{\vskip0.3cm\usebeamerfont*{frametitle}\insertframetitle\vskip-1.5ex\begin{beamercolorbox}[colsep=0.2pt, wd=\textwidth]{lower separation line head}\end{beamercolorbox}}
+  - \setbeamercolor{lower separation line head}{bg=orange}
+  - \definecolor{shadecolor}{RGB}{200, 200, 200}
+  - \hypersetup{colorlinks,citecolor=orange,filecolor=red,linkcolor=brown,urlcolor=blue}
+  - \definecolor{green}{RGB}{48, 69, 41}
+  - \definecolor{darkorange}{RGB}{255, 150, 0}
+  - \definecolor{gray}{RGB}{100, 100, 100}
+  - \setbeamercolor{itemize item}{fg=orange}
+  - \setbeamercolor{itemize subitem}{fg=orange}
+  - \setbeamercolor{enumerate item}{fg=orange}
+  - \setbeamercolor{enumerate subitem}{fg=orange}
+  - \tcbuselibrary{skins}
+  - \usepackage{emoji}
+  - \usepackage{longtable,booktabs}
+editor_options:
+  chunk_output_type: console
+urlcolor: orange
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+
+default_source_hook <- knit_hooks$get('source')
+default_output_hook <- knit_hooks$get('output')
+
+knit_hooks$set(
+  source = function(x, options) {
+    paste0(
+      "\n::: {.codebox data-latex=\"\"}\n\n",
+      default_source_hook(x, options),
+      "\n\n:::\n\n")
+  }
+)
+
+knit_hooks$set(
+  output = function(x, options) {
+    paste0(
+      "\n::: {.codebox data-latex=\"\"}\n\n",
+      default_output_hook(x, options),
+      "\n\n:::\n\n")
+  }
+)
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Outline Today
+
+- Ridge regression
+- Generalized Additive Models
+- Penalized splines
+- Smoothing parameter selection
+- GAMs as GLMMs
+- Example
+
+- 15 minute break
+- 1 Lecture/presentation
+- 1 Practical
+
+## Questions about yesterday?
+
+\center
+
+![](questions.jpg){width=40%}
+
+## Resources
+
+\begin{itemize}
+\item \textbf{Fieberg, J.} (2024). \textit{Statistics for Ecologists.} \newline
+\url{https://statistics4ecologists-v3.netlify.app} \newline
+\footnotesize Ch. 4: Non-linear models — intuitive treatment of splines and basis functions \normalsize
+
+\item \textbf{Simpson, G.} Physalia GAM course. \newline
+\url{https://github.com/gavinsimpson/physalia-gam-course} \newline
+\footnotesize Comprehensive practical course with \texttt{mgcv}; slides and code freely available \normalsize
+
+\item \textbf{Wood, S.N.} (2017). \textit{Generalized Additive Models: An Introduction with R}, 2nd ed. Chapman \& Hall. \newline
+\footnotesize The definitive reference; covers all theory and \texttt{mgcv} in depth \normalsize
+
+\end{itemize}
+
+## \texttt{R} packages for GAMs
+
+\columnsbegin
+\column{0.5\textwidth}
+
+\textbf{Fitting}
+\begin{itemize}
+\item \texttt{mgcv} — the standard; most features, best documented
+\item \texttt{gamm4} — GAMMs via \texttt{lme4} backend (Gaussian)
+\item \texttt{glmmTMB} — GAM smooths + arbitrary GLMM structure
+\end{itemize}
+
+\column{0.5\textwidth}
+
+\textbf{Visualisation \& diagnostics}
+\begin{itemize}
+\item \texttt{gratia} — \texttt{ggplot2}-based smooth plots, \texttt{draw()}, \texttt{appraise()}
+\item \texttt{DHARMa} — simulation residuals (works with \texttt{mgcv})
+\item \texttt{ggeffects} — marginal predictions for \texttt{mgcv} models
+\end{itemize}
+
+\columnsend
+
+\center
+
+\textbf{We will use \texttt{mgcv} for fitting and \texttt{gratia} for visualisation}
+
+# Recap
+
+## Where we are
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+\toprule
+\textbf{Model} & \textbf{Non-linear covariates} & \textbf{Correlation} \\
+\midrule
+GLM & No & No \\
+GLMM & No & Yes (random effects) \\
+\textcolor{orange}{GAM} & \textcolor{orange}{Yes (smooth functions)} & \textcolor{orange}{Optional} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\pause
+
+- GLMs and GLMMs do have non-linearity through the link function, but assume covariates enter the linear predictor **linearly**
+- Many ecological relationships are non-linear
+
+## Non-linearity in ecology
+
+```{r, echo=FALSE, fig.height=5, fig.width=13, message=FALSE, warning=FALSE}
+ISIT <- read.csv("../data/ISIT.csv")
+dat <- subset(ISIT, Station == 9)
+par(mfrow=c(1,2), mar=c(5,5,3,2))
+plot(Sources ~ SampleDepth, data = dat, pch=16, col="steelblue",
+     xlab="Depth (m)", ylab="Bioluminescent sources",
+     main="Bioluminescence vs. depth", cex=1.5, cex.lab=1.5, cex.axis=1.3, cex.main=1.5)
+m_glm <- glm(Sources ~ SampleDepth, family=Gamma(link="log"), data=dat)
+lines(dat$SampleDepth[order(dat$SampleDepth)],
+      predict(m_glm, type="response")[order(dat$SampleDepth)],
+      col="red", lwd=2)
+legend("topright", lty=1, col="red", legend="Poisson GLM", cex=1.3)
+
+plot(residuals(m_glm, type="deviance") ~ fitted(m_glm),
+     pch=16, col="steelblue", xlab="Fitted values", ylab="Deviance residuals",
+     main="GLM residuals", cex=1.5, cex.lab=1.5, cex.axis=1.3, cex.main=1.5)
+abline(h=0, lty="dashed")
+lines(loess.smooth(fitted(m_glm), residuals(m_glm, type="deviance")), col="red", lwd=2)
+```
+
+A Poisson GLM misses the non-linear relationship.
+
+# Ridge Regression
+
+## Penalized regression
+
+Ordinary least squares minimizes:
+
+\begin{equation}
+\sum_{i=1}^n (y_i - \hat{y}_i)^2 = \lVert \textbf{y} - \textbf{X}\symbf{\beta} \rVert^2
+\end{equation}
+
+\pause
+
+**Ridge regression** \tiny (Hoerl and Kennard 1970) \normalsize adds a penalty on the size of the coefficients:
+
+\begin{equation}
+\lVert \textbf{y} - \textbf{X}\symbf{\beta} \rVert^2 + \lambda \lVert \symbf{\beta} \rVert^2
+\end{equation}
+
+- $\lambda \geq 0$ controls how strongly coefficients are penalized towards zero
+- $\lambda = 0$: ordinary least squares
+- $\lambda \to \infty$: all $\hat{\beta}_j \to 0$
+
+## Ridge regression: solution
+
+The ridge estimator has a closed form:
+
+\begin{equation}
+\hat{\symbf{\beta}}_\text{ridge} = (\textbf{X}^\top\textbf{X} + \lambda\textbf{I})^{-1}\textbf{X}^\top\textbf{y}
+\end{equation}
+
+\pause
+
+\begin{itemize}
+\item The $\lambda\textbf{I}$ term regularizes the problem — helps when $\textbf{X}^\top\textbf{X}$ is ill-conditioned
+\item Ridge regression \textbf{shrinks} estimates toward zero
+\item Very useful in high-dimensional settings (more predictors than observations)
+\end{itemize}
+
+## Ridge regression as a GLMM
+
+Ridge regression is equivalent to a mixed model with:
+
+\begin{equation}
+\symbf{\beta} \sim \mathcal{N}\biggl(\textbf{0},\, \frac{\sigma^2}{\lambda}\,\textbf{I}\biggr)
+\end{equation}
+
+\pause
+
+For a Gaussian model with \textbf{known} $\lambda$: minimizing the penalized sum of squares gives the posterior mode (MAP estimate) of $\symbf{\beta}$ — the conditional mode given the data.
+
+\pause
+
+\begin{center}
+\textbf{The penalty $\lambda$ controls variance: small $\lambda$ $\Leftrightarrow$ large variance $\Leftrightarrow$ flexible}
+\end{center}
+
+\pause
+
+\textcolor{orange}{GAMs extend this idea: instead of penalizing the size of $\symbf{\beta}$, we penalize the \textbf{wiggliness} of a smooth function.}
+
+## Ridge via \texttt{mgcv}: a code example
+
+```{r ridge_mgcv, echo=TRUE, message=FALSE, warning=FALSE, cache=TRUE}
+library(mgcv)
+set.seed(1); n <- 60; p <- 25
+X <- matrix(rnorm(n*p), n, p)
+beta_true <- c(2, -1, rep(0, p-2))
+y <- 1 + X %*% beta_true + rnorm(n, sd=1.5)
+
+# OLS: unstable when p close to n
+colnames(X) <- paste0("X", seq_len(p))
+dat_r <- data.frame(y=y, X)
+m_ols <- lm(y ~ ., data=dat_r)
+
+# Ridge via mgcv: "re" smooth treats each predictor as
+# a random slope — equivalent to ridge penalization
+dat_long <- data.frame(
+  y=rep(y,p), xval=c(X),
+  pred=factor(rep(colnames(X),each=n)))
+m_mgcv <- gam(y ~ s(pred, by=xval, bs="re"),
+              data=dat_long, method="REML")
+```
+
+## Ridge via \texttt{mgcv}: comparison
+
+```{r ridge_compare, echo=TRUE, message=FALSE, warning=FALSE, cache=TRUE}
+# glmmTMB gives the same result: random slopes = ridge
+library(glmmTMB)
+m_glmm <- glmmTMB(y ~ (0+xval|pred), data=dat_long)
+
+b_ols  <- coef(m_ols)[-1]
+b_mgcv <- coef(m_mgcv)[-1]        # BLUP from mgcv
+b_glmm <- ranef(m_glmm)$cond$pred[,"xval"]
+```
+
+```{r ridge_plot, echo=FALSE, fig.height=4.5, fig.width=10, cache=TRUE}
+par(mar=c(5,5,3,2), mfrow=c(1,2))
+col_pts <- ifelse(beta_true!=0,"red","gray40")
+plot(b_ols, b_mgcv, pch=16, col=col_pts,
+     xlab="OLS", ylab="mgcv ridge (REML)",
+     main="Ridge shrinks toward zero", cex=1.5, cex.lab=1.4, cex.main=1.3)
+abline(0,1,lty="dashed"); abline(h=0,v=0,col="lightgray")
+plot(b_mgcv, b_glmm, pch=16, col=col_pts,
+     xlab="mgcv ridge", ylab="glmmTMB BLUP",
+     main="mgcv and glmmTMB agree", cex=1.5, cex.lab=1.4, cex.main=1.3)
+abline(0,1,lty="dashed")
+legend("topleft", pch=16, col=c("red","gray40"),
+       legend=c("True non-zero","True zero"), cex=1.1)
+```
+
+## The distinction does not quite hold for GLMMs
+
+\begin{itemize}
+\item \textbf{Ridge}: $\lambda$ is fixed externally (cross-validation, AIC); $\symbf{\beta}$ is optimized directly — no marginal likelihood
+\pause
+\item \textbf{GLMM}: variance components (including the ratio $\sigma^2/\sigma^2_b = \lambda$) are estimated by \textbf{marginalizing over} the random effects via ML or REML; the BLUP is then computed conditionally on those estimates
+\pause
+\item \textbf{Non-Gaussian GLMMs}: the posterior $p(\textbf{u}\vert\textbf{y})$ is not Gaussian, so posterior mode $\neq$ posterior mean; the BLUP (posterior mean) requires integration, not just optimization
+\pause
+\item The equivalence holds \textbf{exactly} only for Gaussian models with known variance components
+\end{itemize}
+
+\pause
+
+\begin{center}
+\textcolor{orange}{The analogy is still useful for intuition, but the mechanics differ}
+\end{center}
+
+# What is a GAM?
+
+## GAM formulation
+
+A Generalized Additive Model replaces linear predictors with smooth functions:
+
+\begin{equation}
+g\{\text{E}(y_i \vert \textbf{x}_i)\} = \alpha + f_1(x_{i1}) + f_2(x_{i2}) + \cdots
+\end{equation}
+
+\columnsbegin
+\column{0.5\textwidth}
+
+**GLM:**
+$$g\{\text{E}(y_i)\} = \alpha + x_{i1}\beta_1 + x_{i2}\beta_2$$
+
+\column{0.5\textwidth}
+
+**GAM:**
+$$g\{\text{E}(y_i)\} = \alpha + f_1(x_{i1}) + f_2(x_{i2})$$
+
+\columnsend
+
+\pause
+
+- $f_j(\cdot)$ are smooth, flexible functions estimated from data
+- Linear terms $x\beta$ are a special case
+- Random effects can be included: $g\{\text{E}(y_i \vert u_j)\} = \alpha + f(x_i) + u_j$
+
+## Why "additive"?
+
+Each smooth contributes **additively** to the linear predictor — just as in a GLM.
+
+```{r, echo=FALSE, fig.height=4.5, fig.width=13, message=FALSE, warning=FALSE}
+library(mgcv)
+set.seed(1)
+n <- 200
+x1 <- runif(n)
+x2 <- runif(n)
+y <- sin(2*pi*x1) + exp(x2) + rnorm(n, sd=0.3)
+dat2 <- data.frame(x1=x1, x2=x2, y=y)
+m2 <- gam(y ~ s(x1) + s(x2), data=dat2)
+par(mfrow=c(1,2), mar=c(5,5,3,2))
+plot(m2, select=1, shade=TRUE, col="orange", cex.lab=1.5, cex.axis=1.3, main="f(x1)", cex.main=1.5)
+plot(m2, select=2, shade=TRUE, col="orange", cex.lab=1.5, cex.axis=1.3, main="f(x2)", cex.main=1.5)
+```
+
+Each smooth is estimated **while holding all others constant** — the partial effect.
+
+# Splines
+
+## What is a spline?
+
+A spline is a **piecewise polynomial** — multiple polynomial segments joined smoothly at **knots** $\xi_1, \ldots, \xi_K$
+
+```{r, echo=FALSE, fig.height=4.5, fig.width=13}
+set.seed(42)
+x <- seq(0, 1, length.out=200)
+knots <- c(0.25, 0.5, 0.75)
+par(mfrow=c(1,2), mar=c(5,5,3,2))
+
+# Piecewise linear (discontinuous at knots)
+y_pw <- ifelse(x < 0.25, 0.5 + 2*x,
+        ifelse(x < 0.5,  -0.2 + 4*(x-0.25),
+        ifelse(x < 0.75, 0.8 - 2*(x-0.5), 0.3 + x)))
+plot(x, y_pw, type="l", lwd=2, col="steelblue",
+     xlab="x", ylab="f(x)", main="Piecewise polynomial", cex.lab=1.5, cex.axis=1.3, cex.main=1.5)
+abline(v=knots, lty="dashed", col="gray")
+text(knots, par("usr")[3]+0.05, labels=expression(xi[1], xi[2], xi[3]), cex=1.3, col="gray40")
+
+# Smooth spline through same data
+y_sp <- sin(2*pi*x*0.8) * 0.4 + 0.5
+plot(x, y_sp, type="l", lwd=2, col="orange",
+     xlab="x", ylab="f(x)", main="Smooth spline", cex.lab=1.5, cex.axis=1.3, cex.main=1.5)
+abline(v=knots, lty="dashed", col="gray")
+text(knots, par("usr")[3]+0.02, labels=expression(xi[1], xi[2], xi[3]), cex=1.3, col="gray40")
+```
+
+A smooth spline constrains adjacent segments to join with **continuous derivatives** — no kinks.
+
+## Basis functions: building blocks
+
+Any smooth $f(x)$ can be represented as a **weighted sum of basis functions** $b_j(x)$:
+
+\begin{equation}
+f(x) = \sum_{j=1}^K \beta_j\, b_j(x) = \textbf{b}(x)^\top\symbf{\beta}
+\end{equation}
+
+\pause
+
+This is the same $\textbf{X}\symbf{\beta}$ structure as a GLM — we simply \textbf{redefine the design matrix} $\textbf{X}$ to contain basis function columns:
+
+\begin{equation}
+\textbf{X}\symbf{\beta}, \quad \text{where } X_{ij} = b_j(x_i)
+\end{equation}
+
+\pause
+
+\begin{itemize}
+\item No new estimation machinery needed
+\item Penalization is the only addition
+\item The same link functions and distributions apply
+\end{itemize}
+
+## Cubic regression splines
+
+The cubic regression spline (CRS) basis uses cubic polynomials between knots, constrained to have continuous first and second derivatives at knots.
+
+```{r, echo=FALSE, fig.height=5, fig.width=13, message=FALSE, warning=FALSE}
+library(mgcv)
+x <- seq(0, 1, length.out=200)
+sm <- smoothCon(s(x, bs="cr", k=7), data=data.frame(x=x), knots=NULL)[[1]]
+B <- sm$X
+par(mar=c(5,5,3,2))
+matplot(x, B, type="l", lty=1, lwd=2,
+        xlab="x", ylab="Basis function value",
+        main="Cubic regression spline basis (k = 7)",
+        cex.lab=1.5, cex.axis=1.3, cex.main=1.5,
+        col=c("steelblue","orange","forestgreen","red","purple","brown","pink"))
+abline(h=0, lty="dashed", col="gray")
+```
+
+Each basis function has **local support** — it is non-zero only near its knot.
+
+## Thin plate regression splines
+
+The \textbf{default in \texttt{mgcv}} \tiny (Wood 2003) \normalsize. A TPS finds the function $f$ minimising:
+
+\begin{equation}
+\sum_{i=1}^n \{y_i - f(x_i)\}^2 + \lambda \int \{f''(x)\}^2\,dx
+\end{equation}
+
+over \textbf{all} smooth functions — no knots to choose. The solution is a natural spline with knots at every data point. For large $n$, \texttt{mgcv} uses a low-rank approximation: keep only the $k$ leading eigenfunctions of the penalty operator.
+
+\pause
+
+\textbf{P-splines} \tiny (Eilers and Marx 1996)\normalsize: B-spline basis + difference penalty on adjacent coefficients
+
+\textbf{Cyclic cubic splines} (\texttt{bs="cc"}): smooth joins at endpoints — for periodic predictors (month, day of year)
+
+## Spline summary
+
+\begin{center}
+\footnotesize
+\begin{tabular}{lll}
+\toprule
+\textbf{Type} & \textbf{mgcv code} & \textbf{When to use} \\
+\midrule
+Thin plate (default) & \texttt{s(x)} & General purpose \\
+Cubic regression & \texttt{s(x, bs="cr")} & Interpretable, fast \\
+P-spline & \texttt{s(x, bs="ps")} & Large datasets \\
+Cyclic cubic & \texttt{s(x, bs="cc")} & Periodic predictors \\
+Duchon spline & \texttt{s(x, bs="ds")} & Spatial data \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+## Building a smooth: step by step
+
+```{r, echo=FALSE, fig.height=5, fig.width=13, message=FALSE, warning=FALSE, out.height="0.65\\textheight"}
+set.seed(7)
+n <- 120
+x <- sort(runif(n))
+y <- sin(2*pi*x) + rnorm(n, sd=0.4)
+dat3 <- data.frame(x=x, y=y)
+m3 <- gam(y ~ s(x, bs="cr", k=6), data=dat3)
+
+sm3 <- smoothCon(s(x, bs="cr", k=6), data=dat3)[[1]]
+B3 <- sm3$X
+cf <- coef(m3)[-1]
+
+par(mfrow=c(1,3), mar=c(5,5,3,2))
+
+# Step 1: basis functions
+matplot(x, B3, type="l", lty=1, lwd=2,
+        xlab="x", ylab="", main="1. Basis functions",
+        cex.lab=1.5, cex.axis=1.2, cex.main=1.5,
+        col=c("steelblue","orange","forestgreen","red","purple","brown"))
+
+# Step 2: weighted basis functions
+matplot(x, sweep(B3, 2, cf, "*"), type="l", lty=1, lwd=2,
+        xlab="x", ylab="", main="2. Weighted by coefficients",
+        cex.lab=1.5, cex.axis=1.2, cex.main=1.5,
+        col=c("steelblue","orange","forestgreen","red","purple","brown"))
+abline(h=0, lty="dashed", col="gray")
+
+# Step 3: sum = smooth
+plot(x, y, pch=16, col="gray60", xlab="x", ylab="", main="3. Sum = smooth",
+     cex=1.2, cex.lab=1.5, cex.axis=1.2, cex.main=1.5)
+lines(x, fitted(m3) - coef(m3)[1], col="orange", lwd=3)
+```
+
+# Penalization
+
+## Wiggliness penalty
+
+Without a penalty, enough basis functions can fit *any* dataset perfectly (overfitting).
+
+\pause
+
+The **wiggliness penalty** discourages overly complex smooths:
+
+\begin{equation}
+\text{PRSS} = \underbrace{\sum_{i=1}^n \{y_i - f(x_i)\}^2}_{\text{Fit to data}} + \lambda \underbrace{\int \{f''(x)\}^2\, dx}_{\text{Wiggliness}}
+\end{equation}
+
+\pause
+
+- $f''(x)$ is the second derivative — measures curvature
+- $\lambda \geq 0$ is the **smoothing parameter**
+- $\lambda = 0$: interpolating spline (overfits)
+- $\lambda \to \infty$: straight line (linear regression)
+
+## Smoothing parameter $\lambda$
+
+```{r, echo=FALSE, fig.height=5.5, fig.width=13, message=FALSE, warning=FALSE}
+set.seed(3)
+n <- 80
+x <- sort(runif(n))
+y <- sin(2*pi*x) + rnorm(n, sd=0.3)
+dat4 <- data.frame(x=x, y=y)
+xp <- seq(0, 1, length.out=200)
+datp <- data.frame(x=xp)
+
+par(mfrow=c(1,3), mar=c(5,5,3,2))
+spans <- c(0.08, 0.35, 0.9)
+mains <- list(expression(paste("Small ", lambda, " (wiggly)")),
+              expression(paste("Medium ", lambda)),
+              expression(paste("Large ", lambda, " (smooth)")))
+for(i in seq_along(spans)){
+  m_sp <- loess(y ~ x, data=dat4, span=spans[i])
+  plot(x, y, pch=16, col="gray60",
+       xlab="x", ylab="f(x)",
+       main=mains[[i]],
+       cex=1.3, cex.lab=1.5, cex.axis=1.3, cex.main=1.5)
+  lines(xp, predict(m_sp, newdata=datp), col="orange", lwd=3)
+}
+```
+
+The same data; only $\lambda$ differs.
+
+## The penalty in matrix form
+
+For a penalized spline with basis matrix $\textbf{B}$ and coefficients $\symbf{\beta}$:
+
+\begin{equation}
+\text{PRSS} = \lVert \textbf{y} - \textbf{B}\symbf{\beta} \rVert^2 + \lambda\, \symbf{\beta}^\top \textbf{S}\, \symbf{\beta}
+\end{equation}
+
+- $\textbf{S}$ is the **penalty matrix** encoding the wiggliness constraint
+- For a cubic spline: $S_{jk} = \int b_j''(x)\, b_k''(x)\, dx$
+
+\pause
+
+The solution is:
+
+\begin{equation}
+\hat{\symbf{\beta}} = (\textbf{B}^\top\textbf{B} + \lambda\textbf{S})^{-1}\textbf{B}^\top\textbf{y}
+\end{equation}
+
+\pause
+
+Compare to ridge: $(\textbf{X}^\top\textbf{X} + \lambda\textbf{I})^{-1}\textbf{X}^\top\textbf{y}$ — same structure, $\textbf{S}$ replaces $\textbf{I}$
+
+## Effective degrees of freedom
+
+The effective degrees of freedom (EDF) of a smooth quantifies its complexity:
+
+\begin{equation}
+\text{EDF} = \text{tr}\bigl\{(\textbf{B}^\top\textbf{B} + \lambda\textbf{S})^{-1}\textbf{B}^\top\textbf{B}\bigr\}
+\end{equation}
+
+\columnsbegin
+\column{0.5\textwidth}
+
+- EDF = 1: straight line
+- EDF = 2: quadratic
+- EDF $\approx k$: nearly interpolating
+
+\column{0.5\textwidth}
+
+- Reported by \texttt{summary.gam}
+- Used for hypothesis tests
+- Larger EDF $\Rightarrow$ more complex smooth
+
+\columnsend
+
+# Smoothing parameter selection
+
+## How do we choose $\lambda$?
+
+Several criteria exist for selecting the smoothing parameter automatically:
+
+\begin{enumerate}
+\item \textbf{GCV} --- Generalized Cross-Validation
+\item \textbf{ML} --- Maximum Likelihood
+\item \textbf{REML} --- Restricted Maximum Likelihood
+\end{enumerate}
+
+All treat $\lambda$ as something to be estimated from the data.
+
+## GCV: Generalized Cross-Validation
+
+Proposed by Craven and Wahba (1979), popularized for GAMs by \textbf{Wood (2004)}:
+
+\begin{equation}
+\text{GCV}(\lambda) = \frac{n \cdot \text{RSS}(\lambda)}{\{n - \text{EDF}(\lambda)\}^2}
+\end{equation}
+
+\pause
+
+\begin{itemize}
+\item Approximates leave-one-out cross-validation at $O(n)$ cost
+\item Penalizes model complexity via EDF
+\item Minimizing GCV over $\lambda$ balances fit vs. smoothness
+\end{itemize}
+
+\pause
+
+\textcolor{red}{\textbf{Problem}: GCV can undersmooth (too wiggly) in some cases, especially with correlated errors \tiny (Reiss and Ogden 2009)\normalsize}
+
+## ML and REML
+
+The GLMM representation of the smooth (see next section) enables likelihood-based selection:
+
+\pause
+
+**ML** (Maximum Likelihood): maximize the marginal likelihood of $\textbf{y}$ over both $\symbf{\beta}$ and $\lambda$
+
+\pause
+
+**REML** (Restricted Maximum Likelihood): maximize the likelihood after projecting out fixed effects
+
+\begin{itemize}
+\item REML is less prone to undersmoothing than ML \tiny (Wood 2011)\normalsize
+\item REML accounts for uncertainty in fixed effects when estimating $\lambda$
+\item Generally recommended; default in \texttt{mgcv} since version 1.8
+\end{itemize}
+
+\pause
+
+\begin{center}
+\textbf{Use \texttt{method="REML"} in \texttt{mgcv::gam()} (it is the default)}
+\end{center}
+
+## Comparing criteria
+
+\begin{center}
+\footnotesize
+\begin{tabular}{llll}
+\toprule
+\textbf{Criterion} & \textbf{Basis} & \textbf{Tends to} & \textbf{Use when} \\
+\midrule
+GCV & CV approximation & Undersmooth & Legacy, simple models \\
+ML & Likelihood & Undersmooth & Rarely preferred \\
+REML & Restricted likelihood & Best calibrated & Default (recommended) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\pause
+
+In \texttt{R}:
+
+```{r, eval=FALSE}
+gam(y ~ s(x), method = "REML")  # default, recommended
+gam(y ~ s(x), method = "GCV.Cp") # GCV
+gam(y ~ s(x), method = "ML")     # ML
+```
+
+# GAMs as GLMMs
+
+## The GLMM representation
+
+\tiny (Wood 2004, 2011) \normalsize
+
+The penalty matrix $\textbf{S}$ is rank-deficient: it has a **null space** (directions that are not penalized).
+
+\pause
+
+Decompose $\textbf{S}$ via spectral decomposition $\textbf{S} = \textbf{U}\symbf{\Lambda}\textbf{U}^\top$ and partition the smooth:
+
+\begin{equation}
+f(x) = \underbrace{\textbf{B}_0\symbf{\beta}_0}_{\text{Unpenalized (fixed)}} + \underbrace{\textbf{B}_1\textbf{b}}_{\text{Penalized (random)}}
+\end{equation}
+
+\pause
+
+with $\textbf{b} \sim \mathcal{N}\bigl(\textbf{0},\, \frac{\sigma^2}{\lambda}\textbf{I}\bigr)$
+
+\pause
+
+This is **exactly** a GLMM: fixed-effects design matrix $\textbf{X} = \textbf{B}_0$ and random-effects design matrix $\textbf{Z} = \textbf{B}_1$.
+
+## What this means in practice
+
+\begin{itemize}
+\item GAMs can be fitted using GLMM software
+\item The smoothing parameter $\lambda$ is determined by the random-effect variance: $\sigma^2_b = \sigma^2/\lambda$
+\item REML estimation of $\lambda$ is exactly REML estimation of the random-effect variance
+\item GAMs and GLMMs are \textbf{two sides of the same coin}
+\end{itemize}
+
+\pause
+
+\begin{center}
+\textbf{A GAM is a GLMM with specially structured random effects}
+\end{center}
+
+## GAMs in \texttt{glmmTMB}
+
+Since the GAM smooth is a GLMM, it can be fitted in \texttt{glmmTMB} using \texttt{mgcv} smooth terms:
+
+```{r, eval=FALSE}
+library(glmmTMB)
+model <- glmmTMB(y ~ s(x), family = poisson, data = dat)
+```
+
+\pause
+
+You can combine GAM smooths with random effects in the same model:
+
+```{r, eval=FALSE}
+model <- glmmTMB(y ~ s(x) + (1|group),
+                 family = poisson, data = dat)
+```
+
+\pause
+
+\begin{itemize}
+\item Uses the Wood (2004, 2011) diagonalization internally
+\item Supports all \texttt{mgcv} basis types
+\item Enables non-Gaussian responses with GAM-type smoothing
+\end{itemize}
+
+# Example
+
+## Example: bioluminescence at depth
+
+Data from Gillibrand et al. (2007), via Zuur et al. (2009)
+
+\columnsbegin
+\column{0.5\textwidth}
+
+- 1,654 observations across 19 stations
+- Response: number of bioluminescent sources
+- Predictor: sample depth (m)
+- Strong non-linear relationship with depth
+
+\column{0.5\textwidth}
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4.5}
+ISIT <- read.csv("../data/ISIT.csv")
+dat_ex <- subset(ISIT, Station == 9)
+plot(Sources ~ SampleDepth, data = dat_ex,
+     pch=16, col="steelblue", cex=1.5,
+     xlab="Depth (m)", ylab="Sources",
+     cex.lab=1.5, cex.axis=1.3)
+```
+
+\columnsend
+
+## ISIT: GLM vs. GAM
+
+```{r, echo=FALSE, fig.height=5.5, fig.width=13, message=FALSE, warning=FALSE}
+library(mgcv)
+dat_ex <- subset(ISIT, Station == 9)
+xseq <- seq(min(dat_ex$SampleDepth), max(dat_ex$SampleDepth), length.out=300)
+pred_df <- data.frame(SampleDepth = xseq)
+
+m_glm <- glm(Sources ~ SampleDepth, family=Gamma(link="log"), data=dat_ex)
+m_gam <- gam(Sources ~ s(SampleDepth, bs="cr"), family=Gamma(link="log"),
+             data=dat_ex, method="REML")
+
+par(mfrow=c(1,2), mar=c(5,5,3,2))
+plot(Sources ~ SampleDepth, data=dat_ex, pch=16, col="gray60",
+     xlab="Depth (m)", ylab="Sources", main="GLM vs. GAM",
+     cex=1.3, cex.lab=1.5, cex.axis=1.3, cex.main=1.5)
+lines(xseq, predict(m_glm, newdata=pred_df, type="response"),
+      col="red", lwd=2, lty="dashed")
+lines(xseq, predict(m_gam, newdata=pred_df, type="response"),
+      col="orange", lwd=3)
+legend("topright", lty=c("dashed","solid"), col=c("red","orange"),
+       legend=c("Poisson GLM","Poisson GAM"), lwd=2, cex=1.2)
+
+plot(m_gam, shade=TRUE, col="orange", shift=coef(m_gam)[1],
+     trans=exp, xlab="Depth (m)", ylab="Sources",
+     main="GAM smooth with 95% CI",
+     cex.lab=1.5, cex.axis=1.3, cex.main=1.5)
+points(dat_ex$SampleDepth, dat_ex$Sources, pch=16, col="gray60", cex=1.3)
+```
+
+## ISIT: fitting
+
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+library(mgcv)
+ISIT <- read.csv("../data/ISIT.csv")
+dat_ex <- subset(ISIT, Station == 9)
+
+model_gam <- gam(Sources ~ s(SampleDepth, bs="cr"),
+                 family = Gamma(link="log"), data = dat_ex,
+                 method = "REML")
+```
+
+## ISIT: summary
+
+\footnotesize
+```{r, echo=FALSE}
+summary(model_gam)
+```
+\normalsize
+
+## ISIT: model checking
+
+```{r, echo=FALSE, fig.height=5, fig.width=13, message=FALSE, warning=FALSE, out.height="0.65\\textheight", results='hide'}
+par(mfrow=c(2,2), mar=c(4,4,3,1))
+gam.check(model_gam, cex.lab=1.2, cex.axis=1.1)
+```
+
+## ISIT: multiple stations
+
+\footnotesize
+
+```{r, eval=FALSE}
+model_full <- gam(Sources ~ s(SampleDepth, bs="cr") +
+                    s(Station, bs="re"),
+                  family = Gamma(link="log"), data = ISIT,
+                  method = "REML")
+```
+
+\normalsize
+
+- \texttt{s(Station, bs="re")}: random intercept for each station — a GAMM
+- The same in \texttt{glmmTMB}:
+
+\footnotesize
+
+```{r, eval=FALSE}
+library(glmmTMB)
+model_tmb <- glmmTMB(Sources ~ s(SampleDepth, bs="cr") +
+                       (1|Station),
+                     family = Gamma(link="log"), data = ISIT)
+```
+
+\normalsize
+
+# Example 2: road kills
+
+## Road-killed toads in Portugal
+
+Data from Zuur et al. (2009), originally Mira et al.
+
+\columnsbegin
+\column{0.5\textwidth}
+
+- 52 road sectors in Portugal
+- Response: number of road-killed *Bufo calamita* (natterjack toad)
+- Predictor: distance to nearest water reservoir (`D.WAT.RES`)
+- Non-linear relationship expected — toads concentrate near water
+
+\column{0.5\textwidth}
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=4.5}
+rk <- read.csv("../data/RoadKills.csv")
+plot(BufoCalamita ~ D.WAT.RES, data=rk,
+     pch=16, col="steelblue", cex=1.3,
+     xlab="Distance to water reservoir (m)",
+     ylab="Road kills", cex.lab=1.4, cex.axis=1.2)
+```
+
+\columnsend
+
+## Road kills: GLM vs. GAM
+
+```{r, echo=FALSE, fig.height=5.5, fig.width=13, message=FALSE, warning=FALSE}
+library(mgcv)
+xrng <- range(rk$D.WAT.RES)
+xseq <- seq(xrng[1], xrng[2], length.out=300)
+pdat <- data.frame(D.WAT.RES=xseq)
+
+m_rk_glm <- glm(BufoCalamita ~ D.WAT.RES, family=poisson, data=rk)
+m_rk_gam <- gam(BufoCalamita ~ s(D.WAT.RES, bs="cr"),
+                family=poisson, data=rk, method="REML")
+
+par(mfrow=c(1,2), mar=c(5,5,3,2))
+plot(BufoCalamita ~ D.WAT.RES, data=rk, pch=16, col="gray60",
+     xlab="Distance to water (m)", ylab="Road kills",
+     main="GLM vs. GAM", cex=1.3, cex.lab=1.4, cex.axis=1.2, cex.main=1.4)
+lines(xseq, predict(m_rk_glm, newdata=pdat, type="response"),
+      col="red", lwd=2, lty="dashed")
+lines(xseq, predict(m_rk_gam, newdata=pdat, type="response"),
+      col="orange", lwd=3)
+legend("topright", lty=c("dashed","solid"), col=c("red","orange"),
+       legend=c("Poisson GLM","Poisson GAM"), lwd=2, cex=1.1)
+
+plot(m_rk_gam, shade=TRUE, col="orange", shift=coef(m_rk_gam)[1],
+     trans=exp, xlab="Distance to water (m)", ylab="Road kills",
+     main="GAM smooth with 95% CI",
+     cex.lab=1.4, cex.axis=1.2, cex.main=1.4)
+points(rk$D.WAT.RES, rk$BufoCalamita, pch=16, col="gray60", cex=1.3)
+```
+
+## Road kills: fitting
+
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+rk <- read.csv("../data/RoadKills.csv")
+
+model_rk <- gam(BufoCalamita ~ s(D.WAT.RES, bs="cr"),
+                family = poisson, data = rk, method = "REML")
+```
+
+## Road kills: summary
+
+\footnotesize
+```{r, echo=FALSE}
+summary(model_rk)
+```
+\normalsize
+
+## Road kills: model checking
+
+```{r, echo=FALSE, fig.height=5, fig.width=13, message=FALSE, warning=FALSE, out.height="0.65\\textheight", results='hide'}
+par(mfrow=c(2,2), mar=c(4,4,3,1))
+gam.check(model_rk, cex.lab=1.2, cex.axis=1.1)
+```
+
+## Road kills: visualisation with \texttt{gratia}
+
+```{r, echo=TRUE, fig.height=5, fig.width=10, message=FALSE, warning=FALSE}
+library(gratia)
+draw(model_rk, residuals=TRUE)
+```
+
+## Road kills: adding more predictors
+
+\footnotesize
+```{r, eval=FALSE}
+model_rk2 <- gam(BufoCalamita ~ s(D.WAT.RES, bs="cr") +
+                   s(D.WAT.COUR, bs="cr") +
+                   s(L.D.ROAD, bs="cr"),
+                 family = poisson, data = rk, method = "REML")
+```
+\normalsize
+
+- Multiple smooths can be combined additively
+- Each smooth's edf is estimated and penalized independently
+- Use AIC or REML score to compare models
+
+# Summary
+
+## Summary
+
+\begin{itemize}
+\item \textbf{Ridge regression}: penalizes $\lVert\symbf{\beta}\rVert^2$ — equivalent to a normal prior; conditional mode = MAP estimate (not a BLUP)
+\item \textbf{GAMs} extend GLMs with smooth functions $f(x)$ instead of linear terms $x\beta$
+\item \textbf{Splines} represent $f(x)$ as weighted basis functions; many types available
+\item \textbf{Wiggliness penalty} controls smoothness; $\lambda$ is estimated automatically
+\item \textbf{REML} is the recommended criterion for smoothing parameter selection
+\item \textbf{GAMs are GLMMs}: the penalized smooth decomposes into fixed + random effects
+\item \textbf{glmmTMB} can fit GAMs alongside random effects in a unified framework
+\end{itemize}
+
+## End
+
+\center
+
+![](Thats_all_folks.png){width=75%}
