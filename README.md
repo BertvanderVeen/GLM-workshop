@@ -78,7 +78,7 @@ On the first day we will go through R basics and background theory of frequentis
 * Own data analysis
 * Discussion/help/..
 
-[First presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/5Friday/BeyondGLMs.pdf)
+[First presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/5Friday/GLMMs.pdf)
 
 [Second presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/5Friday/GAMs.pdf)
 
