@@ -1,5 +1,5 @@
 ---
-title: "Beyond GLMs: Mixed effects models"
+title: "Beyond GLMs with random effects"
 institute: "University of Bayreuth"
 author: "Bert van der Veen"
 output: 
@@ -68,8 +68,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Outline Today
 
 - Beyond GLMs: mixed-effects models
-- Bring your own data
-- Q & A
+- Practical 13: GLMMs
 
 - 15 minute break
 
