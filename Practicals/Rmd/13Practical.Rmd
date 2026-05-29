@@ -1,0 +1,157 @@
+---
+title: "Practical: Generalised Linear Mixed Models"
+subtitle: "Physalia workshop on GLMs"
+author: "Bert van der Veen"
+output: html_document
+---
+
+# Background
+
+So far, all models we have fitted assume that observations are independent. In practice, data often has a grouped or hierarchical structure — repeated measurements on the same individual, observations from the same plot or nest, or samples from the same site. Ignoring this structure inflates our effective sample size and leads to overconfident inference.
+
+Generalised Linear Mixed Models (GLMMs) extend GLMs by including **random effects** to account for this non-independence. In this practical we will use the `Owls` dataset from the `glmmTMB` package, which records the number of sibling negotiation calls (begging) made by chicks in owl nests, along with information on food treatment, brood size, arrival time of the parent, and sex of the parent.
+
+```{r, message=FALSE, warning=FALSE}
+library(glmmTMB)
+data(Owls)
+str(Owls)
+head(Owls)
+```
+
+The key grouping variable is `Nest` — chicks from the same nest share an environment and genetics, so their observations are not independent.
+
+# Exploring the data
+
+Before fitting any models, let us explore the response variable and the grouping structure.
+
+```{r, fig.width=10}
+# Distribution of the response
+hist(Owls$SiblingNegotiation, breaks=30,
+     xlab="Sibling negotiation (count)", main="Distribution of response")
+```
+
+```{r, fig.width=10}
+# Variation across nests
+boxplot(SiblingNegotiation ~ Nest, data=Owls,
+        xlab="Nest", ylab="Sibling negotiation",
+        las=2, cex.axis=0.7, main="Response by nest")
+```
+
+There is clearly considerable variation between nests. A model that ignores this grouping will treat all observations as independent, inflating the effective sample size.
+
+**Question 1.** Do you notice any overdispersion? (hint: compare the mean and variance of `SiblingNegotiation`.)
+
+```{r}
+mean(Owls$SiblingNegotiation)
+var(Owls$SiblingNegotiation)
+```
+
+# A naive Poisson GLM
+
+Let us start by fitting a Poisson GLM that ignores the nest grouping. We include `FoodTreatment` and `ArrivalTime` as fixed effects.
+
+```{r}
+m_pois <- glm(SiblingNegotiation ~ FoodTreatment + ArrivalTime,
+              family = poisson, data = Owls)
+summary(m_pois)
+```
+
+**Question 2.** Check for overdispersion using the residual deviance divided by residual degrees of freedom. What does the value suggest?
+
+```{r}
+deviance(m_pois) / df.residual(m_pois)
+```
+
+**Question 3.** Look at the residuals versus fitted values. Do the residuals show any pattern you would not expect?
+
+```{r, fig.width=10}
+plot(log(fitted(m_pois)), residuals(m_pois, type="pearson"),
+     xlab="log(Fitted values)", ylab="Pearson residuals",
+     main="Poisson GLM: residuals vs. fitted")
+abline(h=0, col="red")
+```
+
+# A negative-binomial GLMM
+
+We now account for both overdispersion (using a negative-binomial distribution) and the nest structure (using a random intercept for `Nest`).
+
+```{r}
+m_nb <- glmmTMB(SiblingNegotiation ~ FoodTreatment + ArrivalTime + (1|Nest),
+                family = nbinom2, data = Owls)
+summary(m_nb)
+```
+
+The `(1|Nest)` term adds a nest-specific random intercept: each nest gets its own baseline level of calling, drawn from a normal distribution with mean 0 and an estimated variance.
+
+**Question 4.** What is the estimated variance of the random intercept? What does a larger variance imply about between-nest differences?
+
+## Extracting random effects
+
+```{r}
+ranef(m_nb)
+```
+
+**Question 5.** Which nests have positive random effects (higher than average calling) and which have negative ones?
+
+```{r, fig.width=8}
+re <- unlist(ranef(m_nb)$cond)
+dotchart(sort(re), xlab="Random intercept estimate", main="Nest-specific deviations")
+abline(v=0, lty="dashed", col="red")
+```
+
+# Residual checking with DHARMa
+
+For GLMMs, standard residuals are not appropriate. The `DHARMa` package provides simulation-based quantile residuals that work for any GLMM.
+
+```{r, message=FALSE, warning=FALSE, fig.width=10}
+library(DHARMa)
+sim_res <- simulateResiduals(m_nb, plot=TRUE)
+```
+
+**Question 6.** Do the DHARMa residuals suggest any remaining issues with the model?
+
+# Comparing models
+
+Let us check whether the random intercept for `Nest` actually improves the model by comparing to a negative-binomial GLM without random effects.
+
+```{r}
+m_nb_fixed <- glmmTMB(SiblingNegotiation ~ FoodTreatment + ArrivalTime,
+                      family = nbinom2, data = Owls)
+anova(m_nb_fixed, m_nb)
+```
+
+**Question 7.** What does the likelihood ratio test tell us about the importance of the nest random effect?
+
+# Adding brood size
+
+The number of chicks in a nest (`BroodSize`) is a natural offset: more chicks means more calls regardless of food treatment. We can include it as a log-offset.
+
+```{r}
+m_nb2 <- glmmTMB(SiblingNegotiation ~ FoodTreatment + ArrivalTime + (1|Nest),
+                 offset = log(BroodSize),
+                 family = nbinom2, data = Owls)
+summary(m_nb2)
+```
+
+**Question 8.** How do the fixed effect estimates change when you include the brood size offset? Does the interpretation of `FoodTreatment` change?
+
+# Exercises
+
+Here is what I want you to do:
+
+<details>
+<summary>Click to see the exercises</summary>
+
+1. In the naive Poisson GLM, what is the dispersion factor? Is it consistent with what you see in the histogram of counts?
+
+2. Fit a Poisson GLMM (keeping the random intercept but using `family = poisson`). How do its fixed effect estimates compare to the negative-binomial GLMM? Check the DHARMa residuals — is there remaining overdispersion?
+
+3. Add `SexParent` as a fixed effect to the negative-binomial GLMM with the offset. Is it a significant predictor?
+
+4. Try fitting a model with both random intercepts and random slopes for `ArrivalTime` by `Nest` using `(ArrivalTime|Nest)`. Does it converge? If so, how does the model compare using AIC?
+
+5. Use `ggeffects::predict_response()` or `emmeans` to visualise the predicted effect of `FoodTreatment` on the expected count (marginalising over nests). Do food-deprived nests call significantly more than satiated ones?
+
+6. What would happen if you ignored the nest random effect entirely? Fit a standard NB GLM and compare the standard errors of the fixed effects to those from the GLMM. Are they larger or smaller in the GLM?
+
+</details>
