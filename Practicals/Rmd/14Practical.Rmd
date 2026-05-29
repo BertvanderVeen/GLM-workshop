@@ -7,12 +7,12 @@ output: html_document
 
 # Background
 
-GLMs assume that covariates enter the linear predictor **linearly** — a one-unit change in $x$ always produces the same change in $g\{\text{E}(y)\}$, regardless of where on the $x$-axis you are. Many ecological relationships are non-linear, however, and forcing a straight line through curved data leads to biased estimates and poor residuals.
+GLMs assume that covariates enter the linear predictor **linearly**: a one-unit change in $x$ always produces the same change in $g\{\text{E}(y)\}$, regardless of where on the $x$-axis you are. Many ecological relationships are non-linear, and a linear model misspecifies the functional form, leading to systematic residual patterns.
 
 Generalized Additive Models (GAMs) replace the linear term $x\beta$ with a smooth function $f(x)$ estimated from the data. The two main packages for fitting GAMs in R are:
 
-- `mgcv` — the standard, comprehensive GAM package by Simon Wood
-- `gratia` — provides `ggplot2`-based visualisation tools for `mgcv` models
+- `mgcv`: the standard GAM package by Simon Wood
+- `gratia`: provides `ggplot2`-based visualisation tools for `mgcv` models
 
 In this practical we will use the ISIT dataset (bioluminescent sources at depth in the ocean) from Gillibrand et al. (2007), the same dataset used in the lecture.
 
@@ -31,7 +31,12 @@ dat <- subset(ISIT, Station == 9)
 nrow(dat)
 ```
 
-# Exploring the data
+# Distribution of the response
+
+```{r, fig.width=10}
+hist(dat$Sources, breaks=20,
+     xlab="Bioluminescent sources", main="Distribution of response")
+```
 
 ```{r, fig.width=10}
 plot(Sources ~ SampleDepth, data=dat, pch=16, col="steelblue",
@@ -39,7 +44,7 @@ plot(Sources ~ SampleDepth, data=dat, pch=16, col="steelblue",
      main="Station 9: sources vs. depth")
 ```
 
-**Question 1.** Does the relationship look linear? What transformation, if any, might make a linear model more appropriate?
+Does the relationship look linear? What distribution might be appropriate for the response?
 
 # A GLM baseline
 
@@ -68,11 +73,11 @@ lines(loess.smooth(log(fitted(m_glm)), residuals(m_glm, type="deviance")),
       col="blue", lwd=2)
 ```
 
-**Question 2.** What does the pattern in the residuals tell you about the linear GLM?
+The pattern in the residuals suggests the linear predictor does not capture the shape of the relationship.
 
 # Fitting a GAM
 
-We now fit a GAM with a smooth term for `SampleDepth`. We use `bs="cr"` (cubic regression spline) and `method="REML"` (recommended for smoothing parameter selection).
+We now fit a GAM with a smooth term for `SampleDepth`. We use `bs="cr"` (cubic regression spline) and `method="REML"` for smoothing parameter selection.
 
 ```{r}
 m_gam <- gam(Sources ~ s(SampleDepth, bs="cr"),
@@ -80,9 +85,7 @@ m_gam <- gam(Sources ~ s(SampleDepth, bs="cr"),
 summary(m_gam)
 ```
 
-The `edf` column in the smooth terms table shows the **effective degrees of freedom** — a measure of how wiggly the estimated smooth is. An edf of 1 is a straight line; higher values indicate more curvature.
-
-**Question 3.** What is the edf of the smooth? Does this suggest a roughly linear or highly non-linear relationship?
+The `edf` column in the smooth terms table shows the **effective degrees of freedom**: a measure of how wiggly the estimated smooth is. An edf of 1 is a straight line; higher values indicate more curvature.
 
 ## Plotting the smooth with gratia
 
@@ -93,23 +96,14 @@ draw(m_gam)
 ```
 
 ```{r, fig.width=8}
-# Fitted values on the response scale overlaid on data
 draw(m_gam, residuals=TRUE)
 ```
 
-**Question 4.** Where does the smooth show the highest uncertainty (widest confidence band)? Why might that be?
-
 # Model checking
 
-The `gam.check()` function produces diagnostic plots and also checks whether the basis dimension `k` is large enough.
-
 ```{r, fig.width=10}
-gam.check(m_gam)
+appraise(m_gam, method="simulate")
 ```
-
-The `k-index` and p-value in the printed output flag whether the smooth needs more basis functions. A significant p-value (k-index < 1) suggests you should increase `k`.
-
-**Question 5.** Does the k-check suggest the current basis dimension is adequate? If not, refit with a larger `k` (e.g., `k=15`) and compare the edf.
 
 # Comparing GLM and GAM
 
@@ -121,10 +115,8 @@ plot(Sources ~ SampleDepth, data=dat, pch=16, col="gray60",
 lines(xseq, pred_glm, col="red", lwd=2, lty="dashed")
 lines(xseq, pred_gam, col="orange", lwd=3)
 legend("topright", lty=c("dashed","solid"), col=c("red","orange"),
-       legend=c("GLM (linear)", "GAM (smooth)"), lwd=2)
+       legend=c("GLM", "GAM"), lwd=2)
 ```
-
-**Question 6.** Which model captures the data pattern better? Check AIC for both models.
 
 ```{r}
 AIC(m_glm, m_gam)
@@ -132,37 +124,35 @@ AIC(m_glm, m_gam)
 
 # Extending to all stations
 
-The ISIT data has 19 stations, and observations from the same station are not independent. We can extend the GAM to include a random intercept for station — this is a GAMM (Generalized Additive Mixed Model).
+The ISIT data has 19 stations, and observations from the same station are not independent. We can extend the GAM to include a random intercept for station, giving a GAMM (Generalized Additive Mixed Model).
 
 ```{r}
-# Full dataset includes zeros so we use Tweedie (handles zero + positive continuous)
+# Full dataset includes zeros so we use Tweedie
 m_gamm <- gam(Sources ~ s(SampleDepth, bs="cr") + s(Station, bs="re"),
               family=tw(), data=ISIT, method="REML")
 summary(m_gamm)
 ```
 
-The `s(Station, bs="re")` term is a random intercept coded as a smooth — exactly the GAM-as-GLMM connection from the lecture.
+The `s(Station, bs="re")` term is a random intercept expressed as a smooth, as introduced in the lecture.
 
 ```{r, fig.width=10}
-draw(m_gamm, select=1)  # just the depth smooth
+draw(m_gamm, select=1)
 ```
 
-**Question 7.** How does the depth smooth change when you include all stations compared to fitting only Station 9?
+How does the depth smooth change when you include all stations compared to fitting only Station 9?
 
 # Exercises
-
-Here is what I want you to do:
 
 <details>
 <summary>Click to see the exercises</summary>
 
-1. Refit the single-station GAM with a thin plate spline (`bs="tp"`, the default) instead of `bs="cr"`. Does the fitted smooth look different? Compare AIC.
+1. Refit the GAM for Station 9 with a thin plate spline (`bs="tp"`, the default) instead of `bs="cr"`. Does the fitted smooth look different? Compare AIC.
 
-2. Fit a GAM to Station 9 using a Poisson family instead of Gamma. Does this seem appropriate given the distribution of the response? Check with `gam.check()`.
+2. Fit a GAM to Station 9 using a Poisson family instead of Gamma. Check the diagnostics with `gratia::appraise()`. Does a Poisson distribution seem appropriate?
 
-3. For the full ISIT dataset, fit a model with a **station-specific** smooth for depth: `s(SampleDepth, by=factor(Station), bs="cr")`. How does this compare (AIC) to the model with a global smooth plus random intercept?
+3. For the full ISIT dataset, fit a model with a station-specific smooth for depth: `s(SampleDepth, by=factor(Station), bs="cr", k=5)`. Note that some stations have very few observations (Station 4 has only 5), so a small `k` is needed to avoid fitting problems. How does this compare (AIC) to the model with a global smooth plus random intercept?
 
-4. Use `gratia::appraise()` on your best model. This produces DHARMa-style diagnostics for GAMs. Are there any remaining problems?
+4. Use `gratia::appraise()` on your best model. Are there any remaining problems?
 
 5. Try the same GAMM in `glmmTMB`:
 ```r
