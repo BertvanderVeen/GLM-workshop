@@ -73,11 +73,14 @@ On the first day we will go through R basics and background theory of frequentis
 [Third presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/4Thursday/OtherModels.pdf)
 
 ## Friday
-* Beyond GLMs: Generalised linear mixed models
+* Beyond GLMs with random effects: Generalised linear mixed models
+* Beyond GLMs with splines: Generalized additive models
 * Participants' case studies (bring your own data)
 * Discussion/help/..
 
-[Presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/5Friday/BeyondGLMs.pdf)
+[First presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/5Friday/BeyondGLMs.pdf)
+
+[Second presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/5Friday/GAMs.pdf)
 
 # Detailed schedule
 |   Day   |Time         |Subject                                                |
@@ -120,8 +123,11 @@ On the first day we will go through R basics and background theory of frequentis
 |         |18:30 - 19:15| Other useful models                                   |
 |         |19:15 - 20:00| Practical 12: other useful models                     |
 |---------|-------------|-------------------------------------------------------|
-|Friday   |14:00 - 16:00| Generalised Linear Mixed-effects Models               |
-|         |16:00 - 18:00| Demonstration, real data analysis, time for questions | <!-- first a demonstration, then discussion and correction after -->
+|Friday   |14:00 - 15:00| Beyond GLMs with random effects: GLMMs                |
+|         |15:00 - 16:00| Practical 13: GLMMs                                   |
+|         |16:00 - 16:15| Break                                                 |
+|         |16:15 - 17:00| Beyond GLMs with splines: GAMs                        |
+|         |17:00 - 18:00| Practical 14: GAMs / real data analysis               | <!-- first a demonstration, then discussion and correction after -->
 
 <!-- from survey
 more real data less simulations
@@ -149,4 +155,5 @@ consider adding equation and equation in words for the examples?!
 notes:
 1) Practical 1, exercise 1.1: the plot should be the t-test plot as shown in the lecture
 2) The 2024 exercise (combining simulation from ex 1 and lm from ex 2) is a nice addition and should be properly incorporated into Practical 2
+3) Missing R packages for inference: consider adding lmtest + sandwich (robust SEs, coeftest/waldtest), multcomp (simultaneous inference/multiple comparisons), brglm2 (Firth's bias-reduced GLM for separation/rare events), and boot (bootstrap CIs)
 -->
