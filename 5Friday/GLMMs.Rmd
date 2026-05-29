@@ -72,6 +72,15 @@ knitr::opts_chunk$set(echo = TRUE)
 
 - 15 minute break
 
+## Further resources
+
+\begin{itemize}
+\item \textbf{Bolker et al. (2009)} Generalized linear mixed models: a practical guide for ecology and evolution. \textit{Trends in Ecology \& Evolution}
+\item \href{https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html}{\textbf{Ben Bolker's GLMM FAQ}}: common issues, convergence, random effects
+\item \textbf{Zuur et al. (2009)} Mixed Effects Models and Extensions in Ecology with R. Springer
+\item \href{https://www.physalia-courses.org}{\textbf{Florian Hartig's Physalia course}}: GLMMs in R
+\end{itemize}
+
 # Recap
 
 ## Questions about yesterday?
@@ -381,68 +390,27 @@ we have the marginal distribution $\textbf{y} \sim \mathcal{N}(\textbf{X}\symbf{
 
 \textbf{This is not how things are done in practice (because the covariance matrix can get quite big!)}
 
+\pause
+
+For non-normal responses (GLMMs), the marginal likelihood usually has no closed form and the integral must be approximated.
+
 <!--
 - but includes inverse of $\boldsymbol{Z}\boldsymbol{\Sigma}\boldsymbol{Z}^\top + \textbf{I}\sigma^2$
 -->
 
-# Estimation
+## Inference
 
 We assume that the random effects follow a normal distribution:
 
 $$
 \textbf{u} \sim \mathcal{N}(\textbf{0}, \boldsymbol{\Sigma})
 $$
-However, we are really interested in $\boldsymbol{u}\vert\textbf{y}$ instead; this holds information from our data!
+However, we are really interested in $\textbf{u}\vert\textbf{y}$ instead; this holds information from our data!
 
 - We want $f(\textbf{u}\vert\textbf{y})$ to be as flexible as possible
 - So we can capture the patterns in the data as accurately as possible
 
-## Estimation methods
-
-- Penalized quasi-likelihood methods
-- Adaptive GH quadrature
-- Laplace approximation
-- Variational approximations
-- Et cetera \footnotesize (see e.g., Bolker et al. 2009) \normalsize
-
-\center Measure of central tendency: Mean or Mode
-
-```{r, echo=F, eval=T, fig.show="hold", out.width="40%", fig.align="center"}
-library(ggplot2)
-
-ggplot(data.frame(x=0), aes(x=x))+stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1))+theme_classic()+geom_vline(aes(xintercept=0), col="red",lty="dashed")+theme(text = element_text(size=24))+xlim(c(-3,3))+xlab("Random effect")+ylab("Likelihood")+annotate("text",x=0.6,y=0.35,label="mean = mode",col="red",size=6)
-
-# gamma: shape=2, scale=2 -> mode=(k-1)*scale=2, mean=k*scale=4
-ggplot(data.frame(x=0), aes(x=x))+stat_function(fun = dgamma, n = 101, args = list(shape = 2, scale = 2))+theme_classic()+geom_vline(aes(xintercept=2), col="red",lty="dashed")+geom_vline(aes(xintercept=4), col="blue",lty="dashed")+theme(text = element_text(size=24))+xlim(c(0,14))+xlab("Random effect")+ylab("Likelihood")+annotate("text",x=2,y=0.17,label="mode",col="red",size=6,hjust=-0.1)+annotate("text",x=4,y=0.17,label="mean",col="blue",size=6,hjust=-0.1)
-
-
-```
-
-## Fitting
-
-- Objective function is assumed to be quadratic (often)
-
-```{r echo=F, out.width="50%", fig.align="center"}
-knitr::include_graphics("tangent.png")
-```
-
-- Usually navigate it with newton's method (numerical optimization)
-
-## Recall: Maximum Likelihood Estimation
-
-At the maximum of the likelihood:
-
-- The gradient is zero (tangent is straight)
-- The hessian (of -LL) should
-  - have positive diagonals
-  - positive eigenvalues
-  - be symmetric
-  - and is thus invertible (we go up in both directions)
-- Asymptotic covariance matrix is given by the inverse of the negative Hessian
-
-\begin{center}
-\textcolor{red}{These are important concepts to understand error messages and convergence in mixed effects models.}
-\end{center}
+# In \texttt{R}
 
 ## There are many \texttt{R}-packages
 
@@ -689,7 +657,7 @@ ranef(model1)
 ## Example: plot random effect in \texttt{glmmTMB}
 
 ```{r, echo = FALSE, fig.height = 6, message=FALSE, warning=FALSE}
-plot(ggeffects::predict_response(model1, terms = "Nest", type = "random"))+see::scale_color_flat()+ggplot2::theme_classic(base_size=20)+ ggplot2::theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+plot(ggeffects::predict_response(model1, terms = "Nest", type = "random", interval = "confidence"))+see::scale_color_flat()+ggplot2::theme_classic(base_size=20)+ ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, vjust = 1, hjust=1))
 ```
 
 ## Combining fixed and random effects
@@ -744,7 +712,7 @@ ranef(model3)
 plot(ggeffects::predict_response(model3, terms = ~(0+BroodSize||Nest), type = "random", ci_level=FALSE))+see::scale_color_flat()+ggplot2::theme_classic(base_size=20)+ggplot2::theme(legend.position="none")
 ```
 
-## Example: random slopes and random intercepts in \texttt{glmmTMB}
+## Example: random slopes, intercepts, and their correlation in \texttt{glmmTMB}
 
 \footnotesize
 
@@ -772,6 +740,53 @@ knitr::include_graphics("convergence_meme.jpg")
 ```
 
 see [Ben Bolker's GLMM FAQ](https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html), [\texttt{lme4} page on performance](https://cran.r-project.org/web/packages/lme4/vignettes/lmerperf.html), and [the \texttt{glmmTMB} troubleshooting vignette](https://cran.r-project.org/web/packages/glmmTMB/vignettes/troubleshooting.html)
+
+## Estimation methods
+
+- Penalized quasi-likelihood methods
+- Adaptive GH quadrature
+- Laplace approximation
+- Variational approximations
+- Et cetera \footnotesize (see e.g., Bolker et al. 2009) \normalsize
+
+\center Measure of central tendency: Mean or Mode
+
+```{r, echo=F, eval=T, fig.show="hold", out.width="40%", fig.align="center"}
+library(ggplot2)
+
+ggplot(data.frame(x=0), aes(x=x))+stat_function(fun = dnorm, n = 101, args = list(mean = 0, sd = 1))+theme_classic()+geom_vline(aes(xintercept=0), col="red",lty="dashed")+theme(text = element_text(size=24))+xlim(c(-3,3))+xlab("Random effect")+ylab("Likelihood")+annotate("text",x=0.6,y=0.35,label="mean = mode",col="red",size=6)
+
+# gamma: shape=2, scale=2 -> mode=(k-1)*scale=2, mean=k*scale=4
+ggplot(data.frame(x=0), aes(x=x))+stat_function(fun = dgamma, n = 101, args = list(shape = 2, scale = 2))+theme_classic()+geom_vline(aes(xintercept=2), col="red",lty="dashed")+geom_vline(aes(xintercept=4), col="blue",lty="dashed")+theme(text = element_text(size=24))+xlim(c(0,14))+xlab("Random effect")+ylab("Likelihood")+annotate("text",x=2,y=0.17,label="mode",col="red",size=6,hjust=-0.1)+annotate("text",x=4,y=0.17,label="mean",col="blue",size=6,hjust=-0.1)
+
+
+```
+
+## Fitting
+
+- Objective function is assumed to be quadratic (often)
+
+```{r echo=F, out.width="50%", fig.align="center"}
+knitr::include_graphics("tangent.png")
+```
+
+- Usually navigate it with newton's method (numerical optimization)
+
+## Recall: Maximum Likelihood Estimation
+
+At the maximum of the likelihood:
+
+- The gradient is zero (tangent is straight)
+- The hessian (of -LL) should
+  - have positive diagonals
+  - positive eigenvalues
+  - be symmetric
+  - and is thus invertible (we go up in both directions)
+- Asymptotic covariance matrix is given by the inverse of the negative Hessian
+
+\begin{center}
+\textcolor{red}{These are important concepts to understand error messages and convergence in mixed effects models.}
+\end{center}
 
 ## Assessing arrival at the MLE
 
@@ -1290,47 +1305,12 @@ t = \frac{
 - Performance is questionable
 - Can always resort to asymptotics (Wald tests $\sqrt{z} = \frac{\hat{\beta}-\beta}{\sigma} \sim \mathcal{N}(0,1)$)
 
-
-## Information criteria 
-
-- Information criteria do not work "on the boundary"
-- Not clear which measure of AIC works best (it depends)
-- As usual beware model selection bias (Freedman's paradox)
-- Generally proceed with caution
-
 ## Take away tips
-
-\begin{center}
-\textcolor{red}{\href{https://en.wikipedia.org/wiki/No_free_lunch_theorem}{No free lunch in statistics}}
-\end{center}
-
-\pause
 
 - Scale your predictors
 - Carefully consider the model structure
-- Keep your model as simple as possible, but not simpler
-- Different packages have different benefits
-  - \texttt{glmmTMB} vs. \texttt{lme4}
-- Try not to -blindly- assume approximations perform well
+- Be even more suspicious of information criteria
+- Different packages have different benefits (\texttt{glmmTMB} vs. \texttt{lme4})
+- Do not blindly assume approximations perform well
 - Always check (residual) assumptions
-- Be pragmatic
 - When in doubt: simulate from your fitted model (e.g., \texttt{DHARMa})
-
-## Write article?
-
-- Be pragmatic (but not too much)
-- Do not rely on P-values (they're mostly useless anyway)
-- Report a single (full) model (if possible, see convergence)
-  - Alternatively, describe your modeling procedure
-  - Use information criteria e.g., to compare two competing (non-nested) hypotheses
-- Nakagawa $R^2$ for mixed models (also approximation)
-
-\begin{center}
-\textcolor{red}{Focus on estimates (effect sizes) and statistical uncertainty}
-\end{center}
-
-# End
-
-\center
-
-![](Thats_all_folks.png){width=75%}
