@@ -104,7 +104,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r, echo = FALSE}
 x<-seq(binomial(link=logit)$linkinv(-5),binomial(link=logit)$linkinv(5),length.out=1000)
-plot(binomial(link=logit)$linkfun(x),x, xlab = expression(pi[i]), ylab = expression(eta[i]), type="l")
+plot(binomial(link=logit)$linkfun(x),x, xlab = expression(eta[i]), ylab = expression(pi[i]), type="l")
 x<-seq(binomial(link=probit)$linkinv(-5),binomial(link=probit)$linkinv(5),length.out=1000)
 lines(binomial(link=probit)$linkfun(x),x, lty="dashed")
 x<-seq(binomial(link=cloglog)$linkinv(-5),binomial(link=cloglog)$linkinv(5),length.out=1000)
