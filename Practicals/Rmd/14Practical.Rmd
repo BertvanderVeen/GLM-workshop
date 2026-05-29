@@ -135,8 +135,9 @@ AIC(m_glm, m_gam)
 The ISIT data has 19 stations, and observations from the same station are not independent. We can extend the GAM to include a random intercept for station — this is a GAMM (Generalized Additive Mixed Model).
 
 ```{r}
+# Full dataset includes zeros so we use Tweedie (handles zero + positive continuous)
 m_gamm <- gam(Sources ~ s(SampleDepth, bs="cr") + s(Station, bs="re"),
-              family=Gamma(link="log"), data=ISIT, method="REML")
+              family=tw(), data=ISIT, method="REML")
 summary(m_gamm)
 ```
 
