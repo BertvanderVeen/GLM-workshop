@@ -75,7 +75,7 @@ On the first day we will go through R basics and background theory of frequentis
 ## Friday
 * Beyond GLMs with random effects: Generalised linear mixed models
 * Beyond GLMs with splines: Generalized additive models
-* Participants' case studies (bring your own data)
+* Own data analysis
 * Discussion/help/..
 
 [First presentation here](https://github.com/BertvanderVeen/GLM-workshop/blob/main/5Friday/BeyondGLMs.pdf)
@@ -127,7 +127,9 @@ On the first day we will go through R basics and background theory of frequentis
 |         |15:00 - 16:00| Practical 13: GLMMs                                   |
 |         |16:00 - 16:15| Break                                                 |
 |         |16:15 - 17:00| Beyond GLMs with splines: GAMs                        |
-|         |17:00 - 18:00| Practical 14: GAMs / real data analysis               | <!-- first a demonstration, then discussion and correction after -->
+|         |17:00 - 17:45| Practical 14: GAMs                                    |
+|         |17:45 - 18:30| Break                                                 |
+|         |18:30 - 20:00| Own data analysis                                     |
 
 <!-- from survey
 more real data less simulations
