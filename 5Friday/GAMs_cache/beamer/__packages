@@ -1,6 +1,5 @@
 knitr
-Matrix
-lme4
+kableExtra
 nlme
 mgcv
 glmmTMB
