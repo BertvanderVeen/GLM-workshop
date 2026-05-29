@@ -363,7 +363,7 @@ cbind("Poisson estimate"=signif(coef(model), 2L), "NB estimate" = signif(coef(mo
 
 ## Horseshoe crabs: Poisson model residuals
 
-```{r, echo = FALSE, fig.height = 8, fig.width = 13}
+```{r, echo = FALSE, fig.height = 8, fig.width = 13, warning= FALSE, message=FALSE}
 par(mfrow=c(1,3))
 car::residualPlot(model, type="response", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Response")
 car::residualPlot(model, type="deviance", cex.main = 2, cex = 2, cex.lab = 1.5, main  ="Deviance")
