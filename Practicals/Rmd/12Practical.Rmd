@@ -36,7 +36,7 @@ shape = var/scale^2
 hist(y)
 ```
 
-If we fit out gamma regression, we see that the parameters are well estimated:
+If we fit our gamma regression, we see that the parameter estimates are close to the true values we used in the simulation (intercept = 1, x1 = -2, x2 = -0.5):
 
 ```{r, error=TRUE}
 (model1 <- glm(y ~ x1 + x2, family = Gamma(link = log), start = c(mean(log(y)), coef(lm(log(y)~x1+x2))[2:3])))
